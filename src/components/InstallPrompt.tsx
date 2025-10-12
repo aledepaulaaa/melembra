@@ -1,6 +1,8 @@
 'use client'
+//melembra/src/components/InstallPrompt.tsx
 import React from "react"
-import PushNotificationManager from "./PushNotification"
+import PushNotificationManager from "./PushNotificationManager"
+import { Button } from "@mui/material"
 
 const InstallPrompt = () => {
     const [isIOS, setIsIOS] = React.useState(false)
@@ -20,16 +22,20 @@ const InstallPrompt = () => {
 
     return (
         <div>
-            <h3>Install App</h3>
-            <button>Add to Home Screen</button>
+            <h3>Instalar App</h3>
+            <Button
+                variant="outlined"
+            >
+                Adicione na tela de ínicio
+            </Button>
             {isIOS && (
                 <p>
-                    To install this app on your iOS device, tap the share button
+                    Para instalar este aplicativo no seu dispositivo iOS, toque no botão de compartilhamento
                     <span role="img" aria-label="share icon">
                         {' '}
                         ⎋{' '}
                     </span>
-                    and then "Add to Home Screen"
+                    e então "Adicionar à tela inicial"
                     <span role="img" aria-label="plus icon">
                         {' '}
                         ➕{' '}

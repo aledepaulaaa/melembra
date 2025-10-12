@@ -1,18 +1,44 @@
-import PushNotificationManager from "@/components/PushNotification"
-import InstallPrompt from "@/components/InstallPrompt"
+'use client'
+//melembra/src/app/page.tsx
+import { Box, Skeleton } from '@mui/material'
+import { useAuth } from '@/components/AuthManager'
+import ReminderFlow from '@/components/ui/ReminderFlow'
 
 export default function Home() {
+    const { loading } = useAuth()
+
+    if (loading) {
+        return (
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    p: 4,
+                }}
+            >
+                <Skeleton animation="wave" width="100%" />
+                <Skeleton animation="wave" width="85%" />
+                <Skeleton animation="wave" width="75%" />
+            </Box>
+        )
+    }
+
     return (
-        <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-                <h1 className="text-4xl font-bold mb-8">Me Lembra App</h1>
-                <div className="mb-8">
-                    <PushNotificationManager />
-                </div>
-                <div>
-                    <InstallPrompt />
-                </div>
-            </div>
-        </main>
+        <Box
+            sx={{
+                // Ocupa 100% da altura do container pai (que é a 'main' do layout)
+                height: '100%',
+                width: '100%', // Corrigido o erro de digitação 'wdith'
+                display: 'flex',
+                flexDirection: 'column',
+                // Alinha o conteúdo na parte de baixo
+                justifyContent: 'flex-end',
+            }}
+        >
+            <ReminderFlow />
+        </Box>
     )
 }
