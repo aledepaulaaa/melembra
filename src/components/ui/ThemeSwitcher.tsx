@@ -3,8 +3,8 @@
 import React, { useContext } from 'react'
 import { useTheme } from '@mui/material/styles'
 import { IconButton } from '@mui/material'
-import Brightness4Icon from '@mui/icons-material/Brightness4' // Ícone para modo escuro
-import Brightness7Icon from '@mui/icons-material/Brightness7' // Ícone para modo claro
+import LightModeIcon from '@mui/icons-material/LightMode'
+import NightlightRoundIcon from '@mui/icons-material/NightlightRound'
 import { motion } from 'framer-motion'
 import { ThemeContext } from '../providers/ThemeProvider'
 
@@ -34,7 +34,7 @@ export default function ThemeSwitcher() {
                 variants={iconVariants}
                 animate="jump"
             >
-                {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                {theme.palette.mode === 'dark' ? <NightlightRoundIcon /> : <LightModeIcon />}
             </motion.div>
         </IconButton>
     )

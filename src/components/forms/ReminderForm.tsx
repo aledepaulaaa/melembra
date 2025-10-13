@@ -1,84 +1,107 @@
 'use client'
-//melembra/src/components/forms/ReminderForm.tsx
-import React, { useState } from 'react'
-import { useAuth } from '../AuthManager'
-import { saveReminder } from '../../app/actions/actions'
-import { toast } from 'react-toastify'
+// melembra/src/components/forms/ReminderForm.tsx
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import { usePushNotification } from '../../hooks/usePushNotification'
-import { Box, TextField, IconButton, CircularProgress, Paper } from '@mui/material'
+import { useAuth } from '../AuthManager'
+import { motion, AnimatePresence } from 'framer-motion'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { ptBR } from 'date-fns/locale/pt-BR'
+import { Box, TextField, IconButton, CircularProgress, Typography } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
+import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminderForm'
+import useReminderForm from '@/hooks/forms/useReminderForm'
+import * as Handlers from '../../app/lib/reminderFormHandlers'
 
-export default function ReminderForm() {
-    const { userId } = useAuth()
-    const { handleSubscribe } = usePushNotification()
+// --- Componente ---
+export default function ReminderForm({ onChatStart = () =>  {} }: ReminderFormProps) {
+    const chatContainerRef = React.useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const [reminderText, setReminderText] = useState('')
-    const [loading, setLoading] = useState(false)
+    const { userId } = useAuth()
+    const formState = useReminderForm()
 
-    const handleSaveReminder = async () => {
-        if (!userId || !reminderText.trim()) {
-            toast.error('Por favor, digite um lembrete.')
-            return
-        }
+    React.useEffect(() => {
+        if (chatContainerRef.current)
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }, [formState.chatHistory, formState.isBotTyping])
 
-        setLoading(true)
-        // Simplesmente salvando o texto do lembrete com a data e hora atuais.
-        // Você pode adicionar uma lógica mais avançada de processamento de data/hora aqui.
-        const result = await saveReminder(reminderText, new Date(), userId)
+    // Agrupa todas as props necessárias para os handlers em um único objeto
+    const handlerProps = { ...formState, userId, router, onChatStart }
 
-        if (result.success) {
-            toast.success('Lembrete salvo com sucesso!')
-            try {
-                await handleSubscribe()
-            } catch (error) {
-                console.error("Falha ao se inscrever para notificações push:", error)
-            }
-            router.push('/lembretes')
-        } else {
-            toast.error(result.error)
-        }
-        setLoading(false)
-        setReminderText('') // Limpa o campo após o envio
+    const onUserSubmit = () => {
+        Handlers.handleUserInput(handlerProps, formState.userInput, formState.chatHistory.length)
+        formState.setUserInput('') // Limpa o input após o envio
     }
 
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault()
-            handleSaveReminder()
-        }
-    }
+    const messageVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }
 
     return (
-        <Box
-            sx={{
-                p: 2,
-                display: 'flex',
-                alignItems: 'center',
-                width: '100%',
-                borderRadius: 2,
-            }}
-        >
-            <TextField
-                fullWidth
-                variant="standard"
-                multiline
-                maxRows={4}
-                value={reminderText}
-                onChange={(e) => setReminderText(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="O que você precisa lembrar ?"
-                InputProps={{
-                    disableUnderline: true,
-                    sx: {
-                        fontSize: '1.1rem',
-                        color: 'white',
-                    },
-                }}
-            />
-            <IconButton color="primary" onClick={handleSaveReminder} disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : <SendIcon />}
-            </IconButton>
-        </Box>
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Box ref={chatContainerRef} sx={{ mb: 2, height: '100%', overflowY: 'auto', p: 1 }}>
+                    <AnimatePresence>
+                        {formState.chatHistory.map((msg) => (
+                            <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="hidden" layout>
+                                <Box sx={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start', my: 1 }}>
+                                    <Box sx={{ bgcolor: msg.sender === 'user' ? 'primary.main' : 'background.paper', p: 1.5, borderRadius: 2, maxWidth: '80%' }}>
+                                        {msg.text && <Typography sx={{ whiteSpace: 'pre-wrap' }}>{msg.text}</Typography>}
+                                        {msg.component && <Box mt={msg.text ? 1 : 0}>{msg.component}</Box>}
+                                    </Box>
+                                </Box>
+                            </motion.div>
+                        ))}
+                        {formState.isBotTyping && (
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-start', my: 1 }}>
+                                    <Box sx={{ bgcolor: 'background.paper', p: 1.5, borderRadius: 2 }}>
+                                        <Typography className="shimmer-text">Pensando...</Typography>
+                                    </Box>
+                                </Box>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </Box>
+                <AnimatePresence>
+                    {formState.showTextInput && (
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
+                            <Box className="animated-border" sx={{ p: '1px', borderRadius: '20px' }}>
+                                <Box
+                                    sx={{
+                                        p: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        width: '100%',
+                                        borderRadius: '19px',
+                                        bgcolor: 'var(--background)'
+                                    }}
+                                >
+                                    <TextField fullWidth
+                                        variant="outlined"
+                                        multiline
+                                        maxRows={4} value={formState.userInput}
+                                        onChange={(e) => formState.setUserInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && onUserSubmit()}
+                                        disabled={formState.isLoading}
+                                        placeholder={formState.step === ConversationStep.ASKING_TITLE ? "Lembrar de..." : "DDD + Número ou Enter para pular"}
+                                        autoFocus
+                                        slotProps={{
+                                            input: {
+                                                sx: {
+                                                    borderRadius: 4,
+                                                    p: 4
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <IconButton color="primary" onClick={onUserSubmit} disabled={formState.isLoading}>
+                                        {formState.isLoading ? <CircularProgress size={24} /> : <SendIcon />}
+                                    </IconButton>
+                                </Box>
+                            </Box>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </Box>
+        </LocalizationProvider>
     )
 }

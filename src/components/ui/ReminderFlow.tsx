@@ -1,15 +1,13 @@
 'use client'
 //melembra/src/components/ui/ReminderFlow.tsx
-import React from 'react'
 import ReminderForm from '@/components/forms/ReminderForm'
 import { Container } from '@mui/material'
+import { ReminderFormProps } from '@/interfaces/IReminderForm'
 
-export default function ReminderFlow() {
+export default function ReminderFlow({ onChatStart }: ReminderFormProps) {
     return (
-        <Container
-            maxWidth="md"
-            sx={{ position: "absolute", bottom: 50, overflowX: "hidden" }}>
-            <ReminderForm />
+        <Container maxWidth="md" sx={{ mb: 4 }}>
+            <ReminderForm onChatStart={onChatStart} />
         </Container>
     )
 }

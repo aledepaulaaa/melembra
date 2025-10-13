@@ -3,7 +3,7 @@
 import webpush, { PushSubscription } from 'web-push'
 import { db } from '../lib/firebase'
 import { getFirebaseAuth } from '../lib/firebase-admin'
-import { addDoc, collection, doc, setDoc, getDoc, getDocs, orderBy, query, where, Timestamp } from 'firebase/firestore'
+import { addDoc, collection, doc, setDoc, getDoc, getDocs, orderBy, query, where, Timestamp, updateDoc, deleteDoc } from 'firebase/firestore'
 
 const adminAuth = getFirebaseAuth()
 
@@ -183,5 +183,35 @@ export async function saveUserPhoneNumber(userId: string, phoneNumber: string) {
     } catch (error) {
         console.error('Erro ao salvar o número de telefone:', error)
         return { success: false, error: 'Falha ao salvar o número.' }
+    }
+}
+
+export async function updateReminderStatus(reminderId: string, completed: boolean) {
+    if (!reminderId) {
+        return { success: false, error: 'ID do lembrete é obrigatório.' }
+    }
+    try {
+        const reminderRef = doc(db, 'reminders', reminderId)
+        await updateDoc(reminderRef, {
+            completed: completed
+        })
+        return { success: true }
+    } catch (error) {
+        console.error('Erro ao atualizar status do lembrete:', error)
+        return { success: false, error: 'Falha ao atualizar o lembrete.' }
+    }
+}
+
+export async function deleteReminder(reminderId: string) {
+    if (!reminderId) {
+        return { success: false, error: 'ID do lembrete é obrigatório.' }
+    }
+    try {
+        const reminderRef = doc(db, 'reminders', reminderId)
+        await deleteDoc(reminderRef)
+        return { success: true }
+    } catch (error) {
+        console.error('Erro ao apagar lembrete:', error)
+        return { success: false, error: 'Falha ao apagar o lembrete.' }
     }
 }

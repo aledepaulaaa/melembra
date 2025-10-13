@@ -1,17 +1,21 @@
 'use client'
 //melembra/src/app/page.tsx
-import { Box, Skeleton } from '@mui/material'
+import React from 'react'
+import { Box, Skeleton, Typography } from '@mui/material'
 import { useAuth } from '@/components/AuthManager'
 import ReminderFlow from '@/components/ui/ReminderFlow'
+import { AnimatePresence, motion } from 'framer-motion'
 
 export default function Home() {
     const { loading } = useAuth()
+    const [isChatStarted, setIsChatStarted] = React.useState(false)
 
     if (loading) {
         return (
             <Box
                 sx={{
                     minHeight: '100vh',
+                    width: "100%",
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -19,9 +23,9 @@ export default function Home() {
                     p: 4,
                 }}
             >
-                <Skeleton animation="wave" width="100%" />
-                <Skeleton animation="wave" width="85%" />
-                <Skeleton animation="wave" width="75%" />
+                <Skeleton animation="wave" height="30%" width="100%" />
+                <Skeleton animation="wave" height="20%" width="100%" />
+                <Skeleton animation="wave" height="10%" width="100%" />
             </Box>
         )
     }
@@ -29,16 +33,37 @@ export default function Home() {
     return (
         <Box
             sx={{
-                // Ocupa 100% da altura do container pai (que é a 'main' do layout)
                 height: '100%',
-                width: '100%', // Corrigido o erro de digitação 'wdith'
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                // Alinha o conteúdo na parte de baixo
-                justifyContent: 'flex-end',
             }}
         >
-            <ReminderFlow />
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    width: '100%',
+                }}
+            >
+                <AnimatePresence>
+                    {!isChatStarted && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                        >
+                            <Typography variant="h4" component="h1">
+                                Precisando lembrar de algo?
+                            </Typography>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </Box>
+            <ReminderFlow onChatStart={() => setIsChatStarted(true)} />
         </Box>
     )
 }
