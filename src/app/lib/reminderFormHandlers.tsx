@@ -42,7 +42,7 @@ export const handleDateSelect = (props: HandlerProps, newDate: Date | null) => {
     addMessageWithTyping(props, {
         sender: 'bot',
         text: `Entendido. Agora, qual o horário?`,
-        component: UI.renderTimeClock(props, minTimeForClock)
+         component: <UI.RenderTimeClockWithConfirm {...props} />
     })
     props.setShowTextInput(false)
     props.setStep(ConversationStep.ASKING_TIME)
@@ -51,31 +51,28 @@ export const handleDateSelect = (props: HandlerProps, newDate: Date | null) => {
 export const handleTimeSelect = (props: HandlerProps, newTime: Date | null) => {
     if (!newTime) return
     const formattedTime = newTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    const combinedDate = props.reminder.date
-    if (combinedDate) {
-        combinedDate.setHours(newTime.getHours())
-        combinedDate.setMinutes(newTime.getMinutes())
-        props.setReminder(prev => ({
-            ...prev,
-            date: combinedDate,
-            time: formattedTime
-        }))
-    }
+    
+    // --- CORREÇÃO DA LÓGICA DE COMBINAÇÃO ---
+    // 1. Crie uma CÓPIA da data para evitar mutação de estado.
+    const newCombinedDate = new Date(props.reminder.date!);
+    // 2. Aplique a hora e os minutos da seleção do relógio.
+    newCombinedDate.setHours(newTime.getHours());
+    newCombinedDate.setMinutes(newTime.getMinutes());
+
+    // 3. Atualize o estado com o novo objeto Date e a hora formatada.
+    props.setReminder(prev => ({ ...prev, date: newCombinedDate, time: formattedTime }))
+
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
-    addMessageToChat(props,
-        {
-            sender: 'user',
-            text: `Horário: ${formattedTime}`
-        })
-    addMessageWithTyping(props, {
-        sender: 'bot',
-        text: `Perfeito. O lembrete irá se repetir?`,
-        component: UI.renderRecurrenceButtons(props, formattedTime)
+    addMessageToChat(props, { sender: 'user', text: `Horário: ${formattedTime}` })
+    addMessageWithTyping(props, { 
+        sender: 'bot', 
+        text: `Perfeito. O lembrete irá se repetir?`, 
+        component: UI.renderRecurrenceButtons(props) 
     })
     props.setStep(ConversationStep.ASKING_RECURRENCE)
 }
 
-export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, time: string) => {
+export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string) => {
     props.setReminder(prev => ({ ...prev, recurrence: recurrence }))
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageToChat(props, { sender: 'user', text: `Recorrência: ${recurrence}` })
@@ -84,20 +81,20 @@ export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, 
     props.setStep(ConversationStep.ASKING_NOTIFICATIONS)
 }
 
-export const moveToConfirmation = async (props: HandlerProps, phoneInput: string, time: string) => {
-    props.setIsLoading(true); props.setShowTextInput(false)
+export const moveToConfirmation = async (props: HandlerProps, phoneInput: string) => {
+    props.setIsLoading(true) 
+    props.setShowTextInput(false)
+
     if (phoneInput.trim() && props.userId) {
         addMessageWithTyping(props, { sender: 'bot', text: `Salvando seu número...` }, 500)
         await saveUserPhoneNumber(props.userId, phoneInput)
         toast.success('Número do WhatsApp salvo!')
     }
 
-    const summaryText = `Lembrete: "${props.reminder.title}"\nQuando: ${props.reminder.date?.toLocaleDateString('pt-BR')} às ${time}\nRepetir: ${props.reminder.recurrence}`
-
     addMessageWithTyping(props, {
         sender: 'bot',
         text: `Tudo pronto! Por favor, confirme os detalhes:`,
-        component: UI.renderConfirmation(props, summaryText)
+        component: UI.renderConfirmation(props)
     })
     props.setIsLoading(false); props.setStep(ConversationStep.CONFIRMING)
 }
@@ -157,7 +154,7 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
             props.setShowTextInput(false); props.setStep(ConversationStep.ASKING_DATE)
             break
         case ConversationStep.ASKING_NOTIFICATIONS:
-            moveToConfirmation(props, trimmedValue, props.reminder.time || '')
+            moveToConfirmation(props, trimmedValue)
             break
     }
 }
