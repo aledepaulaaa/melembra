@@ -7,9 +7,9 @@ import * as Handlers from './reminderFormHandlers'
 import React from 'react'
 
 // --- Funções que retornam os componentes JSX ---
-export const RenderTimeClockWithConfirm = (props: HandlerProps) => {
+export const RenderTimeClockWithConfirm = ({ handlerProps, minTime }: { handlerProps: HandlerProps, minTime?: Date }) => {
     // Estado local para guardar a hora enquanto o usuário a ajusta
-    const [selectedTime, setSelectedTime] = React.useState<Date | null>(props.reminder.date || new Date())
+    const [selectedTime, setSelectedTime] = React.useState<Date | null>(handlerProps.reminder.date || minTime || new Date())
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -17,12 +17,13 @@ export const RenderTimeClockWithConfirm = (props: HandlerProps) => {
                 ampm={false}
                 value={selectedTime}
                 onChange={(time) => setSelectedTime(time as Date)}
+                minTime={minTime}
                 sx={{ bgcolor: 'background.paper', borderRadius: 2, my: 1, maxHeight: 300 }}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                 <Button
                     variant="contained"
-                    onClick={() => Handlers.handleTimeSelect(props, selectedTime)}
+                    onClick={() => Handlers.handleTimeSelect(handlerProps, selectedTime)}
                 >
                     Confirmar Horário
                 </Button>
@@ -53,14 +54,15 @@ export const renderTimeClock = (props: HandlerProps, minTime?: Date) => (
     </motion.div>
 )
 
-export const renderRecurrenceButtons = (props: HandlerProps) => (
+export const renderRecurrenceButtons = (props: HandlerProps, formattedTime: string) => (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Não repetir', )}>Não repetir</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Diariamente', )}>Diariamente</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Semanalmente', )}>Semanalmente</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Mensalmente', )}>Mensalmente</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Anualmente', )}>Anualmente</Button>
+            {/* A CORREÇÃO ESTÁ AQUI: Passamos o `formattedTime` para o handler */}
+            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Não repetir', formattedTime)}>Não repetir</Button>
+            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Diariamente', formattedTime)}>Diariamente</Button>
+            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Semanalmente', formattedTime)}>Semanalmente</Button>
+            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Mensalmente', formattedTime)}>Mensalmente</Button>
+            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Anualmente', formattedTime)}>Anualmente</Button>
         </Stack>
     </motion.div>
 )

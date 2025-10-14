@@ -28,51 +28,49 @@ const isToday = (someDate: Date) => {
 
 export const handleDateSelect = (props: HandlerProps, newDate: Date | null) => {
     if (!newDate) return
+    newDate.setHours(0, 0, 0, 0)
+
     props.setReminder(prev => ({ ...prev, date: newDate }))
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageToChat(props, { sender: 'user', text: `Data: ${newDate.toLocaleDateString('pt-BR')}` })
 
-    // --- LÓGICA DE VALIDAÇÃO ---
     let minTimeForClock: Date | undefined = undefined
     if (isToday(newDate)) {
         minTimeForClock = new Date()
-        minTimeForClock.setHours(minTimeForClock.getHours() + 1) // Adiciona 1 hora
+        minTimeForClock.setHours(minTimeForClock.getHours() + 1)
     }
 
     addMessageWithTyping(props, {
         sender: 'bot',
         text: `Entendido. Agora, qual o horário?`,
-         component: <UI.RenderTimeClockWithConfirm {...props} />
+        component: <UI.RenderTimeClockWithConfirm handlerProps={props} minTime={minTimeForClock} />
     })
     props.setShowTextInput(false)
     props.setStep(ConversationStep.ASKING_TIME)
 }
 
-export const handleTimeSelect = (props: HandlerProps, newTime: Date | null) => {
-    if (!newTime) return
-    const formattedTime = newTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    
-    // --- CORREÇÃO DA LÓGICA DE COMBINAÇÃO ---
-    // 1. Crie uma CÓPIA da data para evitar mutação de estado.
-    const newCombinedDate = new Date(props.reminder.date!);
-    // 2. Aplique a hora e os minutos da seleção do relógio.
-    newCombinedDate.setHours(newTime.getHours());
-    newCombinedDate.setMinutes(newTime.getMinutes());
-
-    // 3. Atualize o estado com o novo objeto Date e a hora formatada.
-    props.setReminder(prev => ({ ...prev, date: newCombinedDate, time: formattedTime }))
-
+export const handleTimeSelect = (props: HandlerProps, timeFromClock: Date | null) => {
+    if (!timeFromClock) return
+    const formattedTime = timeFromClock.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const finalDate = new Date(props.reminder.date!)
+    finalDate.setHours(timeFromClock.getHours())
+    finalDate.setMinutes(timeFromClock.getMinutes())
+    props.setReminder(prev => ({ ...prev, date: finalDate, time: formattedTime }))
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageToChat(props, { sender: 'user', text: `Horário: ${formattedTime}` })
+    
+    // A CORREÇÃO ESTÁ AQUI: Passamos `formattedTime` para a função de renderização
     addMessageWithTyping(props, { 
         sender: 'bot', 
         text: `Perfeito. O lembrete irá se repetir?`, 
-        component: UI.renderRecurrenceButtons(props) 
+        component: UI.renderRecurrenceButtons(props, formattedTime) 
     })
+    
     props.setStep(ConversationStep.ASKING_RECURRENCE)
 }
 
-export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string) => {
+
+export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, time: string) => {
     props.setReminder(prev => ({ ...prev, recurrence: recurrence }))
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageToChat(props, { sender: 'user', text: `Recorrência: ${recurrence}` })
@@ -82,7 +80,7 @@ export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string) 
 }
 
 export const moveToConfirmation = async (props: HandlerProps, phoneInput: string) => {
-    props.setIsLoading(true) 
+    props.setIsLoading(true)
     props.setShowTextInput(false)
 
     if (phoneInput.trim() && props.userId) {
@@ -96,13 +94,18 @@ export const moveToConfirmation = async (props: HandlerProps, phoneInput: string
         text: `Tudo pronto! Por favor, confirme os detalhes:`,
         component: UI.renderConfirmation(props)
     })
-    props.setIsLoading(false); props.setStep(ConversationStep.CONFIRMING)
+    props.setIsLoading(false)
+    props.setStep(ConversationStep.CONFIRMING)
 }
 
 export const handleConfirmSave = async (props: HandlerProps) => {
     const { reminder, userId, router } = props
-    if (!reminder.title || !reminder.date || !userId) { toast.error("Ocorreu um erro. Faltam informações."); return }
-    props.setIsLoading(true); props.setChatHistory(prev => prev.filter(msg => !msg.component))
+    if (!reminder.title || !reminder.date || !userId) {
+        toast.error("Ocorreu um erro. Faltam informações.")
+        return
+    }
+    props.setIsLoading(true)
+    props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageWithTyping(props, { sender: 'bot', text: `Salvando...` }, 100)
     const result = await saveReminder(reminder.title, reminder.date, userId)
     if (result.success) {
@@ -118,7 +121,8 @@ export const handleConfirmSave = async (props: HandlerProps) => {
                 </Button>
         })
     } else {
-        toast.error(result.error || 'Falha ao salvar lembrete.'); addMessageWithTyping(props, { sender: 'bot', text: `Ocorreu um erro: ${result.error}` })
+        toast.error(result.error || 'Falha ao salvar lembrete.')
+        addMessageWithTyping(props, { sender: 'bot', text: `Ocorreu um erro: ${result.error}` })
     }
     props.setIsLoading(false)
 }
@@ -128,7 +132,8 @@ export const handleCancel = (props: HandlerProps) => {
     addMessageToChat(props, { sender: 'user', text: `Cancelar` })
     addMessageWithTyping(props, { sender: 'bot', text: 'Como posso te ajudar a lembrar de algo novo?' })
     props.setReminder({ title: null, date: null, time: null, recurrence: null })
-    props.setShowTextInput(true); props.setStep(ConversationStep.ASKING_TITLE)
+    props.setShowTextInput(true)
+    props.setStep(ConversationStep.ASKING_TITLE)
 }
 
 export const handleUserInput = (props: HandlerProps, value: string, chatHistoryLength: number) => {
@@ -146,12 +151,13 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
         case ConversationStep.ASKING_TITLE:
             if (!trimmedValue) {
                 toast.error("O título não pode ser vazio.")
-                addMessageToChat(props, { sender: 'bot', text: 'Por favor, me diga o que você quer lembrar.' });
+                addMessageToChat(props, { sender: 'bot', text: 'Por favor, me diga o que você quer lembrar.' })
                 return
             }
             props.setReminder(prev => ({ ...prev, title: trimmedValue }))
             addMessageWithTyping(props, { sender: 'bot', text: getRandomDateResponse(trimmedValue), component: UI.renderDatePicker(props) })
-            props.setShowTextInput(false); props.setStep(ConversationStep.ASKING_DATE)
+            props.setShowTextInput(false)
+            props.setStep(ConversationStep.ASKING_DATE)
             break
         case ConversationStep.ASKING_NOTIFICATIONS:
             moveToConfirmation(props, trimmedValue)
