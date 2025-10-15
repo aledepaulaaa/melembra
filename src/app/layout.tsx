@@ -1,5 +1,5 @@
 'use client'
-// src/app/layout.tsx
+//melembra/src/app/layout.tsx
 import React from 'react'
 import { AuthProvider } from '@/components/AuthManager'
 import { Provider } from 'react-redux'
@@ -12,6 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher'
 
 const drawerWidth = 240
+const miniWidth = 64 // largura quando "minimizado"
 
 export default function RootLayout({
     children,
@@ -19,10 +20,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     const [mobileOpen, setMobileOpen] = React.useState(false)
+    const [desktopOpen, setDesktopOpen] = React.useState(true)
 
-    const handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen)
-    }
+    const handleMobileToggle = () => setMobileOpen((s) => !s)
+    const handleDesktopToggle = () => setDesktopOpen((s) => !s)
 
     return (
         <html lang="pt-br">
@@ -31,16 +32,15 @@ export default function RootLayout({
                     <ThemeProvider>
                         <AuthProvider>
                             <Box sx={{ display: 'flex', overflowX: 'hidden' }}>
+                                {/* AppBar mobile (hamburger) */}
                                 <AppBar
                                     position="fixed"
                                     elevation={0}
                                     sx={{
                                         backgroundColor: "transparent",
                                         backdropFilter: 'blur(8px)',
-                                        width: { md: `calc(100% - ${drawerWidth}px)` },
-                                        ml: { md: `${drawerWidth}px` },
-                                        
-                                        display: { md: 'none' } 
+                                        display: { xs: 'flex', md: 'none' },
+                                        width: '100%',
                                     }}
                                 >
                                     <Toolbar>
@@ -48,35 +48,70 @@ export default function RootLayout({
                                             color="inherit"
                                             aria-label="open drawer"
                                             edge="start"
-                                            onClick={handleDrawerToggle}
+                                            onClick={handleMobileToggle}
                                             sx={{ mr: 2 }}
                                         >
                                             <MenuIcon />
                                         </IconButton>
-                                        {/* NOVO: Box com flexGrow para empurrar o switcher para a direita */}
                                         <Box sx={{ flexGrow: 1 }}>
-                                            {/* Substitua pela sua logo para a versão móvel */}
                                             <Typography variant="h6" noWrap component="div">
                                                 LOGO
                                             </Typography>
                                         </Box>
-                                        {/* NOVO: ThemeSwitcher dentro da AppBar */}
                                         <ThemeSwitcher />
                                     </Toolbar>
                                 </AppBar>
-                                <SideNav mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />
+                                <SideNav
+                                    mobileOpen={mobileOpen}
+                                    handleDrawerToggle={handleMobileToggle}
+                                    desktopOpen={desktopOpen}
+                                    handleDesktopToggle={handleDesktopToggle}
+                                    drawerWidth={drawerWidth}
+                                    miniWidth={miniWidth}
+                                />
+                                {/* Floating desktop hamburger (ancorado) */}
+                                <IconButton
+                                    aria-label="toggle drawer"
+                                    onClick={handleDesktopToggle}
+                                    sx={(theme) => ({
+                                        display: { xs: 'none', md: 'flex' },
+                                        position: 'fixed',
+                                        top: theme.spacing(2),
+                                        left: { md: desktopOpen ? `${drawerWidth + 16}px` : `${miniWidth + 16}px` },
+                                        zIndex: theme.zIndex.appBar + 1,
+                                        borderRadius: '50%',
+                                        width: 44,
+                                        height: 44,
+                                        transition: theme.transitions.create(['left', 'transform', 'background-color'], {
+                                            easing: theme.transitions.easing.sharp,
+                                            duration: theme.transitions.duration.short,
+                                        }),
+                                    })}
+                                >
+                                    {/* aumenta levemente as "linhas" do ícone */}
+                                    <MenuIcon sx={{ fontSize: 20 }} />
+                                </IconButton>
+                                {/* MAIN: shift (ml) depende se o drawer desktop está aberto */}
                                 <Box
                                     component="main"
-                                    sx={{
+                                    sx={(theme) => ({
                                         flexGrow: 1,
                                         p: 3,
-                                        width: { md: `calc(100% - ${drawerWidth}px)` },
                                         minHeight: '100vh',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                    }}
+                                        width: '100%',
+                                        transition: theme.transitions.create('margin', {
+                                            easing: theme.transitions.easing.sharp,
+                                            duration: theme.transitions.duration.standard,
+                                        }),
+                                        ml: { md: desktopOpen ? `${drawerWidth}px` : `${miniWidth}px` },
+                                    })}
                                 >
-                                    <Toolbar sx={{ display: { md: 'none' } }} />
+                                    {/* placeholder toolbar só para mobile (evita conteúdo atrás do AppBar) */}
+                                    <Toolbar sx={{ display: { xs: 'block', md: 'none' } }} />
+                                    {/* Toolbar desktop vazio (pode conter breadcrumb/titulo) */}
+                                    <Toolbar sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-start', px: 0 }} />
                                     <PageTransition>
                                         {children}
                                     </PageTransition>

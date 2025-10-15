@@ -1,6 +1,6 @@
 'use client'
 //melembra/src/components/ui/ThemeSwitcher.tsx
-import React, { useContext } from 'react'
+import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import { IconButton } from '@mui/material'
 import LightModeIcon from '@mui/icons-material/LightMode'
@@ -21,7 +21,7 @@ const iconVariants: any = {
 
 export default function ThemeSwitcher() {
     const theme = useTheme()
-    const colorMode = useContext(ThemeContext)
+    const colorMode = React.useContext(ThemeContext)
 
     return (
         <IconButton

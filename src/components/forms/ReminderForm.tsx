@@ -14,7 +14,7 @@ import useReminderForm from '@/hooks/forms/useReminderForm'
 import * as Handlers from '../../app/lib/reminderFormHandlers'
 
 // --- Componente ---
-export default function ReminderForm({ onChatStart = () =>  {} }: ReminderFormProps) {
+export default function ReminderForm({ onChatStart = () => { } }: ReminderFormProps) {
     const chatContainerRef = React.useRef<HTMLDivElement>(null)
     const router = useRouter()
     const { userId } = useAuth()
@@ -37,8 +37,34 @@ export default function ReminderForm({ onChatStart = () =>  {} }: ReminderFormPr
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-           <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Box ref={chatContainerRef} sx={{ mb: 2, height: '100%', overflowY: 'auto', p: 1 }}>
+            {/* 1. Contêiner Principal: display: 'flex' e height: '100%' para preencher a tela */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    bgcolor: 'transparent',
+                    overflowX: 'hidden',
+                }}
+            >
+                {/* 2. Área de Chat: flexGrow: 1 para ocupar todo o espaço restante e overflowY: 'auto' para rolagem */}
+                <Box
+                    ref={chatContainerRef}
+                     sx={{ 
+                    flexGrow: 1, 
+                    overflowY: 'auto',
+                    p: 2,
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        background: 'transparent',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'rgba(0,0,0,0.2)',
+                        borderRadius: '4px',
+                    },
+                }}
+            >
                     <AnimatePresence>
                         {formState.chatHistory.map((msg) => (
                             <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="hidden" layout>
@@ -61,10 +87,22 @@ export default function ReminderForm({ onChatStart = () =>  {} }: ReminderFormPr
                         )}
                     </AnimatePresence>
                 </Box>
+                {/* 3. Contêiner do Input: Ficará fixo no final, pois o chat pegou todo o espaço acima. */}
                 <AnimatePresence>
                     {formState.showTextInput && (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
-                            <Box className="animated-border" sx={{ p: '1px', borderRadius: '20px' }}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                        >
+                            <Box className="animated-border"
+                                sx={{
+                                    borderRadius: '20px',
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    p: 1,
+                                }}
+                            >
                                 <Box
                                     sx={{
                                         p: 2,
@@ -72,10 +110,11 @@ export default function ReminderForm({ onChatStart = () =>  {} }: ReminderFormPr
                                         alignItems: 'center',
                                         width: '100%',
                                         borderRadius: '19px',
-                                        bgcolor: 'var(--background)'
+                                        bgcolor: 'var(--background)',
                                     }}
                                 >
-                                    <TextField fullWidth
+                                    <TextField
+                                        fullWidth
                                         variant="outlined"
                                         multiline
                                         maxRows={4} value={formState.userInput}

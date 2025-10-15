@@ -33,8 +33,7 @@ export default function Home() {
     return (
         <Box
             sx={{
-                height: '100%',
-                width: '100%',
+                flexGrow: 1,
                 display: 'flex',
                 flexDirection: 'column',
             }}
@@ -45,8 +44,6 @@ export default function Home() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    height: '100%',
-                    width: '100%',
                 }}
             >
                 <AnimatePresence>
@@ -56,7 +53,7 @@ export default function Home() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                         >
-                            <Typography variant="h4" component="h1">
+                            <Typography variant="h4" textAlign="center" component="h1">
                                 Precisando lembrar de algo?
                             </Typography>
                         </motion.div>

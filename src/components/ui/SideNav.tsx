@@ -1,21 +1,30 @@
 'use client'
-// melembra/src/components/ui/SideNav.tsx
-import React from 'react'
+//melembra/src/components/ui/SideNav.tsx
 import ThemeSwitcher from './ThemeSwitcher'
 import { useRouter, usePathname } from 'next/navigation'
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import PhonelinkSetupRoundedIcon from '@mui/icons-material/PhonelinkSetupRounded'
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider } from '@mui/material'
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider, Tooltip } from '@mui/material'
 
-const drawerWidth = 240
+const defaultDrawerWidth = 240
 
 interface SideNavProps {
     mobileOpen: boolean
     handleDrawerToggle: () => void
+    desktopOpen?: boolean
+    handleDesktopToggle?: () => void
+    drawerWidth?: number
+    miniWidth?: number
 }
 
-export default function SideNav({ mobileOpen, handleDrawerToggle }: SideNavProps) {
+export default function SideNav({
+    mobileOpen,
+    handleDrawerToggle,
+    desktopOpen = true,
+    drawerWidth = defaultDrawerWidth,
+    miniWidth = 64,
+}: SideNavProps) {
     const router = useRouter()
     const pathname = usePathname()
 
@@ -26,34 +35,55 @@ export default function SideNav({ mobileOpen, handleDrawerToggle }: SideNavProps
     ]
 
     const drawerContent = (
-        // NOVO: Usando Box com Flexbox para empurrar o ThemeSwitcher para baixo
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            {/* NOVO: Toolbar para a Logo */}
-            <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
-                {/* Substitua a Typography pela sua tag <Image> ou <img> */}
-                <Typography variant="subtitle1" mr={2} component="div">
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                backgroundColor: "transparent"
+            }}
+        >
+            <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: desktopOpen ? 'center' : 'flex-start', p: 2 }}>
+                <Typography variant="subtitle1" mr={2} component="div" sx={{ display: desktopOpen ? 'block' : 'none' }}>
                     SUA LOGO AQUI
                 </Typography>
             </Toolbar>
             <Divider />
-            <List sx={{ flexGrow: 1 }}> {/* flexGrow empurra o resto para baixo */}
+            <List sx={{ flexGrow: 1 }}>
                 {menuItems.map((item) => (
-                    <ListItem key={item.text} disablePadding>
-                        <ListItemButton
-                            selected={pathname === item.path}
-                            onClick={() => {
-                                router.push(item.path)
-                                if (mobileOpen) handleDrawerToggle()
-                            }}
-                        >
-                            <ListItemIcon>{item.icon}</ListItemIcon>
-                            <ListItemText primary={item.text} />
-                        </ListItemButton>
+                    <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
+                        <Tooltip title={desktopOpen ? '' : item.text} placement="right">
+                            <ListItemButton
+                                selected={pathname === item.path}
+                                onClick={() => {
+                                    router.push(item.path)
+                                    if (mobileOpen) handleDrawerToggle()
+                                }}
+                                sx={(theme) => ({
+                                    minHeight: 48,
+                                    justifyContent: desktopOpen ? 'initial' : 'center',
+                                    px: 2.5,
+                                    transition: theme.transitions.create(['padding', 'background-color'], {
+                                        duration: theme.transitions.duration.short,
+                                    }),
+                                })}
+                            >
+                                <ListItemIcon
+                                    sx={{
+                                        minWidth: 0,
+                                        mr: desktopOpen ? 3 : 0,
+                                        justifyContent: 'center',
+                                        color: 'inherit',
+                                    }}
+                                >
+                                    {item.icon}
+                                </ListItemIcon>
+                                <ListItemText primary={item.text} sx={{ opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity') }} />
+                            </ListItemButton>
+                        </Tooltip>
                     </ListItem>
                 ))}
             </List>
-            <Divider />
-            {/* NOVO: ThemeSwitcher na parte de baixo do menu */}
             <Box sx={{ p: 2, textAlign: 'center' }}>
                 <ThemeSwitcher />
             </Box>
@@ -63,10 +93,14 @@ export default function SideNav({ mobileOpen, handleDrawerToggle }: SideNavProps
     return (
         <Box
             component="nav"
-            sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
             aria-label="mailbox folders"
+            sx={{
+                width: { md: desktopOpen ? drawerWidth : miniWidth },
+                flexShrink: { md: 0 },
+                backgroundColor: "transparent"
+            }}
         >
-            {/* Drawer temporário (móvel) */}
+            {/* Temporary drawer -> mobile (overlay) */}
             <Drawer
                 variant="temporary"
                 open={mobileOpen}
@@ -74,19 +108,31 @@ export default function SideNav({ mobileOpen, handleDrawerToggle }: SideNavProps
                 ModalProps={{ keepMounted: true }}
                 sx={{
                     display: { xs: 'block', md: 'none' },
-                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                    '& .MuiDrawer-paper': {
+                        boxSizing: 'border-box',
+                        width: drawerWidth,
+                    },
                 }}
             >
                 {drawerContent}
             </Drawer>
-            {/* Drawer permanente (desktop) */}
+            {/* Persistent / mini drawer -> desktop */}
             <Drawer
                 variant="permanent"
                 open
-                sx={{
+                sx={(theme) => ({
                     display: { xs: 'none', md: 'block' },
-                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-                }}
+                    '& .MuiDrawer-paper': {
+                        boxSizing: 'border-box',
+                        width: desktopOpen ? drawerWidth : miniWidth,
+                        overflowX: 'hidden',
+                        whiteSpace: 'nowrap',
+                        transition: theme.transitions.create('width', {
+                            easing: theme.transitions.easing.sharp,
+                            duration: theme.transitions.duration.standard,
+                        }),
+                    },
+                })}
             >
                 {drawerContent}
             </Drawer>
