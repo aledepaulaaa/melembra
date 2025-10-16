@@ -5,6 +5,7 @@ import { Box, Skeleton, Typography } from '@mui/material'
 import { useAuth } from '@/components/AuthManager'
 import ReminderFlow from '@/components/ui/ReminderFlow'
 import { AnimatePresence, motion } from 'framer-motion'
+import LogoMeLembra from '@/components/ui/LogoMeLembra'
 
 export default function Home() {
     const { loading } = useAuth()
@@ -53,9 +54,12 @@ export default function Home() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                         >
-                            <Typography variant="h4" textAlign="center" component="h1">
-                                Precisando lembrar de algo?
-                            </Typography>
+                            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                                <Typography variant="h4" textAlign="start" component="h1">
+                                    Me <br />Lembra?
+                                </Typography>
+                                <LogoMeLembra size={65} />
+                            </Box>
                         </motion.div>
                     )}
                 </AnimatePresence>

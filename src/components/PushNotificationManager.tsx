@@ -1,6 +1,5 @@
 'use client'
 //melembra/src/components/PushNotificationManager.tsx
-import React from "react"
 import { usePushNotification } from "@/hooks/usePushNotification"
 import { Box, Button, TextField, Typography, Paper } from "@mui/material"
 

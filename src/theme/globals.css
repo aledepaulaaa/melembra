@@ -60,7 +60,7 @@ a {
   height: 200%;
   background: conic-gradient(
     transparent,
-    rgba(187, 134, 252, 0.7),
+    #bb86fcb3,
     rgba(3, 103, 218, 0.7),
     transparent
   );

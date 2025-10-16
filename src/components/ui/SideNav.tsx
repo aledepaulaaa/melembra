@@ -1,11 +1,12 @@
 'use client'
 //melembra/src/components/ui/SideNav.tsx
 import ThemeSwitcher from './ThemeSwitcher'
+import LogoMeLembra from './LogoMeLembra'
 import { useRouter, usePathname } from 'next/navigation'
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import PhonelinkSetupRoundedIcon from '@mui/icons-material/PhonelinkSetupRounded'
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Divider, Tooltip } from '@mui/material'
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip } from '@mui/material'
 
 const defaultDrawerWidth = 240
 
@@ -43,13 +44,42 @@ export default function SideNav({
                 backgroundColor: "transparent"
             }}
         >
-            <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: desktopOpen ? 'center' : 'flex-start', p: 2 }}>
-                <Typography variant="subtitle1" mr={2} component="div" sx={{ display: desktopOpen ? 'block' : 'none' }}>
-                    SUA LOGO AQUI
-                </Typography>
-            </Toolbar>
+            {/* --- SEÇÃO SUPERIOR --- */}
+            <Box>
+                {/* Container da Logo que desaparece */}
+                <Box
+                    sx={(theme) => ({
+                        transition: theme.transitions.create(['opacity', 'height'], {
+                            duration: theme.transitions.duration.short
+                        }),
+                        height: desktopOpen ? 64 : 0,
+                        opacity: desktopOpen ? 1 : 0,
+                        overflow: 'hidden',
+                        pointerEvents: desktopOpen ? 'auto' : 'none',
+                    })}
+                >
+                    <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2 }}>
+                        <LogoMeLembra size={40} />
+                    </Toolbar>
+                </Box>
+                {/* --- A CORREÇÃO ESTÁ AQUI --- */}
+                {/* ThemeSwitcher que SÓ aparece quando o menu está ENCOLHIDO */}
+                <Box sx={(theme) => ({
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    // Define uma altura fixa para ocupar o espaço da logo quando encolhido
+                    height: desktopOpen ? 0 : 64,
+                    transition: theme.transitions.create('opacity'),
+                    opacity: desktopOpen ? 0 : 1,
+                    pointerEvents: desktopOpen ? 'none' : 'auto',
+                })}>
+                    <ThemeSwitcher />
+                </Box>
+            </Box>
             <Divider />
-            <List sx={{ flexGrow: 1 }}>
+            {/* Lista de Itens do Menu */}
+            <List sx={{ flexGrow: 1, pt: 1 }}>
                 {menuItems.map((item) => (
                     <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
                         <Tooltip title={desktopOpen ? '' : item.text} placement="right">
@@ -61,7 +91,7 @@ export default function SideNav({
                                 }}
                                 sx={(theme) => ({
                                     minHeight: 48,
-                                    justifyContent: desktopOpen ? 'initial' : 'center',
+                                    justifyContent: 'center',
                                     px: 2.5,
                                     transition: theme.transitions.create(['padding', 'background-color'], {
                                         duration: theme.transitions.duration.short,
@@ -71,7 +101,7 @@ export default function SideNav({
                                 <ListItemIcon
                                     sx={{
                                         minWidth: 0,
-                                        mr: desktopOpen ? 3 : 0,
+                                        mr: desktopOpen ? 3 : 'auto',
                                         justifyContent: 'center',
                                         color: 'inherit',
                                     }}
@@ -84,7 +114,18 @@ export default function SideNav({
                     </ListItem>
                 ))}
             </List>
-            <Box sx={{ p: 2, textAlign: 'center' }}>
+            <Divider />
+            {/* ThemeSwitcher que SÓ aparece quando o menu está ABERTO */}
+            <Box
+                sx={(theme) => ({
+                    p: 2,
+                    textAlign: 'center',
+                    flexShrink: 0,
+                    transition: theme.transitions.create('opacity'),
+                    opacity: desktopOpen ? 1 : 0,
+                    pointerEvents: desktopOpen ? 'auto' : 'none',
+                })}
+            >
                 <ThemeSwitcher />
             </Box>
         </Box>
