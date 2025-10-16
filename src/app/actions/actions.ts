@@ -51,7 +51,7 @@ export async function sendNotification(message: string, userId: string) {
         await webpush.sendNotification(
             subscription,
             JSON.stringify({
-                title: 'Lembrete do TentameLembrar',
+                title: 'Lembrete',
                 body: message,
                 icon: '/icon-192x192.png',
             })

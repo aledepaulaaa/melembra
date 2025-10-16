@@ -32,8 +32,8 @@ export default function UserProfile() {
     } = useUserProfile()
 
     return (
-        <Paper elevation={3} sx={{ p: 3, borderRadius: 2, mt: 3, width: '100%' }}>
-            <Typography variant="h6" gutterBottom>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, width: '100%', boxShadow: 0 }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
                 Detalhes da Conta
             </Typography>
             <TextField

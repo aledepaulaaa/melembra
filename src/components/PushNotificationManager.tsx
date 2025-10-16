@@ -19,7 +19,7 @@ export default function PushNotificationManager() {
     }
 
     return (
-        <Paper elevation={3} sx={{ p: 3, borderRadius: 2, mt: 3 }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
             <Typography variant="h6" gutterBottom>Notificações Push</Typography>
             {subscription ? (
                 <>

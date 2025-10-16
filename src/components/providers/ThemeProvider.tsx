@@ -1,18 +1,12 @@
 'use client'
 //melembra/src/components/providers/ThemeProvider.tsx
 import React from 'react'
-import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material'
-import { Gabarito } from 'next/font/google'
+import { createCustomTheme } from '@/theme/theme'
+import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material'
 
 export const ThemeContext = React.createContext({
     toggleColorMode: () => { },
     colorMode: { toggleColorMode: () => { } },
-})
-
-export const gabarito = Gabarito({
-    weight: ['400', '500', '700', '900'],
-    subsets: ['latin'],
-    display: 'swap',
 })
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -41,56 +35,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
         [],
     )
 
-    const theme = React.useMemo(
-        () =>
-            createTheme({
-                palette: {
-                    mode,
-                    background: {
-                        default: mode === 'dark' ? '#121212' : '#FFFFFF',
-                        paper: mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-                    },
-                    primary: {
-                        main: '#BB86FC',
-                    },
-                    secondary: {
-                        main: '#03DAC6',
-                    },
-                },
-                typography: {
-                    fontFamily: gabarito.style.fontFamily,
-                },
-                components: {
-                    MuiCssBaseline: {
-                        styleOverrides: {
-                            body: {
-                                background: mode === 'dark' ? '#000000' : '#FFFFFF',
-                                color: mode === 'dark' ? '#FFFFFF' : '#000000',
-                                fontFamily: gabarito.style.fontFamily,
-                            },
-                        },
-                    },
-                    MuiButton: {
-                        styleOverrides: {
-                            root: {
-                                borderRadius: 8,
-                            },
-                        },
-                    },
-                    MuiPaper: {
-                        styleOverrides: {
-                            root: {
-                                background: 'rgba(255, 255, 255, 0.1)',
-                                backdropFilter: 'blur(16px)',
-                                border: '1px solid rgba(255, 255, 255, 0.2)',
-                                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-                            },
-                        },
-                    },
-                },
-            }),
-        [mode],
-    )
+    const theme = React.useMemo(() => createCustomTheme(mode), [mode])
 
     if (!isMounted) {
         return null

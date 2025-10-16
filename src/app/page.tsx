@@ -6,6 +6,8 @@ import { useAuth } from '@/components/AuthManager'
 import ReminderFlow from '@/components/ui/ReminderFlow'
 import { AnimatePresence, motion } from 'framer-motion'
 import LogoMeLembra from '@/components/ui/LogoMeLembra'
+import WelcomeInstallDialog from '@/components/WelcomeInstallDialog'
+import LogoAnimated from '@/components/ui/LogoAnimated'
 
 export default function Home() {
     const { loading } = useAuth()
@@ -39,6 +41,7 @@ export default function Home() {
                 flexDirection: 'column',
             }}
         >
+            <WelcomeInstallDialog />
             <Box
                 sx={{
                     flexGrow: 1,
@@ -55,10 +58,10 @@ export default function Home() {
                             exit={{ opacity: 0, y: -10 }}
                         >
                             <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                                <Typography variant="h4" textAlign="start" component="h1">
+                                <Typography variant="h4" fontWeight={900} textAlign="start" lineHeight={1} component="h1">
                                     Me <br />Lembra?
                                 </Typography>
-                                <LogoMeLembra size={65} />
+                                <LogoAnimated size={65} />
                             </Box>
                         </motion.div>
                     )}

@@ -25,9 +25,14 @@ export default function ThemeSwitcher() {
 
     return (
         <IconButton
-            sx={{ ml: 1, position: 'absolute', top: 16, right: 16 }}
+            sx={{
+                ml: 1,
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                color: theme.palette.mode === 'light' ? theme.palette.secondary.main : theme.palette.primary.main
+            }}
             onClick={colorMode.toggleColorMode}
-            color="inherit"
         >
             <motion.div
                 key={theme.palette.mode}

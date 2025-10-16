@@ -65,7 +65,7 @@ export default function ReminderList() {
     if (loading || authLoading) {
         return (
             <Box sx={{ p: 4, width: '100%', maxWidth: 600 }}>
-                <Typography variant="h4" component="h2" gutterBottom>
+                <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                     Seus Lembretes
                 </Typography>
                 <Skeleton variant="rectangular" height={50} sx={{ borderRadius: 2, mb: 2 }} />
@@ -77,7 +77,7 @@ export default function ReminderList() {
 
     return (
         <Box sx={{ p: 4, width: '100%', maxWidth: 600 }}>
-            <Typography variant="h4" component="h2" gutterBottom>
+            <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                 Seus Lembretes
             </Typography>
             {reminders.length > 0 ? (

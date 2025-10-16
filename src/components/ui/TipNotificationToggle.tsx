@@ -43,7 +43,7 @@ export default function TipNotificationToggle() {
     }
 
     return (
-        <Paper elevation={3} sx={{ mt: 2, p: 2, mb: 2, borderRadius: 2 }}>
+        <Paper elevation={0} sx={{ mt: 2, p: 2, mb: 2, borderRadius: 2, boxShadow: 0 }}>
             <Box
                 sx={{
                     display: 'flex',
@@ -51,7 +51,7 @@ export default function TipNotificationToggle() {
                     alignItems: 'center',
                 }}
             >
-                <Typography variant="body1">Ativar Dicas do App</Typography>
+                <Typography variant="body1" fontWeight={700}>Ativar Dicas do App</Typography>
                 <FormControlLabel
                     control={<Switch checked={enabled} onChange={handleToggle} />}
                     label={enabled ? 'Ativado' : 'Desativado'}

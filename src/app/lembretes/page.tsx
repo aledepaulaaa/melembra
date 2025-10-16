@@ -9,7 +9,7 @@ export default function RemindersPage() {
 
     if (loading) {
         return (
-            <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 4 }}>
+            <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1 }}>
                 <Skeleton animation="wave" width="100%" />
                 <Skeleton animation="wave" width="85%" />
                 <Skeleton animation="wave" width="75%" />
@@ -18,7 +18,7 @@ export default function RemindersPage() {
     }
 
     return (
-        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
             <ReminderList />
         </Box>
     )

@@ -1,6 +1,5 @@
 'use client'
 //melembra/src/app/configuracoes/page.tsx
-import React from 'react'
 import { Box, Typography, Paper } from '@mui/material'
 import InstallPrompt from "@/components/InstallPrompt"
 import PushNotificationManager from '@/components/PushNotificationManager'
@@ -16,11 +15,10 @@ export default function SettingsPage() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 4,
             }}
         >
-            <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 600, borderRadius: 4, textAlign: 'center' }}>
-                <Typography variant="h4" component="h2" gutterBottom>Configurações</Typography>
+            <Paper  sx={{ p: 1, width: '100%', maxWidth: 600, borderRadius: 4, textAlign: 'center' }}>
+                <Typography variant="h4" m={2} component="h2" fontWeight={900} gutterBottom>Configurações</Typography>
                 <InstallPrompt />
                 <PushNotificationManager />
                 <UserProfile />

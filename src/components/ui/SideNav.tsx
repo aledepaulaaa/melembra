@@ -1,7 +1,7 @@
 'use client'
 //melembra/src/components/ui/SideNav.tsx
 import ThemeSwitcher from './ThemeSwitcher'
-import LogoMeLembra from './LogoMeLembra'
+import LogoAnimated from './LogoAnimated'
 import { useRouter, usePathname } from 'next/navigation'
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
@@ -59,7 +59,7 @@ export default function SideNav({
                     })}
                 >
                     <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2 }}>
-                        <LogoMeLembra size={40} />
+                        <LogoAnimated size={40} />
                     </Toolbar>
                 </Box>
                 {/* --- A CORREÇÃO ESTÁ AQUI --- */}
@@ -108,7 +108,10 @@ export default function SideNav({
                                 >
                                     {item.icon}
                                 </ListItemIcon>
-                                <ListItemText primary={item.text} sx={{ opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity') }} />
+                                <ListItemText
+                                    primary={item.text}
+                                    sx={{ opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity') }}
+                                />
                             </ListItemButton>
                         </Tooltip>
                     </ListItem>
