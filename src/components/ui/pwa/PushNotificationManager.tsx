@@ -1,7 +1,8 @@
-'use client'
+"use client"
 //melembra/src/components/PushNotificationManager.tsx
 import { usePushNotification } from "@/hooks/usePushNotification"
 import { Box, Button, TextField, Typography, Paper } from "@mui/material"
+import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined"
 
 export default function PushNotificationManager() {
     const {
@@ -24,7 +25,7 @@ export default function PushNotificationManager() {
             {subscription ? (
                 <>
                     <Typography variant="body1">Suas notificações push estão ativadas!</Typography>
-                    <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                    <Box sx={{ mt: 2, display: "flex", gap: 2, flexDirection: "column", justifyContent: "center" }}>
                         <TextField
                             label="Mensagem de teste"
                             variant="outlined"
@@ -36,14 +37,18 @@ export default function PushNotificationManager() {
                             Enviar Teste
                         </Button>
                     </Box>
-                    <Button variant="text" color="error" onClick={handleUnsubscribe} sx={{ mt: 1 }}>
+                    <Button variant="contained" color="error" onClick={handleUnsubscribe} sx={{ mt: 1 }}>
                         Desativar
                     </Button>
                 </>
             ) : (
                 <>
-                    <Typography variant="body1">Você ainda não ativou suas notificações.</Typography>
-                    <Button variant="contained" onClick={handleSubscribe} sx={{ mt: 2 }}>
+                    <Typography variant="body1" mb={2}>Você ainda não ativou suas notificações.</Typography>
+                    <Button
+                        startIcon={<NotificationsActiveOutlinedIcon fontSize="large" />}
+                        variant="contained"
+                        onClick={handleSubscribe}
+                    >
                         Ativar
                     </Button>
                 </>

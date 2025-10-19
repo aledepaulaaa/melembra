@@ -2,12 +2,11 @@
 //melembra/src/app/page.tsx
 import React from 'react'
 import { Box, Skeleton, Typography } from '@mui/material'
-import { useAuth } from '@/components/AuthManager'
-import ReminderFlow from '@/components/ui/ReminderFlow'
+import { useAuth } from '@/components/ui/auth/AuthManager'
+import ReminderFlow from '@/components/forms/ReminderFlow'
 import { AnimatePresence, motion } from 'framer-motion'
-import LogoMeLembra from '@/components/ui/LogoMeLembra'
-import WelcomeInstallDialog from '@/components/WelcomeInstallDialog'
-import LogoAnimated from '@/components/ui/LogoAnimated'
+import WelcomeInstallDialog from '@/components/ui/pwa/WelcomeInstallDialog'
+import LogoAnimated from '@/components/ui/logo/LogoAnimated'
 
 export default function Home() {
     const { loading } = useAuth()
@@ -57,8 +56,8 @@ export default function Home() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                         >
-                            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                                <Typography variant="h4" fontWeight={900} textAlign="start" lineHeight={1} component="h1">
+                            <Box sx={{ display: "flex", gap: 2, alignItems: "center", mt: 10 }}>
+                                <Typography variant="h2" fontWeight={900} textAlign="start" lineHeight={1} component="h2">
                                     Me <br />Lembra?
                                 </Typography>
                                 <LogoAnimated size={65} />

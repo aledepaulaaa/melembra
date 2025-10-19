@@ -70,7 +70,7 @@ export default function InstallPrompt() {
         <>
             <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
                 <Typography variant="h6" gutterBottom>Instalar Aplicativo</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
                     Tenha uma experiência mais rápida e integrada adicionando o MeLembra à sua tela de início.
                 </Typography>
                 <Button

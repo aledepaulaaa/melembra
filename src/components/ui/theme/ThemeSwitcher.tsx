@@ -6,7 +6,7 @@ import { IconButton } from '@mui/material'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import NightlightRoundIcon from '@mui/icons-material/NightlightRound'
 import { motion } from 'framer-motion'
-import { ThemeContext } from '../providers/ThemeProvider'
+import { ThemeContext } from '../../providers/ThemeProvider'
 
 const iconVariants: any = {
     jump: {

@@ -113,15 +113,54 @@ export async function getReminders(userId: string) {
     }
 }
 
+export async function createUser(userData: { email: string, password: string, name: string, nickname: string, whatsappNumber: string }) {
+    const { email, password, name, nickname, whatsappNumber } = userData
+
+    try {
+        // 1. Tenta criar o usuário no Firebase Authentication
+        const userRecord = await adminAuth.createUser({
+            email,
+            password,
+            displayName: name, // Bônus: já define o nome de exibição
+        })
+
+        const userId = userRecord.uid
+
+        // 2. Salva os dados adicionais no Firestore
+        await saveUserProfile(userId, { name, nickname, whatsappNumber, email, userId })
+
+        return { success: true, userId }
+    } catch (error: any) {
+        // Lida com erros comuns, como e-mail já existente
+        if (error.code === 'auth/email-already-exists') {
+            return { success: false, error: 'Este e-mail já está em uso.' }
+        }
+        console.error('Erro ao criar novo usuário:', error)
+        return { success: false, error: 'Falha ao criar a conta. Tente novamente.' }
+    }
+}
+
 export async function linkEmailToAnonymousUser(userId: string, email: string, password: string) {
     try {
+        // VERIFICAÇÃO: Checa se o e-mail já está em uso por outra conta
+        await adminAuth.getUserByEmail(email)
+        // Se a linha acima NÃO deu erro, o e-mail já existe.
+        return { success: false, error: 'Este e-mail já está em uso por outra conta.' }
+    } catch (error: any) {
+        // Se o erro for 'user-not-found', ÓTIMO! Significa que o e-mail está livre.
+        if (error.code !== 'auth/user-not-found') {
+            return { success: false, error: 'Ocorreu um erro ao verificar o e-mail.' }
+        }
+    }
+
+    try {
+        // Se o e-mail está livre, prossegue com a atualização
         await adminAuth.updateUser(userId, {
             email,
             password,
         })
         return { success: true }
     } catch (error) {
-        console.error('Erro ao linkar e-mail à conta anônima:', error)
         return { success: false, error: 'Falha ao associar e-mail. Tente novamente.' }
     }
 }
@@ -213,5 +252,36 @@ export async function deleteReminder(reminderId: string) {
     } catch (error) {
         console.error('Erro ao apagar lembrete:', error)
         return { success: false, error: 'Falha ao apagar o lembrete.' }
+    }
+}
+
+export async function recordFreeUsage(userId: string) {
+    if (!userId) {
+        return { success: false, error: 'UserID obrigatório' }
+    }
+    try {
+        const userDocRef = doc(db, 'users', userId)
+        await setDoc(userDocRef, {
+            lastFreeReminderAt: Timestamp.now()
+        }, { merge: true })
+        return { success: true }
+    } catch (error) {
+        console.error('Erro ao registrar uso gratuito:', error)
+        return { success: false, error: 'Falha ao registrar uso.' }
+    }
+}
+
+export async function saveUserProfile(userId: string, profileData: { name: string, nickname: string, whatsappNumber: string, email: string, userId: string }) {
+    if (!userId) {
+        return { success: false, error: 'UserID obrigatório' }
+    }
+    try {
+        const userDocRef = doc(db, 'users', userId)
+        // Salva todos os dados, incluindo o próprio userId e o email
+        await setDoc(userDocRef, profileData, { merge: true })
+        return { success: true }
+    } catch (error) {
+        console.error('Erro ao salvar perfil do usuário:', error)
+        return { success: false, error: 'Falha ao salvar dados do perfil.' }
     }
 }

@@ -14,10 +14,15 @@ export const createCustomTheme = (mode: PaletteMode) => {
     return createTheme({
         palette: {
             mode,
-            background: {
+             background: {
                 default: mode === 'dark' ? '#121212' : '#FFFFFF',
-                paper: mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+                paper: mode === 'dark' ? '#121212' : '#FFFFFF',
             },
+            text: {
+                primary: mode === 'dark' ? '#FFFFFF' : '#000000',
+                secondary: mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)',
+            },
+            divider: mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
             primary: {
                 main: '#913ff5ff',
             },
@@ -39,10 +44,14 @@ export const createCustomTheme = (mode: PaletteMode) => {
                 },
             },
             MuiButton: {
-                styleOverrides: {
-                    root: {
-                        borderRadius: 8,
-                    },
+                defaultProps: {
+                    sx: {
+                        p: 2,
+                        borderRadius: 4,
+                        fontWeight: 'bold',
+                        textTransform: 'none',
+                        fontSize: 16
+                    }
                 },
             },
             MuiPaper: {
@@ -54,6 +63,14 @@ export const createCustomTheme = (mode: PaletteMode) => {
                         boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
                     },
                 },
+            },
+            MuiDrawer: {
+                styleOverrides: {
+                    paper: {
+                        backgroundColor: mode === 'dark' ? '#121212' : '#FFFFFF',
+                        backgroundImage: 'none',
+                    }
+                }
             },
         },
     })

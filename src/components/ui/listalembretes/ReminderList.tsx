@@ -1,12 +1,12 @@
 'use client'
 // melembra/src/components/ui/ReminderList.tsx
 import React from 'react'
-import { useAuth } from '@/components/AuthManager'
+import { useAuth } from '@/components/ui/auth/AuthManager'
 import { deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button } from '@mui/material'
-import { toast } from 'react-toastify'
+import { useSnackbar } from '@/contexts/SnackbarProvider'
 
 // 1. Interface atualizada para refletir a estrutura do documento no Firestore
 interface Reminder {
@@ -18,6 +18,7 @@ interface Reminder {
 
 export default function ReminderList() {
     const { userId, loading: authLoading } = useAuth()
+    const { openSnackbar } = useSnackbar()
     const [reminders, setReminders] = React.useState<Reminder[]>([])
     const [loading, setLoading] = React.useState(true)
 
@@ -55,9 +56,9 @@ export default function ReminderList() {
 
         const result = await deleteReminder(reminderId)
         if (result.success) {
-            toast.success('Lembrete apagado!')
+            openSnackbar('Lembrete apagado!', 'success')
         } else {
-            toast.error('Erro ao apagar. Recarregando lista...')
+            openSnackbar('Erro ao apagar. Recarregando lista...', 'error')
             fetchReminders() // Recarrega para garantir consistência em caso de erro
         }
     }

@@ -1,15 +1,24 @@
 'use client'
 // melembra/src/app/lembretes/page.tsx
 import { Box, Skeleton } from '@mui/material'
-import { useAuth } from '../../components/AuthManager'
-import ReminderList from '../../components/ui/ReminderList'
+import { useAuth } from '../../components/ui/auth/AuthManager'
+import ReminderList from '../../components/ui/listalembretes/ReminderList'
 
 export default function RemindersPage() {
     const { loading } = useAuth()
 
     if (loading) {
         return (
-            <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1 }}>
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    p: 1
+                }}
+            >
                 <Skeleton animation="wave" width="100%" />
                 <Skeleton animation="wave" width="85%" />
                 <Skeleton animation="wave" width="75%" />
@@ -18,7 +27,15 @@ export default function RemindersPage() {
     }
 
     return (
-        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2 }}>
+        <Box
+            sx={{
+                minHeight: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                p: 2
+            }}
+        >
             <ReminderList />
         </Box>
     )

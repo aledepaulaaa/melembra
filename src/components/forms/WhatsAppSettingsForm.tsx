@@ -1,28 +1,22 @@
 'use client'
 //melembra/src/components/forms/WhatsAppSettingsForm.tsx
-import React, { useState, useEffect } from 'react'
-import {
-    Box,
-    TextField,
-    Button,
-    Typography,
-    Paper,
-    LinearProgress,
-} from '@mui/material'
-import { useAuth } from '../AuthManager'
+import React from 'react'
+import { useAuth } from '../ui/auth/AuthManager'
 import { doc, getDoc } from 'firebase/firestore'
-import { toast } from 'react-toastify'
 import { db } from '@/app/lib/firebase'
 import { saveUserPhoneNumber } from '@/app/actions/actions'
+import { useSnackbar } from '@/contexts/SnackbarProvider'
+import { Box, TextField, Button, Typography, Paper, LinearProgress } from '@mui/material'
 
 export default function WhatsAppSettingsForm() {
     const { userId } = useAuth()
-    const [phoneNumber, setPhoneNumber] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [isSaving, setIsSaving] = useState(false)
+    const { openSnackbar } = useSnackbar()
+    const [phoneNumber, setPhoneNumber] = React.useState('')
+    const [loading, setLoading] = React.useState(false)
+    const [isSaving, setIsSaving] = React.useState(false)
 
     // Busca o número salvo do usuário ao carregar o componente
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchPhoneNumber = async () => {
             if (!userId) return
             setLoading(true)
@@ -38,16 +32,16 @@ export default function WhatsAppSettingsForm() {
 
     const handleSave = async () => {
         if (!userId || !phoneNumber) {
-            toast.error('Por favor, insira um número de telefone válido.')
+            openSnackbar('Por favor, insira um número de telefone válido.', 'error')
             return
         }
 
         setIsSaving(true)
         const result = await saveUserPhoneNumber(userId, phoneNumber)
         if (result.success) {
-            toast.success(result.message)
+            openSnackbar(result.message as string, 'success')
         } else {
-            toast.error(result.error)
+            openSnackbar(result.error as string, 'error')
         }
         setIsSaving(false)
     }

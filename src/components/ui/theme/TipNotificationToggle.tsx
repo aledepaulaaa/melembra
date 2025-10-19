@@ -9,7 +9,7 @@ import {
     Paper,
     Skeleton,
 } from '@mui/material'
-import { useAuth } from '@/components/AuthManager'
+import { useAuth } from '@/components/ui/auth/AuthManager'
 import { getUserPreferences, saveUserPreferences } from '@/app/actions/actions'
 
 export default function TipNotificationToggle() {

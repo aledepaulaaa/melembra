@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { urlBase64ToUint8Array } from "@/app/utils/base64"
 import { sendNotification, subscribeUser, unsubscribeUser } from "@/app/actions/actions"
-import { useAuth } from "@/components/AuthManager"
+import { useAuth } from "@/components/ui/auth/AuthManager"
 
 export const usePushNotification = () => {
     const { userId } = useAuth()

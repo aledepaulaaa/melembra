@@ -1,10 +1,9 @@
 // melembra/app/lib/forms/reminderFormHandlers.tsx
-import { toast } from 'react-toastify'
-import { saveReminder, saveUserPhoneNumber } from '@/app/actions/actions'
+import { recordFreeUsage, saveReminder, saveUserPhoneNumber } from '@/app/actions/actions'
 import { ChatMessage, ConversationStep, HandlerProps } from '@/interfaces/IReminderForm'
-import { getRandomDateResponse } from './dateRequestResponses'
 import { Button } from '@mui/material'
 import * as UI from './reminderFormUI' // Importa nosso novo módulo de UI
+import { getRandomDateResponse } from '@/app/lib/dateRequestResponses'
 
 // --- Funções de Lógica Pura ---
 export const addMessageToChat = (props: HandlerProps, message: Omit<ChatMessage, 'id'>) => {
@@ -69,7 +68,6 @@ export const handleTimeSelect = (props: HandlerProps, timeFromClock: Date | null
     props.setStep(ConversationStep.ASKING_RECURRENCE)
 }
 
-
 export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, time: string) => {
     props.setReminder(prev => ({ ...prev, recurrence: recurrence }))
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
@@ -80,13 +78,15 @@ export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, 
 }
 
 export const moveToConfirmation = async (props: HandlerProps, phoneInput: string) => {
+    const { openSnackbar } = props
+
     props.setIsLoading(true)
     props.setShowTextInput(false)
 
     if (phoneInput.trim() && props.userId) {
         addMessageWithTyping(props, { sender: 'bot', text: `Salvando seu número...` }, 500)
         await saveUserPhoneNumber(props.userId, phoneInput)
-        toast.success('Número do WhatsApp salvo!')
+        openSnackbar('Número do WhatsApp salvo!', 'success')
     }
 
     addMessageWithTyping(props, {
@@ -99,17 +99,31 @@ export const moveToConfirmation = async (props: HandlerProps, phoneInput: string
 }
 
 export const handleConfirmSave = async (props: HandlerProps) => {
-    const { reminder, userId, router } = props
-    if (!reminder.title || !reminder.date || !userId) {
-        toast.error("Ocorreu um erro. Faltam informações.")
+    
+    const { reminder, router, subscription, openSnackbar, getOrCreateAnonymousUser} = props
+    
+    const currentUserId = await getOrCreateAnonymousUser()
+
+    if (!reminder.title || !reminder.date || !currentUserId) {
+        openSnackbar("Ocorreu um erro. Faltam informações.", 'error')
         return
     }
+
     props.setIsLoading(true)
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageWithTyping(props, { sender: 'bot', text: `Salvando...` }, 100)
-    const result = await saveReminder(reminder.title, reminder.date, userId)
+
+    const result = await saveReminder(reminder.title, reminder.date, currentUserId)
+
     if (result.success) {
-        toast.success('Lembrete salvo com sucesso!')
+        openSnackbar('Lembrete salvo com sucesso!', 'success')
+
+        // 3. A LÓGICA CRÍTICA VAI AQUI!
+        // Se o plano for 'free', registra o uso para bloquear no futuro.
+        if (subscription.plan === 'free') {
+            await recordFreeUsage(currentUserId)
+        }
+
         addMessageWithTyping(props, {
             sender: 'bot', text: 'Seu lembrete foi criado!',
             component:
@@ -120,11 +134,14 @@ export const handleConfirmSave = async (props: HandlerProps) => {
                     Ver meus lembretes
                 </Button>
         })
+
     } else {
-        toast.error(result.error || 'Falha ao salvar lembrete.')
+        openSnackbar(result.error || 'Falha ao salvar lembrete.', 'error')
         addMessageWithTyping(props, { sender: 'bot', text: `Ocorreu um erro: ${result.error}` })
     }
+
     props.setIsLoading(false)
+    
 }
 
 export const handleCancel = (props: HandlerProps) => {
@@ -137,6 +154,8 @@ export const handleCancel = (props: HandlerProps) => {
 }
 
 export const handleUserInput = (props: HandlerProps, value: string, chatHistoryLength: number) => {
+    const { openSnackbar } = props
+
     if (props.isLoading) return
 
     // E agora, ele usa o onChatStart que VEM DE DENTRO do objeto 'props'
@@ -150,7 +169,7 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
     switch (props.step) {
         case ConversationStep.ASKING_TITLE:
             if (!trimmedValue) {
-                toast.error("O título não pode ser vazio.")
+                openSnackbar("O título não pode ser vazio.", 'error')
                 addMessageToChat(props, { sender: 'bot', text: 'Por favor, me diga o que você quer lembrar.' })
                 return
             }

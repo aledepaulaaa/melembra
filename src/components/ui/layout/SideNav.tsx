@@ -1,11 +1,13 @@
 'use client'
 //melembra/src/components/ui/SideNav.tsx
-import ThemeSwitcher from './ThemeSwitcher'
-import LogoAnimated from './LogoAnimated'
+import ThemeSwitcher from '../theme/ThemeSwitcher'
+import LogoAnimated from '../logo/LogoAnimated'
 import { useRouter, usePathname } from 'next/navigation'
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
-import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
-import PhonelinkSetupRoundedIcon from '@mui/icons-material/PhonelinkSetupRounded'
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
+import SubscriptionStatus from './SubscriptionStatus'
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
+import RoofingRoundedIcon from '@mui/icons-material/RoofingRounded'
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip } from '@mui/material'
 
 const defaultDrawerWidth = 240
@@ -30,9 +32,10 @@ export default function SideNav({
     const pathname = usePathname()
 
     const menuItems = [
-        { text: 'Início', path: '/', icon: <HomeRoundedIcon /> },
-        { text: 'Lembretes', path: '/lembretes', icon: <CalendarMonthRoundedIcon /> },
-        { text: 'Configurações', path: '/configuracoes', icon: <PhonelinkSetupRoundedIcon /> },
+        { text: 'Início', path: '/', icon: <RoofingRoundedIcon /> },
+        { text: 'Lembretes', path: '/lembretes', icon: <ScheduleRoundedIcon /> },
+        { text: 'Perfil', path: '/perfil', icon: <AccountCircleOutlinedIcon /> },
+        { text: 'Configurações', path: '/configuracoes', icon: <TuneRoundedIcon /> },
     ]
 
     const drawerContent = (
@@ -110,7 +113,10 @@ export default function SideNav({
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.text}
-                                    sx={{ opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity') }}
+                                    sx={{ 
+                                        opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity'),
+                                        fontWeight: "bold"
+                                     }}
                                 />
                             </ListItemButton>
                         </Tooltip>
@@ -118,6 +124,7 @@ export default function SideNav({
                 ))}
             </List>
             <Divider />
+            <SubscriptionStatus desktopOpen={desktopOpen} />
             {/* ThemeSwitcher que SÓ aparece quando o menu está ABERTO */}
             <Box
                 sx={(theme) => ({
@@ -155,6 +162,7 @@ export default function SideNav({
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
                         width: drawerWidth,
+                        boxShadow: "none",
                     },
                 }}
             >
@@ -171,6 +179,8 @@ export default function SideNav({
                         width: desktopOpen ? drawerWidth : miniWidth,
                         overflowX: 'hidden',
                         whiteSpace: 'nowrap',
+                        boxShadow: "none",
+                        backgroundColor: theme.palette.background.default,
                         transition: theme.transitions.create('width', {
                             easing: theme.transitions.easing.sharp,
                             duration: theme.transitions.duration.standard,

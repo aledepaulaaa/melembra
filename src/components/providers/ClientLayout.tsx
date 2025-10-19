@@ -2,32 +2,33 @@
 import React from "react"
 import { store } from "@/app/store/store"
 import { Provider } from "react-redux"
-import { AuthProvider } from "../AuthManager"
-import SideNav from "../ui/SideNav"
+import { AuthProvider, useAuth } from "../ui/auth/AuthManager"
+import SideNav from "../ui/layout/SideNav"
+import { useSubscription } from "@/hooks/useSubscription"
 import ThemeProvider from "./ThemeProvider"
-import ThemeSwitcher from "../ui/ThemeSwitcher"
-import MenuIconCustom from "../ui/MenuIconCustom"
+import ThemeSwitcher from "../ui/theme/ThemeSwitcher"
+import MenuIconCustom from "../ui/layout/MenuIconCustom"
 import PageTransition from "./PageTransition"
+import UpgradeButtonHeader from "../ui/planos/upgradeplanos/UpgradeButtonHeader"
 import { Box, AppBar, Toolbar, IconButton, useTheme } from "@mui/material"
+import { SnackbarProvider } from "@/contexts/SnackbarProvider"
 
 const drawerWidth = 240
 const miniWidth = 64
 
-// --- INÍCIO DA CORREÇÃO ---
-
-// 1. Criamos um componente interno que contém TODA a lógica de UI.
-//    Agora o `useTheme()` é chamado DENTRO do ThemeProvider e funcionará.
 function MainLayout({ children }: { children: React.ReactNode }) {
     const [mobileOpen, setMobileOpen] = React.useState(false)
     const [desktopOpen, setDesktopOpen] = React.useState(true)
-    const theme = useTheme() // Este hook agora lê o tema correto!
+    const theme = useTheme()
+    const { user } = useAuth()
+
+    useSubscription(user?.uid as string)
 
     const handleMobileToggle = () => setMobileOpen((s) => !s)
     const handleDesktopToggle = () => setDesktopOpen((s) => !s)
 
-    // Esta linha agora vai funcionar como esperado
-    const iconColor = theme.palette.mode === 'dark' 
-        ? theme.palette.primary.main 
+    const iconColor = theme.palette.mode === 'dark'
+        ? theme.palette.primary.main
         : theme.palette.secondary.main
 
     return (
@@ -40,7 +41,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     backgroundColor: "transparent",
                     display: { xs: 'flex', md: 'none' },
                     width: '100%',
-                    boxShadow: 0
+                    boxShadow: 0,
                 }}
             >
                 <Toolbar>
@@ -52,6 +53,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     >
                         <MenuIconCustom color={iconColor} />
                     </IconButton>
+                    <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+                        <UpgradeButtonHeader />
+                    </Box>
                     <ThemeSwitcher />
                 </Toolbar>
             </AppBar>
@@ -96,8 +100,8 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     p: 3,
                     minHeight: '100vh',
                     display: 'flex',
+                    alignItems: "center",
                     flexDirection: 'column',
-                    width: '100%',
                     ml: { md: desktopOpen ? `${drawerWidth}px` : `${miniWidth}px` },
                     transition: theme.transitions.create('margin', {
                         easing: theme.transitions.easing.sharp,
@@ -106,7 +110,18 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                 })}
             >
                 <Toolbar sx={{ display: { xs: 'block', md: 'none' } }} />
-                <Toolbar sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-start', px: 0 }} />
+                <Toolbar sx={{ display: { xs: 'none', md: 'block' } }} />
+                <Toolbar
+                    sx={{
+                        display: { xs: 'none', md: 'flex' },
+                        justifyContent: 'center',
+                        position: 'absolute',
+                        alignItems: 'center',
+                        top: 5,
+                    }}
+                >
+                    <UpgradeButtonHeader />
+                </Toolbar>
                 <PageTransition>
                     {children}
                 </PageTransition>
@@ -120,12 +135,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     return (
         <Provider store={store}>
             <ThemeProvider>
-                <AuthProvider>
-                    {/* 3. Renderizamos a UI (MainLayout) DENTRO dos providers */}
-                    <MainLayout>{children}</MainLayout>
-                </AuthProvider>
+                <SnackbarProvider>
+                    <AuthProvider>
+                        <MainLayout>{children}</MainLayout>
+                    </AuthProvider>
+                </SnackbarProvider>
             </ThemeProvider>
         </Provider>
     )
 }
-// --- FIM DA CORREÇÃO ---

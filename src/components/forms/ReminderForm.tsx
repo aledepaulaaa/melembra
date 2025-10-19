@@ -1,24 +1,75 @@
 'use client'
 // melembra/src/components/forms/ReminderForm.tsx
 import React from 'react'
+import * as Handlers from './reminderFormHandlers'
+import { ptBR } from 'date-fns/locale/pt-BR'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../AuthManager'
+import { useAuth } from '../ui/auth/AuthManager'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { ptBR } from 'date-fns/locale/pt-BR'
-import { Box, TextField, IconButton, CircularProgress, Typography } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminderForm'
 import useReminderForm from '@/hooks/forms/useReminderForm'
-import * as Handlers from '../../app/lib/reminderFormHandlers'
+import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper } from '@mui/material'
+import { useAppSelector } from '@/app/store/hooks'
+import { db } from '@/app/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
+import { isToday } from 'date-fns'
+import UsageCountdown from '../ui/planos/upgradeplanos/UsageCountdown'
+import { useSnackbar } from '@/contexts/SnackbarProvider'
+
+const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
+    const router = useRouter()
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <Paper sx={{ p: 3, textAlign: 'center', borderRadius: 4 }}>
+                <Typography variant="h6" fontWeight={700}>Limite diário atingido!</Typography>
+                <Typography sx={{ my: 1 }}>Seu próximo lembrete gratuito estará disponível em:</Typography>
+                {lastUsage && <UsageCountdown lastUsageTime={lastUsage} />}
+                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, faça o upgrade.</Typography>
+                <Button variant="outlined" onClick={() => router.push('/planos')}>
+                    Assinar Plus
+                </Button>
+            </Paper>
+        </motion.div>
+    )
+}
 
 // --- Componente ---
 export default function ReminderForm({ onChatStart = () => { } }: ReminderFormProps) {
     const chatContainerRef = React.useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const { userId } = useAuth()
+    const { userId, getOrCreateAnonymousUser } = useAuth()
     const formState = useReminderForm()
+    const subscription = useAppSelector((state) => state.subscription)
+    const { plan, status } = subscription 
+    const { openSnackbar } = useSnackbar()
+    const [isBlocked, setIsBlocked] = React.useState(false)
+    const [lastUsage, setLastUsage] = React.useState<Date | null>(null)
+
+    // Efeito para verificar se o usuário gratuito já usou a cota do dia
+     React.useEffect(() => {
+        const checkUsage = async () => {
+            if (plan === 'free' && userId && status !== 'loading') {
+                const userDocRef = doc(db, 'users', userId)
+                const userDoc = await getDoc(userDocRef)
+                const usageTimestamp = userDoc.data()?.lastFreeReminderAt?.toDate()
+
+                if (usageTimestamp && isToday(usageTimestamp)) {
+                    setIsBlocked(true)
+                    setLastUsage(usageTimestamp) // Salva a data para o contador
+                } else {
+                    setIsBlocked(false)
+                    setLastUsage(null)
+                }
+            } else {
+                setIsBlocked(false)
+                setLastUsage(null)
+            }
+        }
+        checkUsage()
+    }, [plan, userId, status])
 
     React.useEffect(() => {
         if (chatContainerRef.current)
@@ -26,7 +77,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     }, [formState.chatHistory, formState.isBotTyping])
 
     // Agrupa todas as props necessárias para os handlers em um único objeto
-    const handlerProps = { ...formState, userId, router, onChatStart }
+    const handlerProps = { ...formState, userId, router, onChatStart, subscription, openSnackbar, getOrCreateAnonymousUser}
 
     const onUserSubmit = () => {
         Handlers.handleUserInput(handlerProps, formState.userInput, formState.chatHistory.length)
@@ -34,6 +85,14 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     }
 
     const messageVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }
+
+    if (status === 'loading') {
+        return <CircularProgress />
+    }
+
+    if (isBlocked) {
+        return <UpgradeBlocker lastUsage={lastUsage} />
+    }
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
@@ -49,22 +108,22 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                 {/* 2. Área de Chat: flexGrow: 1 para ocupar todo o espaço restante e overflowY: 'auto' para rolagem */}
                 <Box
                     ref={chatContainerRef}
-                     sx={{ 
-                    flexGrow: 1, 
-                    overflowY: 'auto',
-                    p: 2,
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        background: 'transparent',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        background: 'rgba(0,0,0,0.2)',
-                        borderRadius: '4px',
-                    },
-                }}
-            >
+                    sx={{
+                        flexGrow: 1,
+                        overflowY: 'auto',
+                        p: 2,
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            background: 'transparent',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            background: 'rgba(0,0,0,0.2)',
+                            borderRadius: '4px',
+                        },
+                    }}
+                >
                     <AnimatePresence>
                         {formState.chatHistory.map((msg) => (
                             <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit="hidden" layout>

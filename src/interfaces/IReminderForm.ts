@@ -1,5 +1,7 @@
 //melembra/src/interfaces/IRedminderForm.ts
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"
+import { SubscriptionState } from "./IMeLembraPayment"
+import { AlertColor } from "@mui/material"
 
 export type ChatMessage = {
     id: number
@@ -28,10 +30,11 @@ export interface ReminderFormProps {
 }
 
 export interface HandlerProps {
-    userId: string | null
+    userId: string | null | any
     router: AppRouterInstance
     reminder: ReminderState
     isLoading: boolean
+    subscription: SubscriptionState
     step: ConversationStep
     setReminder: React.Dispatch<React.SetStateAction<ReminderState>>
     setChatHistory: React.Dispatch<React.SetStateAction<ChatMessage[]>>
@@ -40,4 +43,6 @@ export interface HandlerProps {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
     setIsBotTyping: React.Dispatch<React.SetStateAction<boolean>>
     onChatStart: () => void
+    openSnackbar: (message: string, severity?: AlertColor) => void
+    getOrCreateAnonymousUser: () => Promise<string>
 }

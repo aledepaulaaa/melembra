@@ -32,7 +32,6 @@ export const RenderTimeClockWithConfirm = ({ handlerProps, minTime }: { handlerP
     )
 }
 
-
 export const renderDatePicker = (props: HandlerProps) => (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
         <StaticDatePicker
