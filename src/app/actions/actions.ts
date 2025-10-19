@@ -140,30 +140,6 @@ export async function createUser(userData: { email: string, password: string, na
     }
 }
 
-export async function linkEmailToAnonymousUser(userId: string, email: string, password: string) {
-    try {
-        // VERIFICAÇÃO: Checa se o e-mail já está em uso por outra conta
-        await adminAuth.getUserByEmail(email)
-        // Se a linha acima NÃO deu erro, o e-mail já existe.
-        return { success: false, error: 'Este e-mail já está em uso por outra conta.' }
-    } catch (error: any) {
-        // Se o erro for 'user-not-found', ÓTIMO! Significa que o e-mail está livre.
-        if (error.code !== 'auth/user-not-found') {
-            return { success: false, error: 'Ocorreu um erro ao verificar o e-mail.' }
-        }
-    }
-
-    try {
-        // Se o e-mail está livre, prossegue com a atualização
-        await adminAuth.updateUser(userId, {
-            email,
-            password,
-        })
-        return { success: true }
-    } catch (error) {
-        return { success: false, error: 'Falha ao associar e-mail. Tente novamente.' }
-    }
-}
 
 export async function resetUserPassword(email: string) {
     try {

@@ -1,5 +1,5 @@
 'use client'
-// melemebra/src/components/ui/SubscriptionManagementDialog.tsx (NOVO ARQUIVO)
+// melemebra/src/components/ui/SubscriptionManagementDialog.tsx
 import React from 'react'
 import { useAppSelector } from '@/app/store/hooks'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress } from '@mui/material'
@@ -41,7 +41,7 @@ export default function SubscriptionManagementDialog({ open, onClose }: Props) {
                 </Typography>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancelar</Button>
+                <Button onClick={onClose} variant="outlined">Cancelar</Button>
                 <Button onClick={handleManageSubscription} variant="contained" disabled={isRedirecting}>
                     {isRedirecting ? <CircularProgress size={24} /> : 'Ir para o Portal'}
                 </Button>

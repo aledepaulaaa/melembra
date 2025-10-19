@@ -1,14 +1,12 @@
 // melemebra/src/hooks/useUserCreateProfile.ts (VERSÃO CORRIGIDA)
 import React from 'react'
-import { useAppSelector } from '@/app/store/hooks'
-import { createUser, linkEmailToAnonymousUser, saveUserProfile } from '@/app/actions/actions'
+import { createUser } from '@/app/actions/actions'
 import { initialUser, IUserData } from '@/interfaces/IUserData'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { auth } from '@/app/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 
 export default function useUserCreateProfile() {
-    const { user } = useAppSelector((state) => state.auth)
     const { openSnackbar } = useSnackbar()
     const [isLoading, setIsLoading] = React.useState(false)
     const [formData, setFormData] = React.useState<IUserData>(initialUser)
@@ -27,20 +25,11 @@ export default function useUserCreateProfile() {
         }
         setIsLoading(true)
 
-        let result: { success: boolean; error?: string; userId?: string }
-
-        if (user && user.isAnonymous) {
-            result = await linkEmailToAnonymousUser(user.uid, email, password)
-            if (result.success) {
-                await saveUserProfile(user.uid, { name, nickname, whatsappNumber, email, userId: user.uid })
-            }
-        } else {
-            result = await createUser({ email, password, name, nickname, whatsappNumber })
-        }
+        const result = await createUser({ email, password, name, nickname, whatsappNumber })
 
         if (result.success) {
             openSnackbar('Conta criada com sucesso! Autenticando...', 'success')
-            
+
             try {
                 // Isso GARANTE que o onAuthStateChanged dispare imediatamente.
                 await signInWithEmailAndPassword(auth, email, password)

@@ -40,7 +40,7 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
 export default function ReminderForm({ onChatStart = () => { } }: ReminderFormProps) {
     const chatContainerRef = React.useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const { userId, getOrCreateAnonymousUser } = useAuth()
+    const { userId } = useAuth()
     const formState = useReminderForm()
     const subscription = useAppSelector((state) => state.subscription)
     const { plan, status } = subscription 
@@ -77,7 +77,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     }, [formState.chatHistory, formState.isBotTyping])
 
     // Agrupa todas as props necessárias para os handlers em um único objeto
-    const handlerProps = { ...formState, userId, router, onChatStart, subscription, openSnackbar, getOrCreateAnonymousUser}
+    const handlerProps = { ...formState, userId, router, onChatStart, subscription, openSnackbar}
 
     const onUserSubmit = () => {
         Handlers.handleUserInput(handlerProps, formState.userInput, formState.chatHistory.length)

@@ -8,7 +8,7 @@ import { saveUserPhoneNumber } from '@/app/actions/actions'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { Box, TextField, Button, Typography, Paper, LinearProgress } from '@mui/material'
 
-export default function WhatsAppSettingsForm() {
+export default function WhatsAppSettingsForm({ onSave }: { onSave: () => void }) {
     const { userId } = useAuth()
     const { openSnackbar } = useSnackbar()
     const [phoneNumber, setPhoneNumber] = React.useState('')
@@ -40,6 +40,7 @@ export default function WhatsAppSettingsForm() {
         const result = await saveUserPhoneNumber(userId, phoneNumber)
         if (result.success) {
             openSnackbar(result.message as string, 'success')
+            onSave()
         } else {
             openSnackbar(result.error as string, 'error')
         }
@@ -65,7 +66,7 @@ export default function WhatsAppSettingsForm() {
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 Adicione seu número de WhatsApp para receber lembretes e dicas.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
                 <TextField
                     fullWidth
                     label="Seu número de WhatsApp"
@@ -79,8 +80,12 @@ export default function WhatsAppSettingsForm() {
                     color="primary"
                     onClick={handleSave}
                     disabled={isSaving}
+                    fullWidth
                 >
                     {isSaving ? 'Salvando...' : 'Salvar'}
+                </Button>
+                <Button onClick={onSave} variant="outlined" fullWidth>
+                    Pular por agora
                 </Button>
             </Box>
         </Paper>

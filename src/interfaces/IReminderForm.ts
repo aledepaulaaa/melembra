@@ -44,5 +44,4 @@ export interface HandlerProps {
     setIsBotTyping: React.Dispatch<React.SetStateAction<boolean>>
     onChatStart: () => void
     openSnackbar: (message: string, severity?: AlertColor) => void
-    getOrCreateAnonymousUser: () => Promise<string>
 }

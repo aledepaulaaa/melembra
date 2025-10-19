@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { // Use a chave principal
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2025-09-30.clover',
 })
 
