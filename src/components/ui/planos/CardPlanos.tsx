@@ -1,9 +1,10 @@
+//melembra/src/components/ui/planos/CardPlanos.tsx
 import { motion } from "framer-motion"
-import { Grid, Card, CardContent, Typography, List, ListItem,
-ListItemIcon, ListItemText, Button, Box, Chip, CircularProgress } from "@mui/material"
 import CheckIcon from '@mui/icons-material/Check'
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium'
 import { SubscriptionState } from "@/interfaces/IMeLembraPayment"
+import { Grid, Card, CardContent, Typography, List, ListItem,
+ListItemIcon, ListItemText, Button, Box, Chip, CircularProgress } from "@mui/material"
 
 interface CardPlanoProps {
     handleUpgradeClick: () => void
@@ -72,7 +73,7 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                                 onClick={handleUpgradeClick}
                                 disabled={isRedirecting || currentPlan.plan === 'plus'}
                             >
-                                {isRedirecting ? <CircularProgress size={24} color="inherit" /> : (currentPlan.plan === 'plus' ? 'Gerenciar Plano' : 'Fazer Upgrade')}
+                                {isRedirecting ? <CircularProgress size={24} color="inherit" /> : (currentPlan.plan === 'plus' ? 'Gerenciar Plano' : 'Assinar Plus')}
                             </Button>
                         </CardContent>
                     </Card>

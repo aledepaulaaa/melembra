@@ -1,23 +1,16 @@
 'use client'
 //melembra/src/components/ui/TipNotificationToggle.tsx
-import React, { useState, useEffect } from 'react'
-import {
-    FormControlLabel,
-    Switch,
-    Typography,
-    Box,
-    Paper,
-    Skeleton,
-} from '@mui/material'
+import React  from 'react'
 import { useAuth } from '@/components/ui/auth/AuthManager'
 import { getUserPreferences, saveUserPreferences } from '@/app/actions/actions'
+import { FormControlLabel, Switch, Typography, Box, Paper, Skeleton } from '@mui/material'
 
 export default function TipNotificationToggle() {
     const { userId } = useAuth()
-    const [enabled, setEnabled] = useState(true)
-    const [loading, setLoading] = useState(true)
+    const [enabled, setEnabled] = React.useState(true)
+    const [loading, setLoading] = React.useState(true)
 
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchPreferences = async () => {
             if (!userId) return
             const prefs = await getUserPreferences(userId)
