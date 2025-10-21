@@ -58,7 +58,7 @@ export default function WelcomeInstallDialog() {
         setIsOpen(false)
         localStorage.setItem('hasSeenInstallDialog', 'true')
         if (!isIOS && !installPrompt) {
-            openSnackbar("Ok, se mudar de ideia, pode instalar o app nas Configurações.", 'info')
+            openSnackbar("Ok, se mudar de ideia, pode instalar o app em Configurações.", 'info')
         }
     }
 

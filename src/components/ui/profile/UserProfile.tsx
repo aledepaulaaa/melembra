@@ -19,7 +19,7 @@ export default function UserProfile() {
 
     return (
         <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 2, width: '100%', boxShadow: 0 }}>
-            {user && !user.isAnonymous ? (
+            {user ? (
                 // --- VISÃO LOGADO ---
                 <Stack spacing={2}>
                     <Typography variant="h6" fontWeight={700} gutterBottom>Seus Dados</Typography>

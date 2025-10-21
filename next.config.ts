@@ -1,5 +1,15 @@
 // melembra/next.config.js
 /** @type {import('next').NextConfig} */
+const withPWA = require('@ducanh2912/next-pwa').default({
+  dest: 'public', // Onde o service worker e outros arquivos serão gerados
+  register: true, // Registra o service worker automaticamente
+  skipWaiting: true, // ESSENCIAL: Força o novo service worker a ativar assim que for instalado
+   // Diz ao service worker gerado para importar e executar nosso código customizado de push.
+  importScripts: ['/sw-push-handler.js'],
+  // disable: process.env.NODE_ENV === 'development', // Desativa a PWA em ambiente de desenvolvimento para não ter problemas com cache
+})
+
+
 const nextConfig = {
   async headers() {
     return [
@@ -15,4 +25,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

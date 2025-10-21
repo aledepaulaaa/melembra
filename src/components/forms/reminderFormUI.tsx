@@ -1,10 +1,11 @@
 // melembra/src/lib/forms/reminderFormUI.tsx
-import { motion } from 'framer-motion'
-import { Box, Button, Stack, Typography } from '@mui/material'
-import { StaticDatePicker, TimeClock } from '@mui/x-date-pickers'
-import { HandlerProps } from '@/interfaces/IReminderForm'
-import * as Handlers from './reminderFormHandlers'
 import React from 'react'
+import { motion } from 'framer-motion'
+import { HandlerProps } from '@/interfaces/IReminderForm'
+import DiamondIcon from '@mui/icons-material/Diamond'
+import * as Handlers from './reminderFormHandlers'
+import { StaticDatePicker, TimeClock } from '@mui/x-date-pickers'
+import { Box, Button, Stack, Tooltip, Typography } from '@mui/material'
 
 // --- Funções que retornam os componentes JSX ---
 export const RenderTimeClockWithConfirm = ({ handlerProps, minTime }: { handlerProps: HandlerProps, minTime?: Date }) => {
@@ -53,18 +54,40 @@ export const renderTimeClock = (props: HandlerProps, minTime?: Date) => (
     </motion.div>
 )
 
-export const renderRecurrenceButtons = (props: HandlerProps, formattedTime: string) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {/* A CORREÇÃO ESTÁ AQUI: Passamos o `formattedTime` para o handler */}
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Não repetir', formattedTime)}>Não repetir</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Diariamente', formattedTime)}>Diariamente</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Semanalmente', formattedTime)}>Semanalmente</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Mensalmente', formattedTime)}>Mensalmente</Button>
-            <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Anualmente', formattedTime)}>Anualmente</Button>
-        </Stack>
-    </motion.div>
-)
+export const renderRecurrenceButtons = (props: HandlerProps, formattedTime: string) => {
+    const isFreePlan = props.subscription.plan !== 'plus'
+    const recurrenceOptions = ['Diariamente', 'Semanalmente', 'Mensalmente', 'Anualmente']
+
+    return (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', justifyContent: 'center', gap: 1 }}>
+
+                {/* Botão "Não repetir" - Sempre disponível */}
+                <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Não repetir', formattedTime)}>
+                    Não repetir
+                </Button>
+
+                {/* Mapeia as opções de recorrência premium */}
+                {recurrenceOptions.map((option) => (
+                    <Tooltip key={option} title={isFreePlan ? "Recorrência é um recurso Plus" : ""}>
+                        {/* O <span> é essencial para o Tooltip funcionar em botões desabilitados */}
+                        <span>
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                disabled={isFreePlan}
+                                startIcon={isFreePlan ? <DiamondIcon fontSize="small" /> : null}
+                                onClick={() => Handlers.handleRecurrenceSelect(props, option, formattedTime)}
+                            >
+                                {option}
+                            </Button>
+                        </span>
+                    </Tooltip>
+                ))}
+            </Stack>
+        </motion.div>
+    )
+}
 
 export const renderConfirmation = (props: HandlerProps) => {
     const { reminder } = props

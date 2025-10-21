@@ -43,3 +43,7 @@ next-env.d.ts
 
 # credentials
 src/app/lib/melmebra.json
+
+# next-pwa cache files
+public/workbox-*.js
+public/worker-*.js

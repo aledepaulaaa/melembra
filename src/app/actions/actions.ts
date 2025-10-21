@@ -140,7 +140,6 @@ export async function createUser(userData: { email: string, password: string, na
     }
 }
 
-
 export async function resetUserPassword(email: string) {
     try {
         await adminAuth.generatePasswordResetLink(email)
