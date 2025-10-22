@@ -2,11 +2,11 @@
 // melembra/src/components/ui/ReminderList.tsx
 import React from 'react'
 import { useAuth } from '@/components/ui/auth/AuthManager'
-import { deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DeleteIcon from '@mui/icons-material/Delete'
-import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button } from '@mui/material'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
+import { deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
+import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button } from '@mui/material'
 
 // 1. Interface atualizada para refletir a estrutura do documento no Firestore
 interface Reminder {

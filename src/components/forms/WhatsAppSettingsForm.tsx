@@ -11,7 +11,6 @@ import { TextField, Button, Typography, Paper, Skeleton, Divider, Stack } from '
 export default function WhatsAppSettingsForm({ onSave }: { onSave: () => void }) {
     const { userId } = useAuth()
     const { openSnackbar } = useSnackbar()
-    const [phoneNumber, setPhoneNumber] = React.useState('')
     const [loading, setLoading] = React.useState(false)
     const [isSaving, setIsSaving] = React.useState(false)
     const [showEdit, setShowEdit] = React.useState(false)
@@ -29,7 +28,7 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: () => void })
             const docRef = doc(db, 'users', userId)
             const docSnap = await getDoc(docRef)
             if (docSnap.exists() && docSnap.data()?.whatsappNumber) {
-                setPhoneNumber(docSnap.data()?.whatsappNumber)
+                setExistingNumber(docSnap.data()?.whatsappNumber)
             }
 
             setLoading(false)
