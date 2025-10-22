@@ -1,38 +1,46 @@
 'use client'
 //melembra/src/hooks/usePushNotification.ts
-import { useState, useEffect } from "react"
+import React from "react"
+import { useAppSelector } from "@/app/store/hooks"
+import { useSnackbar } from "@/contexts/SnackbarProvider"
 import { urlBase64ToUint8Array } from "@/app/utils/base64"
 import { sendNotification, subscribeUser, unsubscribeUser } from "@/app/actions/actions"
 
-// NOVO: Importar os hooks do Redux e do Snackbar
-import { useAppSelector } from "@/app/store/hooks"
-import { useSnackbar } from "@/contexts/SnackbarProvider"
-
 export const usePushNotification = () => {
-    // ALTERADO: Lê o usuário do Redux, a fonte única da verdade.
     const { user } = useAppSelector((state) => state.auth)
-    const { openSnackbar } = useSnackbar() // NOVO: Hook para feedback
+    const { openSnackbar } = useSnackbar()
+    const [isSupported, setIsSupported] = React.useState(false)
+    const [subscription, setSubscription] = React.useState<PushSubscription | null>(null)
+    const [message, setMessage] = React.useState('Este é um lembrete de teste!')
+    const [isLoading, setIsLoading] = React.useState(true)
 
-    const [isSupported, setIsSupported] = useState(false)
-    const [subscription, setSubscription] = useState<PushSubscription | null>(null)
-    const [message, setMessage] = useState('Este é um lembrete de teste!')
-    const [isLoading, setIsLoading] = useState(true) // NOVO: Estado de carregamento
+    React.useEffect(() => {
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.PushManager) {
+            setIsSupported(true)
+        }
+    }, [])
 
-    useEffect(() => {
-        const checkSupportAndSubscription = async () => {
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                setIsSupported(true)
-                // Apenas verifica a inscrição existente, não pede permissão.
+    React.useEffect(() => {
+        if (!isSupported || !user) {
+            // Se não há suporte ou usuário, não há o que carregar.
+            setIsLoading(false)
+            return
+        }
+
+        const checkSubscription = async () => {
+            try {
                 const registration = await navigator.serviceWorker.ready
                 const sub = await registration.pushManager.getSubscription()
                 setSubscription(sub)
+            } catch (error) {
+                console.error("Erro ao verificar a inscrição do Service Worker:", error)
+            } finally {
+                setIsLoading(false)
             }
-            setIsLoading(false)
         }
-        checkSupportAndSubscription()
-    }, [user]) // Re-executa se o usuário mudar (login/logout)
 
-    // A função registerServiceWorker não é mais necessária no useEffect.
+        checkSubscription()
+    }, [isSupported, user])
 
     const handleSubscribe = async () => {
         // ALTERADO: Lógica completa para pedir permissão no clique.
@@ -112,9 +120,8 @@ export const usePushNotification = () => {
 
     return {
         isSupported,
-        // ALTERADO: Exporta um booleano para facilitar a vida do componente
         isSubscribed: !!subscription,
-        isLoading, // NOVO: Exporta o estado de carregamento
+        isLoading,
         message,
         setMessage,
         handleSubscribe,

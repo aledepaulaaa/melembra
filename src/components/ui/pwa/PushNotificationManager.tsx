@@ -17,7 +17,9 @@ export default function PushNotificationManager() {
     } = usePushNotification()
 
     if (isLoading) {
-        return <Skeleton variant="rounded" width="100%" height={150} />
+        return (
+            <Skeleton variant="rounded" width="100%" height={150} />
+        )
     }
 
     if (!isSupported) {

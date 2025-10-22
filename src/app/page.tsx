@@ -2,17 +2,17 @@
 //melembra/src/app/page.tsx
 import React from 'react'
 import { Box, Skeleton, Typography } from '@mui/material'
-import { useAuth } from '@/components/ui/auth/AuthManager'
 import ReminderFlow from '@/components/forms/ReminderFlow'
 import { AnimatePresence, motion } from 'framer-motion'
 import WelcomeInstallDialog from '@/components/ui/pwa/WelcomeInstallDialog'
 import LogoAnimated from '@/components/ui/logo/LogoAnimated'
+import { useAppSelector } from './store/hooks'
 
 export default function Home() {
-    const { loading } = useAuth()
+    const { status } = useAppSelector((state) => state.auth)
     const [isChatStarted, setIsChatStarted] = React.useState(false)
 
-    if (loading) {
+    if (status === 'loading') {
         return (
             <Box
                 sx={{

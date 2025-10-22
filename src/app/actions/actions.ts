@@ -4,7 +4,7 @@ import webpush, { PushSubscription } from 'web-push'
 // 1. IMPORTAÇÕES SEPARADAS: Admin para escrita, Cliente para leitura.
 import { getFirebaseFirestore as getAdminDb, getFirebaseAuth } from '../lib/firebase-admin'
 import { db as clientDb } from '../lib/firebase'
-import { collection, doc, getDoc, getDocs, orderBy, query, where, Timestamp as ClientTimestamp } from 'firebase/firestore'
+import { doc, getDoc, Timestamp as ClientTimestamp } from 'firebase/firestore'
 import { Timestamp as AdminTimestamp } from 'firebase-admin/firestore'
 
 // --- INSTÂNCIAS ---
@@ -195,9 +195,9 @@ export async function getReminders(userId: string) {
 export async function getUserPreferences(userId: string) {
     if (!userId) return { success: false, error: 'UserID obrigatório' }
     try {
-        const docRef = doc(clientDb, 'preferences', userId)
-        const docSnap = await getDoc(docRef)
-        return { success: true, preferences: docSnap.exists() ? docSnap.data() : { enableTips: true } }
+        const docRef = db.collection('preferences').doc(userId)
+        const docSnap = await docRef.get()
+        return { success: true, preferences: docSnap.exists ? docSnap.data() : { enableTips: true } }
     } catch (error) {
         console.error('Erro ao buscar preferências:', error)
         return { success: false, error: 'Falha ao buscar preferências.' }

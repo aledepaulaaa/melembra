@@ -1,13 +1,13 @@
 'use client'
 // melembra/src/app/lembretes/page.tsx
 import { Box, Skeleton } from '@mui/material'
-import { useAuth } from '../../components/ui/auth/AuthManager'
 import ReminderList from '../../components/ui/listalembretes/ReminderList'
+import { useAppSelector } from '../store/hooks'
 
 export default function RemindersPage() {
-    const { loading } = useAuth()
+    const { status } = useAppSelector((state) => state.auth)
 
-    if (loading) {
+    if (status === 'loading') {
         return (
             <Box
                 sx={{

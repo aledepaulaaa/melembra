@@ -1,15 +1,16 @@
 'use client'
 //melembra/src/components/forms/WhatsAppSettingsForm.tsx
 import React from 'react'
-import { useAuth } from '../ui/auth/AuthManager'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/app/lib/firebase'
 import { saveUserPhoneNumber } from '@/app/actions/actions'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { TextField, Button, Typography, Paper, Skeleton, Divider, Stack } from '@mui/material'
+import { useAppSelector } from '@/app/store/hooks'
 
 export default function WhatsAppSettingsForm({ onSave }: { onSave: () => void }) {
-    const { userId } = useAuth()
+    const { user } = useAppSelector((state) => state.auth)
+    const userId = user?.uid
     const { openSnackbar } = useSnackbar()
     const [loading, setLoading] = React.useState(false)
     const [isSaving, setIsSaving] = React.useState(false)

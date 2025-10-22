@@ -4,7 +4,6 @@ import React from 'react'
 import * as Handlers from './reminderFormHandlers'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '../ui/auth/AuthManager'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
@@ -27,7 +26,7 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
                 <Typography variant="h6" fontWeight={700}>Limite diário atingido!</Typography>
                 <Typography sx={{ my: 1 }}>Seu próximo lembrete gratuito estará disponível em:</Typography>
                 {lastUsage && <UsageCountdown lastUsageTime={lastUsage} />}
-                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, faça o upgrade.</Typography>
+                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, assine o plus.</Typography>
                 <Button variant="outlined" onClick={() => router.push('/planos')}>
                     Assinar Plus
                 </Button>
@@ -40,13 +39,14 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
 export default function ReminderForm({ onChatStart = () => { } }: ReminderFormProps) {
     const chatContainerRef = React.useRef<HTMLDivElement>(null)
     const router = useRouter()
-    const { userId } = useAuth()
     const formState = useReminderForm()
     const subscription = useAppSelector((state) => state.subscription)
     const { plan, status } = subscription 
     const { openSnackbar } = useSnackbar()
     const [isBlocked, setIsBlocked] = React.useState(false)
     const [lastUsage, setLastUsage] = React.useState<Date | null>(null)
+    const { user} = useAppSelector((state) => state.auth)
+    const userId = user?.uid
 
     // Efeito para verificar se o usuário gratuito já usou a cota do dia
      React.useEffect(() => {

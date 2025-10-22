@@ -1,10 +1,10 @@
 'use client'
 // melembra/src/components/ui/ReminderList.tsx
 import React from 'react'
-import { useAuth } from '@/components/ui/auth/AuthManager'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
+import { useAppSelector } from '@/app/store/hooks'
 import { deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
 import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button } from '@mui/material'
 
@@ -17,10 +17,11 @@ interface Reminder {
 }
 
 export default function ReminderList() {
-    const { userId, loading: authLoading } = useAuth()
     const { openSnackbar } = useSnackbar()
     const [reminders, setReminders] = React.useState<Reminder[]>([])
     const [loading, setLoading] = React.useState(true)
+    const { user, status } = useAppSelector((state) => state.auth)
+    const userId = user?.uid
 
     const fetchReminders = async () => {
         if (!userId) return
@@ -35,10 +36,10 @@ export default function ReminderList() {
     }
 
     React.useEffect(() => {
-        if (!authLoading) {
+        if (status !== 'loading') {
             fetchReminders()
         }
-    }, [userId, authLoading])
+    }, [userId, status])
 
     const handleStatusChange = async (reminderId: string, newStatus: boolean) => {
         // Atualiza o estado visualmente de forma otimista
@@ -63,7 +64,7 @@ export default function ReminderList() {
         }
     }
 
-    if (loading || authLoading) {
+    if (loading || status !== 'loading') {
         return (
             <Box sx={{ p: 4, width: '100%', maxWidth: 600 }}>
                 <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>

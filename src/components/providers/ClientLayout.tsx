@@ -2,7 +2,7 @@
 import React from "react"
 import { store } from "@/app/store/store"
 import { Provider } from "react-redux"
-import { AuthProvider, useAuth } from "../ui/auth/AuthManager"
+import { AuthProvider } from "../ui/auth/AuthManager"
 import SideNav from "../ui/layout/SideNav"
 import { useSubscription } from "@/hooks/useSubscription"
 import ThemeProvider from "./ThemeProvider"
@@ -12,6 +12,7 @@ import PageTransition from "./PageTransition"
 import UpgradeButtonHeader from "../ui/planos/upgradeplanos/UpgradeButtonHeader"
 import { Box, AppBar, Toolbar, IconButton, useTheme } from "@mui/material"
 import { SnackbarProvider } from "@/contexts/SnackbarProvider"
+import { useAppSelector } from "@/app/store/hooks"
 
 const drawerWidth = 240
 const miniWidth = 64
@@ -20,7 +21,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     const [mobileOpen, setMobileOpen] = React.useState(false)
     const [desktopOpen, setDesktopOpen] = React.useState(true)
     const theme = useTheme()
-    const { user } = useAuth()
+    const { user } = useAppSelector((state) => state.auth)
 
     useSubscription(user?.uid as string)
 

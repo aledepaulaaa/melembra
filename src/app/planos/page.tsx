@@ -4,7 +4,6 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { useAuth } from '@/components/ui/auth/AuthManager'
 import { useAppSelector } from '@/app/store/hooks'
 import CardPlanos from '@/components/ui/planos/CardPlanos'
 import UpgradeAccountDialog from '@/components/ui/planos/upgradeplanos/UpgradeAccountDialog'
@@ -34,7 +33,8 @@ const cardVariants = {
 
 export default function PlanosPage() {
     const router = useRouter()
-    const { userId } = useAuth()
+    const { user } = useAppSelector((state) => state.auth)
+    const userId = user?.uid
     const currentPlan = useAppSelector((state) => state.subscription)
 
     const [isRedirecting, setIsRedirecting] = React.useState(false)

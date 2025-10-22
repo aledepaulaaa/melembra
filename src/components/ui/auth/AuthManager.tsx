@@ -1,23 +1,20 @@
 'use client'
-// melemebra/src/components/ui/auth/AuthManager.tsx (VERSÃO FINAL E CORRETA)
-import React from 'react'
+// melemebra/src/components/ui/auth/AuthManager.tsx
+import React, { useEffect } from 'react'
 import { auth } from '@/app/lib/firebase'
-import { onAuthStateChanged, User } from 'firebase/auth'
+import { onAuthStateChanged } from 'firebase/auth'
 import { useAppDispatch } from '@/app/store/hooks'
-import { clearAuthUser, setAuthUser } from '@/app/store/slices/authSlice'
+import { setAuthUser, clearAuthUser } from '@/app/store/slices/authSlice'
 
-interface AuthContextType {
-    user: User | null
-    userId: string | null
-    loading: boolean
-}
-
-const AuthContext = React.createContext<AuthContextType | undefined>(undefined)
-
-function AuthListener({ children }: { children: React.ReactNode }) {
+/**
+ * AuthListener é um componente "invisível" que sincroniza o estado de
+ * autenticação do Firebase com a store do Redux.
+ * Ele deve ser renderizado apenas uma vez no topo da árvore de componentes.
+ */
+function AuthListener() {
     const dispatch = useAppDispatch()
 
-    React.useEffect(() => {
+    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 // Se um usuário for encontrado, serializamos e despachamos para o Redux.
@@ -31,36 +28,24 @@ function AuthListener({ children }: { children: React.ReactNode }) {
                 dispatch(clearAuthUser())
             }
         })
-        return () => unsubscribe() // Limpa o listener
+        // A função de limpeza é chamada quando o componente é desmontado
+        return () => unsubscribe()
     }, [dispatch])
 
-    return <>{children}</>
+    // Este componente não renderiza nenhuma UI
+    return null
 }
 
+/**
+ * AuthProvider é o componente que você usará no seu layout.
+ * Sua única função é garantir que o AuthListener seja montado e
+ * que os componentes filhos (o resto do seu app) sejam renderizados.
+ */
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = React.useState<User | null>(null)
-    const [loading, setLoading] = React.useState(true)
-
-    React.useEffect(() => {
-        // Este é o listener principal. Ele APENAS ouve.
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser)
-            setLoading(false)
-        })
-        return () => unsubscribe()
-    }, [])
-
     return (
-        <AuthContext.Provider value={{ user, userId: user?.uid || null, loading }}>
-            <AuthListener>{children}</AuthListener>
-        </AuthContext.Provider>
+        <>
+            <AuthListener />
+            {children}
+        </>
     )
-}
-
-export const useAuth = () => {
-    const context = React.useContext(AuthContext)
-    if (context === undefined) {
-        throw new Error('useAuth deve ser usado dentro de um AuthProvider')
-    }
-    return context
 }

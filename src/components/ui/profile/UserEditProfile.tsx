@@ -1,13 +1,13 @@
 'use client'
 // melemebra/src/components/ui/UserEditProfile.tsx
 import React from 'react'
-import { useAuth } from '@/components/ui/auth/AuthManager'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/app/lib/firebase'
 import { saveUserProfile } from '@/app/actions/actions'
 import { initialUser, IUserData } from '@/interfaces/IUserData'
 import { Button, CircularProgress, Skeleton, Stack, TextField } from '@mui/material'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
+import { useAppSelector } from '@/app/store/hooks'
 
 // Função simples para validar e formatar o número
 const formatPhoneNumber = (value: string) => {
@@ -15,11 +15,12 @@ const formatPhoneNumber = (value: string) => {
 }
 
 export default function UserEditProfile() {
-    const { userId } = useAuth()
     const { openSnackbar } = useSnackbar()
     const [loading, setLoading] = React.useState(true)
     const [isSaving, setIsSaving] = React.useState(false)
     const [profile, setProfile] = React.useState<IUserData>(initialUser)
+    const { user } = useAppSelector((state) => state.auth)
+    const userId = user?.uid
 
     React.useEffect(() => {
         const fetchProfile = async () => {
