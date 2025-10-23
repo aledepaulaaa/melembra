@@ -16,54 +16,59 @@ import AddToHomeScreenIcon from '@mui/icons-material/AddToHomeScreen'
 import IosShareIcon from '@mui/icons-material/IosShare' // Ícone de compartilhamento do iOS
 
 export default function InstallPrompt() {
-    const [installPromptEvent, setInstallPromptEvent] = React.useState<Event | null>(null)
+    // ALTERADO: Tipagem correta para o evento
+    const [promptEvent, setPromptEvent] = React.useState<BeforeInstallPromptEvent | null>(null)
     const [isAppInstalled, setIsAppInstalled] = React.useState(false)
     const [isIOS, setIsIOS] = React.useState(false)
     const [iosDialogOpen, setIosDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
-        // Verifica se já está em modo standalone
         if (window.matchMedia('(display-mode: standalone)').matches) {
             setIsAppInstalled(true)
         }
 
-        // Detecta se o dispositivo é iOS
         const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
         setIsIOS(isIOSDevice)
 
-        const handleBeforeInstallPrompt = (event: Event) => {
+        // O TypeScript agora entende o tipo 'beforeinstallprompt'
+        const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
             event.preventDefault()
-            setInstallPromptEvent(event)
+            setPromptEvent(event)
         }
 
-        // Só adiciona o listener se não for iOS, pois o iOS não o suporta
-        if (!isIOSDevice) {
-            window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-        }
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
 
         return () => {
-            if (!isIOSDevice) {
-                window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-            }
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
         }
     }, [])
 
     const handleInstallClick = () => {
+        // Cenário 1: Dispositivo iOS -> Mostra o dialog de instruções
         if (isIOS) {
-            // Se for iOS, abre o dialog de instruções
             setIosDialogOpen(true)
-        } else if (installPromptEvent) {
-            // Se for Android/Desktop, aciona o prompt nativo
-            (installPromptEvent as any).prompt()
-        } else {
-            // Fallback para outros casos
-            alert('Para instalar, procure a opção "Adicionar à Tela de Início" no menu do seu navegador.')
+            return
         }
+
+        // Cenário 2: Android/Desktop com prompt disponível -> Mostra o prompt nativo
+        if (promptEvent) {
+            promptEvent.prompt() // O TypeScript não reclama mais!
+            return
+        }
+
+        // Cenário 3 (Fallback): Navegadores que não disparam o evento, mas suportam PWA
+        // A melhor abordagem aqui é não fazer nada ou mostrar um alerta mais amigável
+        // se você tiver certeza de que o navegador é compatível.
+        // Por segurança, o botão pode simplesmente não fazer nada se não houver um prompt.
+        // O alert anterior era a causa do problema visual.
+        console.log('O prompt de instalação nativo não está disponível neste momento.')
     }
 
-    // Não mostra o componente se o app já estiver instalado
-    if (isAppInstalled) {
-        return null
+    // CORREÇÃO: Só mostra o botão se houver uma ação possível (iOS ou prompt disponível)
+    const canInstall = isIOS || !!promptEvent;
+
+    if (isAppInstalled || !canInstall) {
+        return null // Não renderiza o componente se o app já estiver instalado ou se não for instalável
     }
 
     return (
@@ -91,7 +96,7 @@ export default function InstallPrompt() {
                 <DialogContent>
                     <DialogContentText component="div">
                         <Typography component="h5" textAlign="center" fontWeight="bold" color="textPrimary" mb={4}>
-                            Para instalar o MeLembra <br/>siga estes passos simples:
+                            Para instalar o MeLembra <br />siga estes passos simples:
                         </Typography>
                     </DialogContentText>
                     <Box component="ol" sx={{ pl: 2, mt: 2 }}>

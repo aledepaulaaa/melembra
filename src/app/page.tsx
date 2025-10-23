@@ -56,11 +56,11 @@ export default function Home() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                         >
-                            <Box sx={{ display: "flex", gap: 2, alignItems: "center", mt: 10 }}>
+                            <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 10 }}>
                                 <Typography variant="h2" fontWeight={900} textAlign="start" lineHeight={1} component="h2">
                                     Me <br />Lembra?
                                 </Typography>
-                                <LogoAnimated size={65} />
+                                <LogoAnimated size={55} />
                             </Box>
                         </motion.div>
                     )}
