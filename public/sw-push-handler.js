@@ -1,4 +1,4 @@
-//melembra/public/sw.js
+//melembra/public/sw-push-handler.js
 self.addEventListener('push', function (event) {
     if (event.data) {
         const data = event.data.json()

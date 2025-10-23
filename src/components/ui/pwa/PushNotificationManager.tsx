@@ -7,7 +7,7 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 export default function PushNotificationManager() {
     const {
         isSupported,
-        isSubscribed,
+        subscription,
         isLoading,
         message,
         setMessage,
@@ -34,7 +34,7 @@ export default function PushNotificationManager() {
     return (
         <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
             <Typography variant="h6" gutterBottom>Notificações Push</Typography>
-            {isSubscribed ? (
+            {subscription ? (
                 <>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
                         Suas notificações estão ativas! Envie um teste para confirmar.

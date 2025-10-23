@@ -1,10 +1,30 @@
-'use client'
 //melembra/src/hooks/usePushNotification.ts
+'use client'
 import React from "react"
 import { useAppSelector } from "@/app/store/hooks"
 import { useSnackbar } from "@/contexts/SnackbarProvider"
 import { urlBase64ToUint8Array } from "@/app/utils/base64"
 import { sendNotification, subscribeUser, unsubscribeUser } from "@/app/actions/actions"
+
+const REGISTRATION_PATH = '/sw-push-handler.js' // ajuste se o seu SW estiver em outro caminho
+
+async function ensureServiceWorkerRegistered(): Promise<ServiceWorkerRegistration | null> {
+    if (!('serviceWorker' in navigator)) return null
+
+    try {
+        // tenta pegar uma registration existente — é rápido e não espera por 'ready'
+        let registration = await navigator.serviceWorker.getRegistration()
+        if (registration) return registration
+
+        // se não existir, tenta registrar um SW no path configurado
+        registration = await navigator.serviceWorker.register(REGISTRATION_PATH)
+        // registration pode não estar ativo imediatamente; devolvemos o objeto mesmo assim
+        return registration
+    } catch (err) {
+        console.error('[SW] Falha ao garantir registro do Service Worker:', err)
+        return null
+    }
+}
 
 export const usePushNotification = () => {
     const { user } = useAppSelector((state) => state.auth)
@@ -15,35 +35,48 @@ export const usePushNotification = () => {
     const [isLoading, setIsLoading] = React.useState(true)
 
     React.useEffect(() => {
-        if (typeof window !== 'undefined' && 'serviceWorker' in navigator && window.PushManager) {
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window) {
             setIsSupported(true)
+        } else {
+            setIsSupported(false)
         }
     }, [])
 
     React.useEffect(() => {
-        if (!isSupported || !user) {
-            // Se não há suporte ou usuário, não há o que carregar.
+        if (!isSupported) {
             setIsLoading(false)
             return
         }
 
+        let mounted = true
         const checkSubscription = async () => {
+            setIsLoading(true)
             try {
-                const registration = await navigator.serviceWorker.ready
+                const registration = await ensureServiceWorkerRegistered()
+                if (!registration) {
+                    console.warn('[Push] Nenhuma registration disponível para PushManager')
+                    if (mounted) {
+                        setSubscription(null)
+                    }
+                    return
+                }
+
+                // usa getSubscription() (rápido) em vez de .ready que pode esperar indefinidamente
                 const sub = await registration.pushManager.getSubscription()
-                setSubscription(sub)
+                if (mounted) setSubscription(sub)
             } catch (error) {
                 console.error("Erro ao verificar a inscrição do Service Worker:", error)
             } finally {
-                setIsLoading(false)
+                if (mounted) setIsLoading(false)
             }
         }
 
         checkSubscription()
+
+        return () => { mounted = false }
     }, [isSupported, user])
 
     const handleSubscribe = async () => {
-        // ALTERADO: Lógica completa para pedir permissão no clique.
         if (!user) {
             openSnackbar('Você precisa ter uma conta para ativar as notificações.', 'warning')
             return
@@ -55,36 +88,52 @@ export const usePushNotification = () => {
 
         setIsLoading(true)
         try {
-            // Pede a permissão ao usuário AQUI
             const permission = await Notification.requestPermission()
             if (permission !== 'granted') {
                 openSnackbar('Permissão para notificações não concedida.', 'info')
-                setIsLoading(false)
                 return
             }
 
-            const registration = await navigator.serviceWorker.ready
+            const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+            if (!vapidPublicKey) {
+                throw new Error("Chave VAPID pública não configurada no ambiente.")
+            }
+
+            const registration = await ensureServiceWorkerRegistered()
+            if (!registration) throw new Error('Service Worker não disponível para inscrição.')
+
             const sub = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(
-                    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-                ),
+                applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
             })
 
-            // Vincula a inscrição ao UID do usuário logado
-            await subscribeUser(sub.toJSON() as any, user.uid)
+            // envia para o servidor (server action)
+            const result = await subscribeUser(sub.toJSON(), user.uid)
+            if (!result || !result.success) {
+                throw new Error(result?.error || 'Falha ao salvar inscrição no servidor.')
+            }
+
             setSubscription(sub)
             openSnackbar('Notificações ativadas com sucesso!', 'success')
+
         } catch (error) {
-            console.error("Erro ao inscrever:", error)
-            openSnackbar('Não foi possível ativar as notificações.', 'error')
+            console.error("Erro detalhado ao inscrever:", error)
+            openSnackbar(error instanceof Error ? error.message : 'Não foi possível ativar as notificações.', 'error')
+
+            try {
+                const registration = await navigator.serviceWorker.getRegistration()
+                const sub = registration ? await registration.pushManager.getSubscription() : null
+                if (sub) await sub.unsubscribe()
+                setSubscription(null)
+            } catch (cleanupError) {
+                console.error("Erro ao tentar limpar a inscrição falha:", cleanupError)
+            }
         } finally {
             setIsLoading(false)
         }
     }
 
     const handleUnsubscribe = async () => {
-        // ALTERADO: Lógica mais robusta com feedback e verificação de usuário.
         if (!user) return
         if (!subscription) return
 
@@ -103,7 +152,6 @@ export const usePushNotification = () => {
     }
 
     const handleSendTest = async () => {
-        // ALTERADO: Lógica mais robusta com feedback e verificação de usuário.
         if (!user) return
         if (!message.trim()) {
             openSnackbar('Digite uma mensagem para o teste.', 'warning')
@@ -120,7 +168,7 @@ export const usePushNotification = () => {
 
     return {
         isSupported,
-        isSubscribed: !!subscription,
+        subscription,
         isLoading,
         message,
         setMessage,

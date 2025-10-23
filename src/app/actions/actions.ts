@@ -1,10 +1,8 @@
 //melembra/src/app/actions/actions.ts
 'use server'
-import webpush, { PushSubscription } from 'web-push'
+import webpush from 'web-push'
 // 1. IMPORTAÇÕES SEPARADAS: Admin para escrita, Cliente para leitura.
 import { getFirebaseFirestore as getAdminDb, getFirebaseAuth } from '../lib/firebase-admin'
-import { db as clientDb } from '../lib/firebase'
-import { doc, getDoc, Timestamp as ClientTimestamp } from 'firebase/firestore'
 import { Timestamp as AdminTimestamp } from 'firebase-admin/firestore'
 
 // --- INSTÂNCIAS ---
@@ -18,10 +16,8 @@ webpush.setVapidDetails(
     process.env.VAPID_PRIVATE_KEY!
 )
 
-
 // --- FUNÇÕES DE ESCRITA E MODIFICAÇÃO (Convertidas para o Admin SDK) ---
-
-export async function subscribeUser(sub: PushSubscription, userId: string) {
+export async function subscribeUser(sub: PushSubscriptionJSON, userId: string) {
     if (!userId) throw new Error('É necessário o UserID do usuário para inscrição')
     try {
         const docRef = db.collection('inscricoes').doc(userId)
@@ -137,7 +133,6 @@ export async function saveReminder(title: string, date: Date, userId: string) {
 
 
 // --- FUNÇÕES DE AUTH (Já usavam Admin SDK, sem alterações) ---
-
 export async function createUser(userData: { email: string, password: string, name: string, nickname: string, whatsappNumber: string }) {
     const { email, password, name, nickname, whatsappNumber } = userData
     try {
@@ -163,7 +158,6 @@ export async function resetUserPassword(email: string) {
         return { success: false, error: 'Falha ao enviar link de redefinição de senha.' }
     }
 }
-
 
 // --- FUNÇÕES DE LEITURA (Usam o Cliente SDK para respeitar as regras de segurança) ---
 export async function getReminders(userId: string) {
@@ -206,7 +200,6 @@ export async function getUserPreferences(userId: string) {
 
 
 // --- FUNÇÕES ESPECIAIS (Leitura com Admin SDK por necessidade) ---
-
 export async function sendNotification(message: string, userId: string) {
     if (!userId) throw new Error('UserID é necessário')
     // Precisa ler do DB de Admin para obter a subscription, que pode conter dados sensíveis
