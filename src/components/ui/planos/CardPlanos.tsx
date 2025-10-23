@@ -58,14 +58,6 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                                     <ListItemIcon><CheckIcon color="primary" /></ListItemIcon>
                                     <ListItemText primary="Notificações via WhatsApp" />
                                 </ListItem>
-                                <ListItem>
-                                    <ListItemIcon><CheckIcon color="primary" /></ListItemIcon>
-                                    <ListItemText primary="Notificações Push" />
-                                </ListItem>
-                                <ListItem>
-                                    <ListItemIcon><CheckIcon color="primary" /></ListItemIcon>
-                                    <ListItemText primary="Dicas de lembretes" />
-                                </ListItem>
                             </List>
                             <Button
                                 fullWidth

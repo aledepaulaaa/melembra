@@ -17,6 +17,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { isToday } from 'date-fns'
 import UsageCountdown from '../ui/planos/upgradeplanos/UsageCountdown'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
+import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 
 const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
     const router = useRouter()
@@ -27,7 +28,11 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
                 <Typography sx={{ my: 1 }}>Seu próximo lembrete gratuito estará disponível em:</Typography>
                 {lastUsage && <UsageCountdown lastUsageTime={lastUsage} />}
                 <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, assine o plus.</Typography>
-                <Button variant="outlined" onClick={() => router.push('/planos')}>
+                <Button
+                    startIcon={<DiamondOutlinedIcon />}
+                    variant="outlined"
+                    onClick={() => router.push('/planos')}
+                >
                     Assinar Plus
                 </Button>
             </Paper>
@@ -58,7 +63,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
 
                 if (usageTimestamp && isToday(usageTimestamp)) {
                     setIsBlocked(true)
-                    setLastUsage(usageTimestamp) // Salva a data para o contador
+                    setLastUsage(usageTimestamp)
                 } else {
                     setIsBlocked(false)
                     setLastUsage(null)
