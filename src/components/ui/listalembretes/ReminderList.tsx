@@ -64,7 +64,7 @@ export default function ReminderList() {
         }
     }
 
-    if (loading || status !== 'loading') {
+    if (loading || status === 'loading') {
         return (
             <Box sx={{ p: 4, width: '100%', maxWidth: 600 }}>
                 <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
