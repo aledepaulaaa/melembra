@@ -123,6 +123,7 @@ export async function saveReminder(title: string, date: Date, userId: string) {
             userId,
             createdAt: AdminTimestamp.now(),
             sent: false,
+            preNotificationSent: false,
         })
         return { success: true, reminderId: docRef.id }
     } catch (error) {
