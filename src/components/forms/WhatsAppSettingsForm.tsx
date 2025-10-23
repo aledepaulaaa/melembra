@@ -85,7 +85,7 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: () => void })
                         label="Nº WhatsApp"
                         value={newNumber}
                         onChange={(e) => setNewNumber(e.target.value)}
-                        placeholder="Ex: 5511999999999"
+                        placeholder="Ex: 11999999999"
                         variant="outlined"
                         size="small"
                     />

@@ -72,7 +72,14 @@ export default function UserEditProfile() {
         <Stack spacing={2}>
             <TextField name="name" label="Nome Completo *" value={profile.name} onChange={handleInputChange} fullWidth />
             <TextField name="nickname" label="Apelido" value={profile.nickname} onChange={handleInputChange} fullWidth />
-            <TextField name="whatsappNumber" label="Nº WhatsApp (Apenas números)" value={profile.whatsappNumber} onChange={handleInputChange} fullWidth />
+            <TextField
+                fullWidth
+                name="whatsappNumber"
+                label="WhatsApp (Apenas números)"
+                placeholder="Ex: 3198334-7898"
+                value={profile.whatsappNumber}
+                onChange={handleInputChange}
+            />
             <Button onClick={handleSave} variant="contained" disabled={isSaving}>
                 {isSaving ? <CircularProgress size={24} /> : 'Salvar Alterações'}
             </Button>
