@@ -21,6 +21,7 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
     const [showEdit, setShowEdit] = React.useState(false)
     const [existingNumber, setExistingNumber] = React.useState<string | null>(null)
     const [isInfoDialogOpen, setIsInfoDialogOpen] = React.useState(false)
+    const [isSaving, setIsSaving] = React.useState(false)
 
     // 3. Usar o hook para gerenciar o estado e a validação
     const { value: newNumber, setValue: setNewNumber, isValidating, handleValidate } = useWhatsAppInput()
@@ -33,7 +34,7 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
             if (docSnap.exists() && docSnap.data()?.whatsappNumber) {
                 const number = docSnap.data().whatsappNumber
                 setExistingNumber(number)
-                setNewNumber(number) // Pré-popula o input com o número existente
+                setNewNumber(number)
             }
             setLoading(false)
         }
@@ -48,17 +49,30 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
     const handleSaveAndContinue = async () => {
         if (!userId) return
 
-        const isValid = await handleValidate()
-        if (isValid) {
-            const cleanNumber = newNumber.replace(/\D/g, '')
-            const result = await saveUserPhoneNumber(userId, cleanNumber)
-            if (result.success) {
-                openSnackbar(result.message as string, 'success')
-                onSave(cleanNumber)
-            } else {
-                openSnackbar(result.error as string, 'error')
-            }
+        // Valida o número primeiro
+        const validationResult = await handleValidate()
+
+        // Se a validação retornar erro explícito, para aqui.
+        if (!validationResult.success) {
+            openSnackbar(validationResult.error!, 'error')
+            return
         }
+
+        // Se a validação for inconclusiva, avisa o usuário.
+        if (validationResult.inconclusive) {
+            openSnackbar('Não foi possível validar o número agora, mas ele será salvo.', 'warning')
+        } else {
+            // Se a validação teve sucesso, mostra a mensagem de sucesso.
+            openSnackbar(validationResult.message!, 'success')
+        }
+
+        // --- A LÓGICA DE SALVAR COMEÇA AQUI ---
+        setIsSaving(true)
+        const cleanNumber = newNumber.replace(/\D/g, '')
+        await saveUserPhoneNumber(userId, cleanNumber)
+        setIsSaving(false)
+
+        onSave(cleanNumber) // Continua o fluxo
     }
 
     const handleSkip = () => {
@@ -88,8 +102,8 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
                             placeholder="+55 (XX) 9XXXX-XXXX"
                             variant="outlined"
                             size="small"
-                            value={formatDisplayNumber(newNumber)} // 4. Mostra o número formatado
-                            onChange={(e) => setNewNumber(e.target.value)} // Atualiza o estado
+                            value={formatDisplayNumber(newNumber)}
+                            onChange={(e) => setNewNumber(e.target.value)}
                             slotProps={{
                                 input: {
                                     endAdornment: (
@@ -102,8 +116,8 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
                                 }
                             }}
                         />
-                        <Button onClick={handleSaveAndContinue} disabled={isValidating} variant="contained">
-                            {isValidating ? <CircularProgress size={24} /> : 'Validar e Continuar'}
+                        <Button onClick={handleSaveAndContinue} disabled={isValidating || isSaving} variant="contained">
+                            {isValidating || isSaving ? <CircularProgress size={24} /> : 'Validar e Continuar'}
                         </Button>
                     </Stack>
                 )}

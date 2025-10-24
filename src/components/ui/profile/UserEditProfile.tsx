@@ -1,31 +1,31 @@
 'use client'
 // melemebra/src/components/ui/profile/UserEditProfile.tsx
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/app/lib/firebase'
 import { saveUserProfile } from '@/app/actions/actions'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { useAppSelector } from '@/app/store/hooks'
 import { IUserData } from '@/interfaces/IUserData'
-import { useWhatsAppInput, formatDisplayNumber } from '@/hooks/useWhatsAppInput'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import { Button, CircularProgress, Skeleton, Stack, TextField, InputAdornment, IconButton } from '@mui/material'
 import WhatsAppInfoDialog from '../dialogs/WhatsAppInfoDialog'
+import { useWhatsAppInput, formatDisplayNumber } from '@/hooks/useWhatsAppInput'
+import { Button, CircularProgress, Skeleton, Stack, TextField, InputAdornment, IconButton } from '@mui/material'
 
 export default function UserEditProfile() {
     const { openSnackbar } = useSnackbar()
     const { user } = useAppSelector((state) => state.auth)
     const userId = user?.uid
 
-    const [loading, setLoading] = useState(true)
-    const [isSaving, setIsSaving] = useState(false)
-    const [profile, setProfile] = useState<Omit<IUserData, 'password' | 'email'>>({ name: '', nickname: '', whatsappNumber: '' })
-    const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false)
+    const [loading, setLoading] = React.useState(true)
+    const [isSaving, setIsSaving] = React.useState(false)
+    const [profile, setProfile] = React.useState<Omit<IUserData, 'password' | 'email'>>({ name: '', nickname: '', whatsappNumber: '' })
+    const [isInfoDialogOpen, setIsInfoDialogOpen] = React.useState(false)
 
     // 3. Usar o hook para gerenciar o estado e a validação do WhatsApp
     const { value: whatsappNumber, setValue: setWhatsappNumber, isValidating, handleValidate } = useWhatsAppInput()
 
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchProfile = async () => {
             if (!userId) return
             const userDocRef = doc(db, 'users', userId)
@@ -55,23 +55,26 @@ export default function UserEditProfile() {
             openSnackbar('O nome é obrigatório.', 'error')
             return
         }
-
         setIsSaving(true)
-
-        // Valida o número de WhatsApp antes de salvar
-        const isWhatsAppValid = await handleValidate()
-        if (!isWhatsAppValid) {
-            openSnackbar('O número de WhatsApp parece inválido. Verifique-o antes de salvar.', 'warning')
-            // Opcional: descomente a linha abaixo para bloquear o salvamento
+        
+        // Valida o número de WhatsApp ANTES de salvar
+        const validationResult = await handleValidate()
+        if (!validationResult.success) {
+            // Se a validação falhar explicitamente (número inválido)
+            openSnackbar(validationResult.error, 'error')
             setIsSaving(false)
-            return
+            return // Bloqueia o salvamento
+        }
+        if (validationResult.inconclusive) {
+            // Se a API externa estiver fora do ar ou incerta, avisa o usuário mas permite salvar
+            openSnackbar('Não foi possível validar o número agora, mas ele foi salvo. Verifique se está correto.', 'warning')
         }
 
         const cleanNumber = whatsappNumber.replace(/\D/g, '')
         const userEmail = auth.currentUser?.email || ''
-
+        
         await saveUserProfile(userId, { ...profile, whatsappNumber: cleanNumber, email: userEmail, userId: userId })
-
+        
         setIsSaving(false)
         openSnackbar('Perfil atualizado com sucesso!', 'success')
     }

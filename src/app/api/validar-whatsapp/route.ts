@@ -4,42 +4,57 @@ import { NextResponse } from 'next/server'
 export async function POST(request: Request) {
     try {
         const { phoneNumber } = await request.json()
-
-        // 1. Limpa o número para enviar apenas dígitos para a API
-        const cleanNumber = phoneNumber.replace(/\D/g, '')
+        let cleanNumber = (phoneNumber || '').replace(/\D/g, '')
 
         if (!cleanNumber) {
             return NextResponse.json({ success: false, error: 'Número de telefone inválido.' }, { status: 400 })
         }
 
-        // 2. Monta a requisição para a RapidAPI
+        if (cleanNumber.length >= 10 && cleanNumber.length <= 11) {
+            cleanNumber = `55${cleanNumber}`
+        }
+
+        const url = 'https://whatsapp-number-validator3.p.rapidapi.com/WhatsappNumberHasItWithToken'
         const options = {
             method: 'POST',
-            url: 'https://whatsapp-number-validator3.p.rapidapi.com/WhatsappNumberHasItWithToken',
             headers: {
                 'x-rapidapi-key': process.env.RAPIDAPI_KEY!,
                 'x-rapidapi-host': 'whatsapp-number-validator3.p.rapidapi.com',
                 'Content-Type': 'application/json'
             },
-            data: {
+            body: JSON.stringify({
                 phone_number: cleanNumber
-            }
+            })
         }
 
-        // 3. Faz a chamada usando fetch
-        const response = await fetch(options.url, options)
+        const response = await fetch(url, options)
         const data = await response.json()
 
-        // 4. Interpreta e retorna a resposta da RapidAPI
-        // Exemplo de resposta da API: { "exists": true }
-        if (data.exists) {
-            return NextResponse.json({ success: true, message: 'Seu número de WhatsApp é válido!' })
-        } else {
-            return NextResponse.json({ success: false, error: 'Este número não parece ter WhatsApp. Verifique por favor.' })
+        // --- A CORREÇÃO PRINCIPAL ESTÁ AQUI ---
+
+        // Primeiro, verificamos se a chamada HTTP em si falhou.
+        if (response.status !== 200) {
+            console.error("RapidAPI respondeu com status de erro:", response.status, data)
+            return NextResponse.json({ success: true, message: 'Serviço de validação indisponível, mas o número foi salvo.', inconclusive: true })
         }
 
+        // Agora, verificamos o CONTEÚDO da resposta.
+        if (data.status === 'valid') {
+            // Se o status for 'valid', é um sucesso!
+            return NextResponse.json({ success: true, message: 'Seu número de WhatsApp é válido e foi confirmado!' })
+        } else {
+            // Se o status for qualquer outra coisa ('invalid', 'error', etc.), consideramos um erro.
+            console.warn("RapidAPI retornou um status não válido:", data)
+            return NextResponse.json({ success: false, error: 'Este número não parece ter um WhatsApp ativo. Verifique por favor.' })
+        }
+        // --- FIM DA CORREÇÃO ---
+
     } catch (error) {
-        console.error("Erro ao validar número no RapidAPI:", error)
-        return NextResponse.json({ success: false, error: 'Não foi possível validar o número neste momento.' }, { status: 500 })
+        console.error("Erro de rede ao validar número no RapidAPI:", error)
+        return NextResponse.json({
+            success: true,
+            message: 'Não foi possível validar o número agora. Salvo para verificação posterior.',
+            inconclusive: true
+        }, { status: 500 })
     }
 }

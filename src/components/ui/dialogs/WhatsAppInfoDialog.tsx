@@ -1,7 +1,7 @@
 //melembra/src/components/ui/WhatsAppInfoDialog.tsx
 'use client'
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, Alert, DialogContentText } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, Alert, DialogContentText, Typography } from '@mui/material'
 
 interface Props {
     open: boolean
@@ -24,6 +24,12 @@ export default function WhatsAppInfoDialog({ open, onClose }: Props) {
                         O formato ideal é: **+55 (DDD) 9....-....**
                         <br />
                         Exemplo para DDD 31: **+55 (31) 98334-7898**.
+                        <br />
+                        <Typography
+                            variant="caption"
+                        >
+                            Recomendamos sempre incluir o nono dígito (9) para garantir a compatibilidade com todos os sistemas.
+                        </Typography>
                     </Alert>
                 </DialogContentText>
             </DialogContent>

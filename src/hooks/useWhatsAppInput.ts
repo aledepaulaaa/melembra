@@ -1,6 +1,5 @@
 // melembra/src/hooks/useWhatsAppInput.ts
 import { useState } from 'react'
-import { useSnackbar } from '@/contexts/SnackbarProvider'
 
 // Função que formata um número limpo (ex: 5531983347898) para exibição
 export const formatDisplayNumber = (value: string): string => {
@@ -11,16 +10,23 @@ export const formatDisplayNumber = (value: string): string => {
     return `+${clean.slice(0, 2)} (${clean.slice(2, 4)}) ${clean.slice(4, 9)}-${clean.slice(9, 13)}`
 }
 
+interface ValidationResult {
+    success: boolean
+    message?: string
+    error: string
+    inconclusive?: boolean
+}
+
 export function useWhatsAppInput(initialValue = '') {
-    const { openSnackbar } = useSnackbar()
     const [value, setValue] = useState(initialValue)
     const [isValidating, setIsValidating] = useState(false)
 
-    const handleValidate = async (): Promise<boolean> => {
+    const handleValidate = async (): Promise<ValidationResult> => {
         const cleanNumber = value.replace(/\D/g, '')
-        if (cleanNumber.length < 11) { // Mínimo de DDI + DDD + 8 dígitos
-            openSnackbar('Número inválido. Verifique o DDD e o número.', 'error')
-            return false
+
+        // A validação de comprimento básica acontece aqui
+        if (cleanNumber.length < 11) {
+            return { success: false, error: 'Número inválido. Verifique o DDI, DDD e o número.' }
         }
 
         setIsValidating(true)
@@ -30,18 +36,12 @@ export function useWhatsAppInput(initialValue = '') {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phoneNumber: cleanNumber }),
             })
+            // O resultado da API é retornado diretamente
             const result = await response.json()
-
-            if (result.success) {
-                openSnackbar(result.message, 'success')
-                return true
-            } else {
-                openSnackbar(result.error, 'error')
-                return false
-            }
+            return result
         } catch (error) {
-            openSnackbar('Erro ao conectar com o serviço de validação.', 'error')
-            return false
+            // Em caso de falha de rede, retornamos um resultado "inconclusivo"
+            return { success: true, inconclusive: true, error: 'Erro de conexão com o serviço de validação.' }
         } finally {
             setIsValidating(false)
         }
