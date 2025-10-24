@@ -4,7 +4,7 @@ import React from 'react'
 import { Box, Skeleton, Typography } from '@mui/material'
 import ReminderFlow from '@/components/forms/ReminderFlow'
 import { AnimatePresence, motion } from 'framer-motion'
-import WelcomeInstallDialog from '@/components/ui/pwa/WelcomeInstallDialog'
+import WelcomeInstallDialog from '@/components/ui/dialogs/WelcomeInstallDialog'
 import LogoAnimated from '@/components/ui/logo/LogoAnimated'
 import { useAppSelector } from './store/hooks'
 
