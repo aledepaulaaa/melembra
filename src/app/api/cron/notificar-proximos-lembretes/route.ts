@@ -14,31 +14,36 @@ export async function POST(request: Request) {
 
     try {
         const now = Timestamp.now()
-        // Procura por lembretes entre AGORA e daqui a 5 minutos
-        const fiveMinutesFromNow = Timestamp.fromMillis(now.toMillis() + 5 * 60 * 1000)
+        const fiveMinutesFromNow = now.toMillis() + 5 * 60 * 1000
 
-        // Query para encontrar lembretes que estão no intervalo de 5 minutos
+        // --- CORREÇÃO DA QUERY ---
+        // 1. Busca todos os lembretes que ainda não receberam o aviso prévio.
         const snapshot = await db.collection('reminders')
-            .where('scheduledAt', '>', now)
-            .where('scheduledAt', '<=', fiveMinutesFromNow)
-            .where('preNotificationSent', '!=', true) // IMPORTANTE: Evita enviar a mesma notificação duas vezes
+            .where('preNotificationSent', '==', false)
             .get()
 
         if (snapshot.empty) {
-            return NextResponse.json({ message: 'Nenhum lembrete para notificar nos próximos 5 minutos.' })
+            return NextResponse.json({ message: 'Nenhum lembrete pendente de aviso prévio.' })
         }
 
         let notificationsSent = 0
         for (const doc of snapshot.docs) {
             const reminder = doc.data()
-            const message = `Seu lembrete "${reminder.title}" começa em 5 minutos.`
+            const scheduledAtMillis = (reminder.scheduledAt as Timestamp).toMillis()
 
-            await sendNotification(message, reminder.userId)
+            // 2. Filtra a data/hora AQUI no código.
+            // Verifica se o lembrete está agendado para os próximos 5 minutos.
+            if (scheduledAtMillis > now.toMillis() && scheduledAtMillis <= fiveMinutesFromNow) {
+                const message = `Seu lembrete "${reminder.title}" começa em 5 minutos.`
 
-            // Marca o lembrete para não enviar este aviso novamente
-            await doc.ref.update({ preNotificationSent: true })
-            notificationsSent++
+                await sendNotification(message, reminder.userId)
+
+                // Marca o lembrete para não enviar este aviso novamente
+                await doc.ref.update({ preNotificationSent: true })
+                notificationsSent++
+            }
         }
+        // --- FIM DA CORREÇÃO ---
 
         return NextResponse.json({ message: `${notificationsSent} notificações de aviso prévio enviadas.` })
 
