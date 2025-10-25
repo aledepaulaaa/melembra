@@ -35,11 +35,13 @@ export const RenderTimeClockWithConfirm = ({ handlerProps, minTime }: { handlerP
 
 export const renderDatePicker = (props: HandlerProps) => (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <StaticDatePicker
-            disablePast
-            onAccept={(date) => Handlers.handleDateSelect(props, date)}
-            sx={{ bgcolor: 'background.paper', borderRadius: 2, my: 1 }}
-        />
+        <Stack spacing={2}>
+            <StaticDatePicker
+                disablePast
+                onAccept={(date) => Handlers.handleDateSelect(props, date)}
+                sx={{ bgcolor: 'background.paper', borderRadius: 2, my: 1 }}
+            />
+        </Stack>
     </motion.div>
 )
 
@@ -61,12 +63,10 @@ export const renderRecurrenceButtons = (props: HandlerProps, formattedTime: stri
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', justifyContent: 'center', gap: 1 }}>
-
                 {/* Botão "Não repetir" - Sempre disponível */}
                 <Button size="small" variant="outlined" onClick={() => Handlers.handleRecurrenceSelect(props, 'Não repetir', formattedTime)}>
                     Não repetir
                 </Button>
-
                 {/* Mapeia as opções de recorrência premium */}
                 {recurrenceOptions.map((option) => (
                     <Tooltip key={option} title={isFreePlan ? "Recorrência é um recurso Plus" : ""}>

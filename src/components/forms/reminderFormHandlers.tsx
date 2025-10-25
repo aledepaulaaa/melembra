@@ -19,6 +19,34 @@ export const addMessageWithTyping = (props: HandlerProps, message: Omit<ChatMess
     }, delay)
 }
 
+export const handleQuickReminder = (props: HandlerProps, minutes: number) => {
+    // Calcula o tempo futuro
+    const reminderTime = new Date(Date.now() + minutes * 60 * 1000)
+    const formattedTime = reminderTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+    // Atualiza o estado do lembrete com a nova data/hora
+    props.setReminder(prev => ({ ...prev, date: reminderTime, time: formattedTime }))
+    
+    // Limpa a UI e atualiza o chat
+    props.setChatHistory(prev => prev.filter(msg => !msg.component))
+    addMessageToChat(props, { sender: 'user', text: `Lembrar em ${minutes} minutos` })
+
+    // Cria as props atualizadas para a próxima etapa
+    const updatedHandlerProps = {
+        ...props,
+        reminder: { ...props.reminder, date: reminderTime, time: formattedTime }
+    }
+
+    // Pula diretamente para a pergunta de recorrência
+    addMessageWithTyping(props, { 
+        sender: 'bot', 
+        text: `Ok! Lembrete agendado para ${formattedTime}. Ele irá se repetir?`, 
+        component: UI.renderRecurrenceButtons(updatedHandlerProps, formattedTime) 
+    })
+    
+    props.setStep(ConversationStep.ASKING_RECURRENCE)
+}
+
 const isToday = (someDate: Date) => {
     const today = new Date()
     return someDate.getDate() === today.getDate() &&
@@ -37,7 +65,8 @@ export const handleDateSelect = (props: HandlerProps, newDate: Date | null) => {
     let minTimeForClock: Date | undefined = undefined
     if (isToday(newDate)) {
         minTimeForClock = new Date()
-        minTimeForClock.setHours(minTimeForClock.getHours() + 1)
+        // minTimeForClock.setHours(minTimeForClock.getHours() + 1)
+         minTimeForClock.setMinutes(minTimeForClock.getMinutes() + 5)
     }
 
     const updatedHandlerProps = {
@@ -128,6 +157,8 @@ export const handleConfirmSave = async (props: HandlerProps) => {
 
     const { reminder, router, subscription, userId, openSnackbar } = props
 
+    const recurrence = reminder.recurrence || 'Não repetir'
+
     if (!reminder.title || !reminder.date || !userId) {
         openSnackbar("Ocorreu um erro. Faltam informações.", 'error')
         return
@@ -137,7 +168,7 @@ export const handleConfirmSave = async (props: HandlerProps) => {
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageWithTyping(props, { sender: 'bot', text: `Salvando...` }, 100)
 
-    const result = await saveReminder(reminder.title, reminder.date, userId)
+    const result = await saveReminder(reminder.title, reminder.date, userId, recurrence)
 
     if (result.success) {
         openSnackbar('Lembrete salvo com sucesso!', 'success')

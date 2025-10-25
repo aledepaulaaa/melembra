@@ -114,7 +114,7 @@ export async function saveUserPhoneNumber(userId: string, phoneNumber: string) {
     }
 }
 
-export async function saveReminder(title: string, date: Date, userId: string) {
+export async function saveReminder(title: string, date: Date, userId: string,  recurrence: string) {
     if (!userId || !title || !date) return { success: false, error: 'Dados do lembrete inválidos.' }
     try {
         const docRef = await db.collection('reminders').add({
@@ -124,6 +124,7 @@ export async function saveReminder(title: string, date: Date, userId: string) {
             createdAt: AdminTimestamp.now(),
             sent: false,
             preNotificationSent: false,
+            recurrence: recurrence
         })
         return { success: true, reminderId: docRef.id }
     } catch (error) {
