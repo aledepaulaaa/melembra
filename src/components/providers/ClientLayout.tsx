@@ -1,3 +1,4 @@
+'use client'
 //bora-app/src/components/providers/ClientLayout.tsx
 import React from "react"
 import { store } from "@/app/store/store"
