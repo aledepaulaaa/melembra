@@ -1,5 +1,5 @@
 'use client'
-// melembra/src/components/ui/WelcomeInstallDialog.tsx
+//bora-app/src/components/ui/WelcomeInstallDialog.tsx
 import {
     Button,
     Dialog,
@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import IosShareIcon from '@mui/icons-material/IosShare'
-import LogoMeLembra from '../logo/LogoMeLembra'
+import LogoBora from '../logo/LogoBora'
 import React from 'react'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 
@@ -82,13 +82,13 @@ export default function WelcomeInstallDialog() {
         >
             <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
-                    <LogoMeLembra size={65} />
-                    <Typography variant="h4" component="span" fontWeight="bold">Oi sou o MeLembra!</Typography>
+                    <LogoBora size={65} />
+                    <Typography variant="h4" component="span" fontWeight="bold">Oi sou o Bora!</Typography>
                 </Box>
             </DialogTitle>
             <DialogContent sx={{ textAlign: 'center' }}>
                 <DialogContentText sx={{ color: "inherit", fontSize: 20, mb: 2 }}>
-                    Tenha uma experiência completa <br/>instalando o app <b>MeLembra.</b>
+                    Tenha uma experiência completa <br/>instalando o app <b>Bora.</b>
                 </DialogContentText>
                 {isIOS && (
                     <Accordion>

@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/app/page.tsx
+//bora-app/src/app/page.tsx
 import React from 'react'
 import { Box, Skeleton, Typography } from '@mui/material'
 import ReminderFlow from '@/components/forms/ReminderFlow'
@@ -58,7 +58,7 @@ export default function Home() {
                         >
                             <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 10 }}>
                                 <Typography variant="h2" fontWeight={900} textAlign="start" lineHeight={1} component="h2">
-                                    Me <br />Lembra?
+                                    Bora Lembrar?
                                 </Typography>
                                 <LogoAnimated size={55} />
                             </Box>

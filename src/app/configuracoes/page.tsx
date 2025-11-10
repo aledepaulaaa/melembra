@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/app/configuracoes/page.tsx
+//bora-app/src/app/configuracoes/page.tsx
 import { Box, Typography, Paper } from '@mui/material'
 import InstallPrompt from "@/components/ui/pwa/InstallPrompt"
 import PushNotificationManager from '@/components/ui/pwa/PushNotificationManager'

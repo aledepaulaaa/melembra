@@ -1,4 +1,4 @@
-// melembra/src/app/api/validar-whatsapp/route.ts
+//bora-app/src/app/api/validar-whatsapp/route.ts
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {

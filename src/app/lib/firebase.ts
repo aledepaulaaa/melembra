@@ -1,4 +1,4 @@
-//melembra/src/app/lib/firebase.ts
+//bora-app/src/app/lib/firebase.ts
 import { initializeApp } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
 import { getAuth } from "firebase/auth"

@@ -1,4 +1,4 @@
-// melembra/src/interfaces/IMeLembraPayments.ts
+//bora-app/src/interfaces/IMeLembraPayments.ts
 import { Timestamp } from "firebase-admin/firestore"
 
 /**

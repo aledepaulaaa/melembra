@@ -1,4 +1,4 @@
-//melembra/src/app/api/cron/notificar-proximos-lembretes/route.ts
+//bora-app/src/app/api/cron/notificar-proximos-lembretes/route.ts
 import { NextResponse } from 'next/server'
 import { sendNotification } from '@/app/actions/actions'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'

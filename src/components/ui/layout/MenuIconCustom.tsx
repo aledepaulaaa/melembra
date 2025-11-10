@@ -1,4 +1,4 @@
-//melembra/src/components/ui/MenuIconCustom.tsx
+//bora-app/src/components/ui/MenuIconCustom.tsx
 import { Box } from "@mui/material"
 
 interface MenuIconCustomProps {

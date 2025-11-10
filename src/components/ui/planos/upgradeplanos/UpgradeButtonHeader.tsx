@@ -1,4 +1,4 @@
-// melembra/src/components/ui/UpgradeButtonHeader.tsx
+//bora-app/src/components/ui/UpgradeButtonHeader.tsx
 import { useAppSelector } from "@/app/store/hooks"
 import { Button } from "@mui/material"
 // CORREÇÃO: Mudar a importação do useRouter

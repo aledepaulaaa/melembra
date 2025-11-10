@@ -1,5 +1,5 @@
 'use client'
-// melembra/src/components/ui/LogoAnimated.tsx
+//bora-app/src/components/ui/LogoAnimated.tsx
 import { useTheme } from '@mui/material/styles'
 import { motion, Variants } from 'framer-motion'
 

@@ -1,10 +1,10 @@
-//melembra/src/app/manifest.ts
+//bora-app/src/app/manifest.ts
 import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Me Lembra?',
-        short_name: 'Me Lembra?',
+        name: 'Bora?',
+        short_name: 'Bora?',
         description: 'Você não vai esquecer de mais nada!',
         start_url: '/',
         display: 'standalone',

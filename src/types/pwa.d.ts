@@ -1,4 +1,4 @@
-// melembra/src/types/pwa.d.ts
+//bora-app/src/types/pwa.d.ts
 
 // 1. Define a interface para o evento especial
 interface BeforeInstallPromptEvent extends Event {

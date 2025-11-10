@@ -1,4 +1,4 @@
-// melembra/src/hooks/useSubscription.ts
+//bora-app/src/hooks/useSubscription.ts
 import { useEffect } from 'react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/app/lib/firebase' // SDK do CLIENTE para o frontend

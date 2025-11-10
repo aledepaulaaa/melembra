@@ -1,4 +1,4 @@
-// melembra/src/theme/theme.ts
+//bora-app/src/theme/theme.ts
 import { createTheme, PaletteMode } from '@mui/material'
 import { Gabarito } from 'next/font/google'
 

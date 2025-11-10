@@ -1,4 +1,4 @@
-//melembra/src/components/ui/planos/CardPlanos.tsx
+//bora-app/src/components/ui/planos/CardPlanos.tsx
 import { motion } from "framer-motion"
 import CheckIcon from '@mui/icons-material/Check'
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium'

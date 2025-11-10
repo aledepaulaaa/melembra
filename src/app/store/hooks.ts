@@ -1,4 +1,4 @@
-// melembra/src/app/store/hooks.ts
+//bora-app/src/app/store/hooks.ts
 import { useDispatch, useSelector } from 'react-redux'
 import type { RootState, AppDispatch } from './store'
 

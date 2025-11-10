@@ -1,4 +1,4 @@
-//melembra/public/sw-push-handler.js
+//bora-app/public/sw-push-handler.js
 self.addEventListener('push', function (event) {
     if (event.data) {
         const data = event.data.json()
@@ -19,5 +19,5 @@ self.addEventListener('push', function (event) {
 self.addEventListener('notificationclick', function (event) {
     console.log('Notification click received.')
     event.notification.close()
-    event.waitUntil(clients.openWindow('https://melembra.vercel.app/'))
+    event.waitUntil(clients.openWindow('https://aplicativobora.com.br/'))
 })

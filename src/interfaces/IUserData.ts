@@ -1,4 +1,4 @@
-//melembra/src/interfaces/IUserData.ts
+//bora-app/src/interfaces/IUserData.ts
 export interface IUserData {
     name: string
     nickname: string

@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/components/providers/ThemeProvider.tsx
+//bora-app/src/components/providers/ThemeProvider.tsx
 import React from 'react'
 import { createCustomTheme } from '@/theme/theme'
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material'

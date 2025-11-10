@@ -1,4 +1,4 @@
-//melembra/src/app/store/slices/reminderSlice.ts
+//bora-app/src/app/store/slices/reminderSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface ReminderItem {

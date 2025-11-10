@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/components/ui/ThemeSwitcher.tsx
+//bora-app/src/components/ui/ThemeSwitcher.tsx
 import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import { IconButton } from '@mui/material'

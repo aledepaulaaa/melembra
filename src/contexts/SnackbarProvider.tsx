@@ -1,4 +1,4 @@
-// melemebra/src/contexts/SnackbarContext.tsx (VERSÃO CORRIGIDA)
+// melemebra/src/contexts/SnackbarContext.tsx
 'use client'
 
 import React, { createContext, useContext, useState, ReactNode } from 'react'

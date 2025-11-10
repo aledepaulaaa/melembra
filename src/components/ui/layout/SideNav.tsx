@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/components/ui/SideNav.tsx
+//bora-app/src/components/ui/SideNav.tsx
 import ThemeSwitcher from '../theme/ThemeSwitcher'
 import LogoAnimated from '../logo/LogoAnimated'
 import { useRouter, usePathname } from 'next/navigation'

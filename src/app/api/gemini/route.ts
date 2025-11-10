@@ -1,4 +1,4 @@
-// melembra/src/app/api/gemini/route.ts
+//bora-app/src/app/api/gemini/route.ts
 import { NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 

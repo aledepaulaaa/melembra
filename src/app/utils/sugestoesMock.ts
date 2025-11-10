@@ -1,4 +1,4 @@
-//melembra/src/utils/sugestoesMock.ts
+//bora-app/src/utils/sugestoesMock.ts
 export const sugestoesMock = [
     "Comprar pão",
     "Pagar contas",

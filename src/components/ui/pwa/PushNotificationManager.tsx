@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/components/PushNotificationManager.tsx
+//bora-app/src/components/PushNotificationManager.tsx
 import { usePushNotification } from "@/hooks/usePushNotification"
 import { Box, Button, TextField, Typography, Paper, Skeleton } from "@mui/material"
 import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined"

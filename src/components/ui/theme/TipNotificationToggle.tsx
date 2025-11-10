@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/components/ui/TipNotificationToggle.tsx
+//bora-app/src/components/ui/TipNotificationToggle.tsx
 import React  from 'react'
 import { getUserPreferences, saveUserPreferences } from '@/app/actions/actions'
 import { FormControlLabel, Switch, Typography, Box, Paper, Skeleton } from '@mui/material'

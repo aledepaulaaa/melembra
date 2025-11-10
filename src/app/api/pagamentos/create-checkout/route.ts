@@ -1,4 +1,4 @@
-// melembra/src/app/api/pagamentos/create-checkout/route.ts
+//bora-app/src/app/api/pagamentos/create-checkout/route.ts
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'

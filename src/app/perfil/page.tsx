@@ -1,5 +1,5 @@
 'use-client'
-//melembra/src/app/perfil/page.tsx
+//bora-app/src/app/perfil/page.tsx
 import UserProfile from "@/components/ui/profile/UserProfile"
 import { Box, Typography } from "@mui/material"
 

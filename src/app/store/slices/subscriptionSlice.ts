@@ -1,4 +1,4 @@
-// melembra/src/app/store/slices/subscriptionSlice.ts
+//bora-app/src/app/store/slices/subscriptionSlice.ts
 import { ISubscription, SubscriptionState } from '@/interfaces/IMeLembraPayment'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 

@@ -1,4 +1,4 @@
-// melembra/next.config.js
+//bora-app/next.config.js
 /** @type {import('next').NextConfig} */
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public', // Onde o service worker e outros arquivos serão gerados

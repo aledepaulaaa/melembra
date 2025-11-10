@@ -1,4 +1,4 @@
-//melembra/src/interfaces/IRedminderForm.ts
+//bora-app/src/interfaces/IRedminderForm.ts
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime"
 import { SubscriptionState } from "./IMeLembraPayment"
 import { AlertColor } from "@mui/material"

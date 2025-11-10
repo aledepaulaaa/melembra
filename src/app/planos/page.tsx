@@ -1,5 +1,5 @@
 'use client'
-// melembra/src/app/planos/page.tsx
+//bora-app/src/app/planos/page.tsx
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'

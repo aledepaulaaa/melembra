@@ -1,4 +1,4 @@
-// melembra/src/components/providers/ClientLayout.tsx
+//bora-app/src/components/providers/ClientLayout.tsx
 import React from "react"
 import { store } from "@/app/store/store"
 import { Provider } from "react-redux"

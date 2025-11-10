@@ -1,5 +1,5 @@
 'use client'
-// melembra/src/components/InstallPrompt.tsx
+//bora-app/src/components/InstallPrompt.tsx
 import React from 'react'
 import {
     Button,
@@ -76,7 +76,7 @@ export default function InstallPrompt() {
             <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
                 <Typography variant="h6" gutterBottom>Instalar Aplicativo</Typography>
                 <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
-                    Tenha uma experiência mais rápida e integrada adicionando o MeLembra à sua tela de início.
+                    Tenha uma experiência mais rápida e integrada adicionando o Bora à sua tela de início.
                 </Typography>
                 <Button
                     variant="contained"
@@ -96,7 +96,7 @@ export default function InstallPrompt() {
                 <DialogContent>
                     <DialogContentText component="div">
                         <Typography component="h5" textAlign="center" fontWeight="bold" color="textPrimary" mb={4}>
-                            Para instalar o MeLembra <br />siga estes passos simples:
+                            Para instalar o Bora <br />siga estes passos simples:
                         </Typography>
                     </DialogContentText>
                     <Box component="ol" sx={{ pl: 2, mt: 2 }}>

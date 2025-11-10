@@ -1,4 +1,4 @@
-//melembra/src/components/ui/WhatsAppInfoDialog.tsx
+//bora-app/src/components/ui/WhatsAppInfoDialog.tsx
 'use client'
 import WhatsAppIcon from '@mui/icons-material/WhatsApp'
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, Alert, DialogContentText, Typography } from '@mui/material'

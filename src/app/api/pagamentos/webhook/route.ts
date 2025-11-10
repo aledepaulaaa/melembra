@@ -1,4 +1,4 @@
-// melembra/src/app/api/pagamentos/webhook/route.ts
+//bora-app/src/app/api/pagamentos/webhook/route.ts
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'

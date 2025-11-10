@@ -1,5 +1,5 @@
 'use client'
-// melembra/src/components/ui/ReminderList.tsx
+//bora-app/src/components/ui/ReminderList.tsx
 import React from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DeleteIcon from '@mui/icons-material/Delete'

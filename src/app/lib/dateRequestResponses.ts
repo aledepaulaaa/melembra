@@ -1,4 +1,4 @@
-// melembra/src/lib/botResponses.ts
+//bora-app/src/lib/botResponses.ts
 export const dateRequestResponses = [
     "Muito bem! E qual a data para o lembrete '{title}'?",
     "Ótimo, então você quer criar o lembrete '{title}', certo? Qual a data que quer definir para ele?",

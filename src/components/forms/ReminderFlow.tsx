@@ -1,5 +1,5 @@
 'use client'
-//melembra/src/components/ui/ReminderFlow.tsx
+//bora-app/src/components/ui/ReminderFlow.tsx
 import ReminderForm from '@/components/forms/ReminderForm'
 import { Container, Box } from '@mui/material'
 import { ReminderFormProps } from '@/interfaces/IReminderForm'

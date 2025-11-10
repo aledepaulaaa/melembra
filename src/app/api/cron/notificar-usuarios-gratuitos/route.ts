@@ -1,4 +1,4 @@
-// melembra/src/app/api/cron/notificar-usuarios-gratuitos/route.ts
+//bora-app/src/app/api/cron/notificar-usuarios-gratuitos/route.ts
 import { NextResponse } from 'next/server'
 import { sendNotification } from '@/app/actions/actions'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
