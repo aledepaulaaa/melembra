@@ -40,16 +40,18 @@ async function findOrCreateStripeCustomer(userId: string): Promise<string> {
 
 export async function POST(request: Request) {
     try {
-        const { userId } = await request.json()
+        const { userId, priceId  } = await request.json()
 
         if (!userId) {
             return new NextResponse('UserID do usuário é obrigatório', { status: 400 })
         }
 
+         if (!priceId) {
+            return new NextResponse('Price ID do plano é obrigatório', { status: 400 })
+        }
+
         // Obtém o ID do cliente da Stripe (cria se não existir)
         const stripeCustomerId = await findOrCreateStripeCustomer(userId)
-
-        // URL base da sua aplicação
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
         // Cria a sessão de Checkout na Stripe
@@ -59,13 +61,9 @@ export async function POST(request: Request) {
             mode: 'subscription',
             line_items: [
                 {
-                    price: process.env.STRIPE_PLUS_PLAN_PRICE_ID,
+                    price: priceId,
                     quantity: 1,
                 },
-                {
-                    price: process.env.STRIPE_PREMIUM_PLAN_PRICE_ID,
-                    quantity: 1
-                }
             ],
             
             // Tipos de pagamento que você aceita (pode adicionar 'boleto' etc)

@@ -6,7 +6,7 @@ import { SubscriptionState } from "@/interfaces/IMeLembraPayment"
 import { Grid, Card, CardContent, Typography, List, ListItem, ListItemIcon, ListItemText, Button, Box, Chip, CircularProgress, Stack } from "@mui/material"
 
 interface CardPlanoProps {
-    handleUpgradeClick: () => void
+    handleUpgradeClick: (planId: 'plus' | 'premium') => void
     currentPlan: SubscriptionState
     isRedirecting: boolean
     cardVariants: any
@@ -81,7 +81,7 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                             <Button
                                 fullWidth
                                 variant="contained"
-                                onClick={handleUpgradeClick}
+                                onClick={() => handleUpgradeClick('plus')}
                                 disabled={isRedirecting || currentPlan.plan === 'plus'}
                             >
                                 {isRedirecting ? <CircularProgress size={24} color="inherit" /> : (currentPlan.plan === 'plus' ? 'Gerenciar Plano' : 'Assinar')}
@@ -122,10 +122,10 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                             <Button
                                 fullWidth
                                 variant="contained"
-                                onClick={handleUpgradeClick}
-                                disabled={isRedirecting || currentPlan.plan === 'plus'}
+                                onClick={() => handleUpgradeClick('premium')}
+                                disabled={isRedirecting || currentPlan.plan === 'premium'}
                             >
-                                {isRedirecting ? <CircularProgress size={24} color="inherit" /> : (currentPlan.plan === 'plus' ? 'Gerenciar Plano' : 'Assinar')}
+                                {isRedirecting ? <CircularProgress size={24} color="inherit" /> : (currentPlan.plan === 'premium' ? 'Gerenciar Plano' : 'Assinar')}
                             </Button>
                         </CardContent>
                     </Card>

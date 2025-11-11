@@ -40,7 +40,12 @@ export default function PlanosPage() {
     const [isRedirecting, setIsRedirecting] = React.useState(false)
     const [dialogOpen, setDialogOpen] = React.useState(false)
 
-    const handleUpgradeClick = async () => {
+     const planPriceIds = {
+        plus: process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID,
+        premium: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID,
+    }
+
+    const handleUpgradeClick = async (planId: 'plus' | 'premium') => {
         if (auth.currentUser?.isAnonymous) {
             setDialogOpen(true)
             return // Para a execução
@@ -53,11 +58,14 @@ export default function PlanosPage() {
 
         setIsRedirecting(true)
 
+        // Pegar o priceId correto baseado no plano clicado
+        const priceId = planPriceIds[planId]
+
         try {
             const response = await fetch('/api/pagamentos/create-checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId }),
+                body: JSON.stringify({ userId, priceId }),
             })
 
             if (!response.ok) {

@@ -9,6 +9,17 @@ const initialState: SubscriptionState = {
     data: null,
 }
 
+const getPlanFromPriceId = (priceId: string): 'plus' | 'premium' => {
+    switch (priceId) {
+        case process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID:
+            return 'plus';
+        case process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID:
+            return 'premium';
+        default:
+            return 'plus'; // Ou um valor padrão/erro
+    }
+}
+
 export const subscriptionSlice = createSlice({
     name: 'subscription',
     initialState,
@@ -19,7 +30,7 @@ export const subscriptionSlice = createSlice({
         },
         // Ação para quando encontramos uma assinatura ativa
         setSubscriptionActive: (state, action: PayloadAction<ISubscription>) => {
-            state.plan = 'plus' // Simplificamos para a UI saber que é 'plus'
+            state.plan = getPlanFromPriceId(action.payload.stripePriceId)
             state.status = 'active'
             state.data = action.payload
         },

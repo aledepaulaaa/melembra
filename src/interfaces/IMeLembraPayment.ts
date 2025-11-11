@@ -38,7 +38,7 @@ export interface ISubscription {
 
 // Define o formato do nosso estado de assinatura
 export interface SubscriptionState {
-    plan: 'free' | 'plus' | 'canceled' // Planos simples para a UI
+    plan: 'free' | 'plus' | 'premium' | 'canceled' // Planos simples para a UI
     status: 'loading' | 'active' | 'inactive' | 'error'
     data: ISubscription | null // Opcional: Armazenar todos os dados se precisar
 }
