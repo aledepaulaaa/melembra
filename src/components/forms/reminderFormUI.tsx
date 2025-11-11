@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { HandlerProps } from '@/interfaces/IReminderForm'
 import DiamondIcon from '@mui/icons-material/Diamond'
 import * as Handlers from './reminderFormHandlers'
-import { StaticDatePicker, TimeClock } from '@mui/x-date-pickers'
+import { MobileDatePicker, StaticDatePicker, TimeClock } from '@mui/x-date-pickers'
 import { Box, Button, Stack, Tooltip, Typography } from '@mui/material'
 
 // --- Funções que retornam os componentes JSX ---
@@ -14,13 +14,21 @@ export const RenderTimeClockWithConfirm = ({ handlerProps, minTime }: { handlerP
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <TimeClock
-                ampm={false}
-                value={selectedTime}
-                onChange={(time) => setSelectedTime(time as Date)}
-                minTime={minTime}
-                sx={{ bgcolor: 'background.paper', borderRadius: 2, my: 1, maxHeight: 300 }}
-            />
+            <Stack direction="column" alignItems="center" justifyContent="center" spacing={1}>
+                <TimeClock
+                    ampm={false}
+                    value={selectedTime}
+                    onChange={(time) => setSelectedTime(time as Date)}
+                    minTime={minTime}
+                    sx={{
+                        bgcolor: 'transparent',
+                        borderRadius: 2,
+                        my: 1,
+                        maxHeight: 300,
+                        overflow: "hidden"
+                    }}
+                />
+            </Stack>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                 <Button
                     variant="contained"
@@ -34,31 +42,44 @@ export const RenderTimeClockWithConfirm = ({ handlerProps, minTime }: { handlerP
 }
 
 export const renderDatePicker = (props: HandlerProps) => (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <Stack spacing={2}>
-            <StaticDatePicker
-                disablePast
+    <motion.div
+        transition={{ delay: 0.5 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+    >
+        <Stack spacing={1} justifyContent="center" alignItems="center">
+            <MobileDatePicker
                 onAccept={(date) => Handlers.handleDateSelect(props, date)}
-                sx={{ bgcolor: 'background.paper', borderRadius: 2, my: 1 }}
+                sx={{
+                    bgcolor: 'background.paper',
+                    borderRadius: 2,
+                    maxHeight: 380,
+                    overflowY: 'auto'
+                }}
             />
         </Stack>
     </motion.div>
 )
 
 export const renderTimeClock = (props: HandlerProps, minTime?: Date) => (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <TimeClock
-            ampm={false}
-            onChange={(time) => Handlers.handleTimeSelect(props, time as Date)}
-            minTime={minTime}
-            sx={{ bgcolor: 'background.paper', borderRadius: 2, my: 1, maxHeight: 300 }}
-        />
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+    >
+        <Stack spacing={1}>
+            <TimeClock
+                ampm={false}
+                onChange={(time) => Handlers.handleTimeSelect(props, time as Date)}
+                minTime={minTime}
+                sx={{ bgcolor: 'background.paper', borderRadius: 2, maxHeight: 300 }}
+            />
+        </Stack>
     </motion.div>
 )
 
 export const renderRecurrenceButtons = (props: HandlerProps, formattedTime: string) => {
     const isFreePlan = props.subscription.plan !== 'plus'
-    const recurrenceOptions = ['Diariamente', 'Semanalmente', 'Mensalmente', 'Anualmente']
+    const recurrenceOptions = ['Diariamente', 'Semanalmente', 'Mensalmente']
 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

@@ -125,6 +125,7 @@ export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, 
 
     const updatedHandlerProps = {
         ...props,
+        time,
         reminder: { ...props.reminder, recurrence: recurrence }
     }
 

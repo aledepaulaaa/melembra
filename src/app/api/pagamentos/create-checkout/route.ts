@@ -62,6 +62,10 @@ export async function POST(request: Request) {
                     price: process.env.STRIPE_PLUS_PLAN_PRICE_ID,
                     quantity: 1,
                 },
+                {
+                    price: process.env.STRIPE_PREMIUM_PLAN_PRICE_ID,
+                    quantity: 1
+                }
             ],
             
             // Tipos de pagamento que você aceita (pode adicionar 'boleto' etc)

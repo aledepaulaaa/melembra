@@ -3,8 +3,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Bora?',
-        short_name: 'Bora?',
+        name: 'Bora',
+        short_name: 'Bora',
         description: 'Você não vai esquecer de mais nada!',
         start_url: '/',
         display: 'standalone',
