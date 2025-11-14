@@ -1,110 +1,145 @@
-BORA — Visão geral do aplicativo (BORA.md) ✨
-Pequena descrição
-Um sistema clean, escalável e intuitivo para envio de lembretes inteligentes via Push (Next.js) e WhatsApp (whatsapp-web.js). Código escrito em TypeScript com atenção a princípios de arquitetura (SOLID, Clean Architecture) e práticas de produção.
-Desenvolvido por Alexandre de Paula — https://github.com/aledepaulaaa
+# BORA — Visão geral do aplicativo ✨
+
+Um sistema clean, escalável e intuitivo para envio de lembretes inteligentes via Push (Next.js PWA) e WhatsApp (whatsapp-web.js).  
+Código em TypeScript com atenção a princípios de arquitetura (SOLID, Clean Architecture) e práticas de produção.
+
+Desenvolvido por: Alexandre de Paula — https://github.com/aledepaulaaa  
 Produção: https://www.aplicativobora.com.br/ 🌐
 
-Resumo das responsabilidades
+---
 
-Frontend (client): Next.js (App Router) — PWA, UI, lógica de criação/assinatura de lembretes, push notifications.
-Backend (server): Node + TypeScript — integração WhatsApp, agendamento (node-cron), persistência em Firebase (Firestore), endpoints HTTP para controle/manual.
-Integração: Firebase Admin para dados/autenticação/messaging; whatsapp-web.js para envio interativo; cron jobs para disparo programado.
-Estrutura simplificada do monorepo
+## Visão geral rápida 🚀
+BORA permite criar, agendar e entregar lembretes inteligentes ao usuário via push notifications (PWA) e mensagens no WhatsApp. Projetado para confiabilidade em produção, com separação clara entre frontend (Next.js) e backend (bora-server) que mantém a sessão do WhatsApp.
+
+---
+
+## Componentes principais 🧩
+
+- Frontend (appbora) — Next.js (App Router), PWA, interface de criação/assinatura de lembretes e integração Push.
+- Backend (bora-server) — Node.js + TypeScript, integração com whatsapp-web.js, agendamento com node-cron, persistência em Firestore.
+- Persistência — Firebase Firestore (via firebase-admin).
+- Agendamento — node-cron para jobs programados; handlers específicos para fluxos (teste, premium, etc.).
+- Sessão WhatsApp — .wwebjs_auth/ local (persistência de sessão).
+
+---
+
+## Estrutura simplificada do monorepo 📁
 
 appbora/ (Next.js — frontend)
-src/app/
-layout.tsx, page.tsx, manifest.ts
-actions/, api/, configuracoes/, lembretes/, perfil/, planos/
-src/components/, contexts/, hooks/, interfaces/, theme/
+- src/app/ (App Router: layout.tsx, page.tsx, manifest.ts)
+- src/actions/, api/, configuracoes/, lembretes/, perfil/, planos/
+- src/components/, contexts/, hooks/, interfaces/, theme/
+
 bora-server/ (Node TypeScript — backend)
-src/
-index.ts
-controllers/whatsapp.controller.ts
-routes/whatsapp.routes.ts
-database/firebase-admin.ts
-interfaces/IReminder.ts
-services/
-whatsappClient.ts, whatsappBot.ts, whatsapp.service.ts
-jobHandlers.ts, jobScheduler.ts, jobTestHandler.ts, jobPremiumUsers.ts
-.wwebjs_auth/ (sessão WhatsApp — não versionar)
-.wwebjs_cache/
-Pontos-chave do server-side (Next.js App Router & bora-server)
+- src/index.ts (bootstrap)
+- src/controllers/whatsapp.controller.ts
+- src/routes/whatsapp.routes.ts
+- src/database/firebase-admin.ts
+- src/interfaces/IReminder.ts
+- src/services/whatsappClient.ts, whatsappBot.ts, whatsapp.service.ts
+- jobHandlers.ts, jobScheduler.ts, jobTestHandler.ts, jobPremiumUsers.ts
+- .wwebjs_auth/ (não versionar)
 
-Next.js (App Router) — rotas server-side e client-side, PWA e suporte a push. Arquitetura moderna do frontend com server components quando aplicável (pasta src/app/).
-Serviço de backend dedicado (bora-server) — mantido separado para preservar sessão do WhatsApp, executar jobs e expor APIs REST necessárias ao frontend.
-Persistência: Firestore (via firebase-admin) — modelo de lembretes, estados de fluxo conversacional, e dados de usuários.
-Jobs: node-cron agendando leitura de lembretes e envio via whatsapp-web.js; jobs de teste e fluxo para usuários premium.
-Sessão WhatsApp: armazenada localmente em .wwebjs_auth/ para persistência entre reinícios; tom cuidado ao escalar (ver recomendação abaixo).
-Princípios e práticas arquiteturais aplicadas
+---
 
-Clean Architecture / Camadas
-controllers (entrada), services (use-cases), database (infraestrutura), interfaces (entities/contracts).
-SOLID
-Single Responsibility: cada service/controller tem responsabilidade única.
-Dependency Inversion: serviços dependem de contratos/abstrações (interfaces) e não de implementações concretas.
-Open/Closed: módulos extensíveis (ex.: novos jobHandlers) sem alterar código existente.
-Tipagem forte com TypeScript (interfaces/IReminder).
-Responsabilidade única para integração com provedores externos (firebase-admin, whatsapp-web.js).
-Tratamento de variáveis sensíveis via .env e formatação segura de private key do Firebase.
-Observabilidade mínima: logs por módulo (QR, ready, errors).
-Arquivos/ módulos de destaque (referências)
+## Princípios arquiteturais e boas práticas 🏗️
 
-Frontend (appbora)
-src/app/page.tsx — ponto de entrada da UI
-src/hooks/usePushNotification.ts — integração Push
-src/interfaces/IReminder.ts — modelo cliente
-Backend (bora-server)
-src/index.ts — inicialização do servidor express e serviços
-src/database/firebase-admin.ts — inicialização do Firebase Admin
-src/services/whatsappClient.ts — cliente e eventos do whatsapp-web.js
-src/services/whatsappBot.ts — fluxo de conversação / criação de lembretes
-src/services/jobScheduler.ts — agendamento cron (start/stop)
-src/controllers/whatsapp.controller.ts — endpoint POST /api/send-message
-src/interfaces/IReminder.ts — contrato do lembrete
-Instalação local (resumo rápido)
+- Clean Architecture: controllers (entrada), services (use-cases), database (infra).
+- SOLID aplicado: responsabilidades únicas, injeção por abstração, módulos extensíveis.
+- Tipagem forte com TypeScript (interfaces/IReminder).
+- Isolamento de integrações externas (Firebase, WhatsApp) por adaptadores.
+- Variáveis sensíveis em .env / Secret Manager — FIREBASE_PRIVATE_KEY devidamente formatada.
 
-Frontend (appbora)
-Backend (bora-server)
-Variáveis de ambiente importantes
+---
 
-FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY (formatada), PORT
-Configs adicionais para WhatsApp/admin (definidas em .env local)
-Observações de produção e scaling 🚦
+## Fluxos e responsabilidades ✉️
 
-WhatsApp session state é stateful: para escalabilidade horizontal, recomenda-se manter o componente do WhatsApp isolado em um worker/instância dedicada (ou usar soluções de filas e sessões externas).
-Jobs agendados: para múltiplas instâncias, prevenir duplicidade com leader election (Redis locks) ou mover agendamento para um serviço gerenciado (Cloud Scheduler / Cloud Tasks).
-Deploy frontend: Vercel / Cloud Run (Next.js App Router suportado).
-Deploy backend: Cloud Run / AWS ECS / DigitalOcean App Platform. Manter secrets no Secret Manager e não commitar .wwebjs_auth/.env.
-Métricas e logs: centralizar (Cloud Logging / Datadog) para rastrear entregas e erros.
-Boas práticas para evolução
+- Frontend: UI, criação/edição de lembretes, permissões de push, envio de tokens FCM para o backend.
+- Backend: manutenção de sessão WhatsApp, endpoints REST (ex.: POST /api/send-message), agendamento e execução de jobs que dispararam mensagens.
+- Jobs: leitura periódica de lembretes prontos, parsing de datas (chrono-node), execução e logging de envios via whatsapp-web.js.
 
-Manter contratos (interfaces) estáveis entre client e server.
-Isolar integrações externas por adaptadores (Repository / Gateway pattern).
-Escrever testes unitários para jobHandlers, parsing de datas (chrono-node) e fluxos do bot.
-Documentar endpoints com OpenAPI/Swagger quando crescer API pública.
-Sugestões rápidas de melhorias futuras
+---
 
-Migrar jobs para workers escaláveis (ex.: BullMQ + Redis).
-Adicionar testes E2E para fluxo de envio de lembretes (simular Webhook/WhatsApp).
-Usar uma camada de rate limiting/queue para envio em massa (evitar bloqueios do WhatsApp).
-Tecnologias principais
+## Arquivos e módulos de destaque ⭐
 
-Next.js (App Router), React, PWA — frontend
-Node.js + TypeScript, Express — backend (bora-server)
-whatsapp-web.js — integração WhatsApp
-Firebase Admin (Firestore) — persistência e messaging
-node-cron — agendamento
-chrono-node — parsing de datas naturais
-qrcode-terminal, dotenv, nodemon, etc.
-Contato / autoria
+- Frontend
+  - src/app/page.tsx — entrada da UI
+  - src/hooks/usePushNotification.ts — integração com Push
+  - src/interfaces/IReminder.ts — modelo cliente
 
-Desenvolvido por: Alexandre de Paula
-GitHub: https://github.com/aledepaulaaa
-App em produção: https://www.aplicativobora.com.br/ 🚀
-Licença & segurança
+- Backend
+  - src/index.ts — inicialização do servidor e serviços
+  - src/database/firebase-admin.ts — bootstrap do Firebase Admin
+  - src/services/whatsappClient.ts — eventos e cliente whatsapp-web.js
+  - src/services/whatsappBot.ts — fluxo conversacional / criação de lembretes
+  - src/services/jobScheduler.ts — start/stop de cron jobs
+  - src/controllers/whatsapp.controller.ts — endpoint HTTP para envio manual
 
-Nunca commitar: .env, .wwebjs_auth/, .wwebjs_cache/
-Use Secret Manager / Vault em produção para FIREBASE_PRIVATE_KEY.
-Versão deste documento
+---
 
-1.0 — visão técnica e operacional do BORA (client + server)
+## Variáveis de ambiente importantes 🔐
+
+- FIREBASE_PROJECT_ID
+- FIREBASE_CLIENT_EMAIL
+- FIREBASE_PRIVATE_KEY (formatada — manter quebras e escape corretos)
+- PORT
+- Outras: configs de WhatsApp / admin (definidas localmente)
+
+Nunca commitar: .env, .wwebjs_auth/, .wwebjs_cache/ — usar Secret Manager / Vault em produção.
+
+---
+
+## Instalação local (resumo) 🛠️
+
+1. Clonar repositório.
+2. Criar .env.local com variáveis necessárias.
+3. Frontend:
+   - cd appbora
+   - npm install
+   - npm run dev
+4. Backend:
+   - cd bora-server
+   - npm install
+   - npm run dev
+
+Observação: ao iniciar o backend, o whatsapp-web.js solicitará QR na primeira execução — acompanhar logs.
+
+---
+
+## Observações de produção e escalabilidade 🚦
+
+- Sessão WhatsApp é stateful: para horizontalizar, isolar em worker/instância dedicada ou adotar filas/sessões externas.
+- Jobs agendados: evitar execução duplicada em múltiplas instâncias (usar leader election / Redis locks ou mover para Cloud Scheduler/Cloud Tasks).
+- Deploy frontend: Vercel / Cloud Run. Backend: Cloud Run / AWS ECS / DigitalOcean App Platform.
+- Segredos: usar Secret Manager; não versionar arquivos de sessão.
+- Logs e métricas: centralizar (Cloud Logging / Datadog) para rastrear entregas e falhas.
+
+---
+
+## Sugestões de evolução ✨
+
+- Migrar jobs para workers escaláveis (BullMQ + Redis).
+- Implementar rate limiting / queues para envios em massa (prevenir bloqueio do WhatsApp).
+- Testes: unitários para jobHandlers e parsing; E2E para fluxo de envio de lembretes (simulação do WhatsApp).
+- Documentar API com OpenAPI/Swagger quando abrir para consumo externo.
+- Adotar monitoramento de entregabilidade (retries, DLQ) para mensagens falhas.
+
+---
+
+## Segurança & conformidade 🔒
+
+- Proteger private keys e credenciais.
+- Evitar exposição de dados sensíveis em logs.
+- Considerar consentimento e regras de opt-in para envio via WhatsApp (conformidade com políticas do provedor).
+
+---
+
+## Contato / autoria ✍️
+Desenvolvedor: Alexandre de Paula  
+GitHub: https://github.com/aledepaulaaa  
+Site: https://www.aplicativobora.com.br/
+
+---
+
+Versão do documento: 1.1 — visão técnica e operacional do BORA (client + server)  
+Licença: manter conforme repositório principal.
