@@ -6,7 +6,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
     title: {
         template: '%s | Bora',
-        default: 'Bora Lembrar? | Bora!',
+        default: 'Aplicativo - Bora',
     },
     description: 'Nunca mais esqueça de nada.',
 }

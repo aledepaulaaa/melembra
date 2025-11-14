@@ -3,6 +3,7 @@ import { initializeApp, getApps, cert, App } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 import { getMessaging } from 'firebase-admin/messaging'
+import { getStorage } from 'firebase-admin/storage'
 
 // ✅ Função para formatar chave privada
 function formatPrivateKey(key: string): string {
@@ -80,4 +81,9 @@ export function getFirebaseMessaging() {
 export function getFirebaseAuth() {
     const app = getFirebaseApp()
     return getAuth(app)
+}
+
+export function getFirebaseStorage(){
+    const app = getFirebaseApp()
+    return getStorage(app)
 }

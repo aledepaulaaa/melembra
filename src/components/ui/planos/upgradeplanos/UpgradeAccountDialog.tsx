@@ -21,7 +21,7 @@ export default function UpgradeAccountDialog({ open, onClose }: Props) {
             open={open}
             onClose={onClose}
         >
-            <DialogTitle fontWeight="bold" fontSize={24}>Obaaa, vai assinar o Plus?</DialogTitle>
+            <DialogTitle fontWeight="bold" fontSize={24}>Obaaa, vai assinar um plano?</DialogTitle>
             <DialogContent>
                 <Box
                     sx={{

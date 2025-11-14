@@ -1,10 +1,13 @@
 //bora-app/app/lib/forms/reminderFormHandlers.tsx
 import * as UI from './reminderFormUI' // Importa nosso novo módulo de UI
 import { getRandomDateResponse } from '@/app/lib/dateRequestResponses'
-import { recordFreeUsage, saveReminder, saveUserPhoneNumber } from '@/app/actions/actions'
-import { ChatMessage, ConversationStep, HandlerProps } from '@/interfaces/IReminderForm'
+import { saveReminder } from '@/app/actions/actions'
+import { ChatMessage, ConversationStep, HandlerProps } from '@/interfaces/IReminder'
 import { Button } from '@mui/material'
 import WhatsAppSettingsForm from './WhatsAppSettingsForm'
+import { resizeImageToStorage } from '@/app/lib/resizeImageToStorage'
+import { getDownloadURL, uploadBytes, ref } from 'firebase/storage'
+import { storage } from '@/app/lib/firebase'
 
 // --- Funções de Lógica Pura ---
 export const addMessageToChat = (props: HandlerProps, message: Omit<ChatMessage, 'id'>) => {
@@ -26,7 +29,7 @@ export const handleQuickReminder = (props: HandlerProps, minutes: number) => {
 
     // Atualiza o estado do lembrete com a nova data/hora
     props.setReminder(prev => ({ ...prev, date: reminderTime, time: formattedTime }))
-    
+
     // Limpa a UI e atualiza o chat
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageToChat(props, { sender: 'user', text: `Lembrar em ${minutes} minutos` })
@@ -38,12 +41,12 @@ export const handleQuickReminder = (props: HandlerProps, minutes: number) => {
     }
 
     // Pula diretamente para a pergunta de recorrência
-    addMessageWithTyping(props, { 
-        sender: 'bot', 
-        text: `Ok! Lembrete agendado para ${formattedTime}. Ele irá se repetir?`, 
-        component: UI.renderRecurrenceButtons(updatedHandlerProps, formattedTime) 
+    addMessageWithTyping(props, {
+        sender: 'bot',
+        text: `Ok! Lembrete agendado para ${formattedTime}. Ele irá se repetir?`,
+        component: UI.renderRecurrenceButtons(updatedHandlerProps, formattedTime)
     })
-    
+
     props.setStep(ConversationStep.ASKING_RECURRENCE)
 }
 
@@ -66,7 +69,7 @@ export const handleDateSelect = (props: HandlerProps, newDate: Date | null) => {
     if (isToday(newDate)) {
         minTimeForClock = new Date()
         // minTimeForClock.setHours(minTimeForClock.getHours() + 1)
-         minTimeForClock.setMinutes(minTimeForClock.getMinutes() + 5)
+        minTimeForClock.setMinutes(minTimeForClock.getMinutes() + 5)
     }
 
     const updatedHandlerProps = {
@@ -129,15 +132,32 @@ export const handleRecurrenceSelect = (props: HandlerProps, recurrence: string, 
         reminder: { ...props.reminder, recurrence: recurrence }
     }
 
-    addMessageWithTyping(props, {
-        sender: 'bot',
-        text: `Ótimo. Deseja receber notificações no WhatsApp?`,
-        // Passa as props atualizadas para a próxima etapa
-        component: <WhatsAppSettingsForm onSave={() => moveToConfirmation(updatedHandlerProps)} />
-    })
+    // VERIFICA SE O USUÁRIO É PREMIUM/PLUS
+    const isPremiumUser = props.subscription.plan === 'plus' || props.subscription.plan === 'premium'
+    if (isPremiumUser) {
+        addMessageWithTyping(props, {
+            sender: 'bot',
+            text: `Deseja personalizar seu lembrete com cores, imagens ou uma descrição?`,
+            component: UI.renderCustomizationPrompt(updatedHandlerProps)
+        })
+        props.setStep(ConversationStep.ASKING_CUSTOMIZATION)
+    } else {
+        addMessageWithTyping(props, {
+            sender: 'bot',
+            text: `Ótimo. Deseja receber notificações no WhatsApp?`,
+            // Passa as props atualizadas para a próxima etapa
+            component: <WhatsAppSettingsForm onSave={() => moveToConfirmation(updatedHandlerProps)} />
+        })
+        props.setStep(ConversationStep.ASKING_NOTIFICATIONS)
+    }
 
     props.setShowTextInput(false) // Mude para false aqui, já que o WhatsAppForm tem seu próprio input
-    props.setStep(ConversationStep.ASKING_NOTIFICATIONS)
+}
+
+// FUNÇÃO para lidar com a confirmação da personalização
+export const handleCustomizationConfirm = async (props: HandlerProps) => {
+    // A lógica de upload da imagem será feita no `handleConfirmSave`
+    moveToConfirmation(props)
 }
 
 export const moveToConfirmation = async (props: HandlerProps) => {
@@ -155,10 +175,8 @@ export const moveToConfirmation = async (props: HandlerProps) => {
 }
 
 export const handleConfirmSave = async (props: HandlerProps) => {
-
     const { reminder, router, subscription, userId, openSnackbar } = props
-
-    const recurrence = reminder.recurrence || 'Não repetir'
+    let imageUrl = reminder.img || ''
 
     if (!reminder.title || !reminder.date || !userId) {
         openSnackbar("Ocorreu um erro. Faltam informações.", 'error')
@@ -167,16 +185,40 @@ export const handleConfirmSave = async (props: HandlerProps) => {
 
     props.setIsLoading(true)
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
-    addMessageWithTyping(props, { sender: 'bot', text: `Salvando...` }, 100)
+    addMessageWithTyping(props, { sender: 'bot', text: `Preparando tudo...` }, 100)
 
-    const result = await saveReminder(reminder.title, reminder.date, userId, recurrence)
+    if (reminder.imageFile) {
+        try {
+            addMessageToChat(props, { sender: 'bot', text: 'Comprimindo imagem...' })
+            const compressedImage = await resizeImageToStorage(reminder.imageFile)
+
+            addMessageToChat(props, { sender: 'bot', text: 'Enviando para a nuvem...' })
+            const storageRef = ref(storage, `reminders/${userId}/${Date.now()}.png`)
+            const snapshot = await uploadBytes(storageRef, compressedImage)
+            imageUrl = await getDownloadURL(snapshot.ref)
+            addMessageToChat(props, { sender: 'bot', text: 'Imagem salva!' })
+        } catch (error) {
+            console.error("Erro no upload da imagem:", error)
+            openSnackbar("Falha ao salvar a imagem. Tente novamente.", 'error')
+            props.setIsLoading(false)
+            return
+        }
+    }
+
+    addMessageToChat(props, { sender: 'bot', text: 'Salvando seu lembrete...' })
+
+    const result = await saveReminder(
+        reminder.title,
+        reminder.date,
+        userId,
+        reminder.recurrence || 'Não repetir',
+        reminder.cor || '#BB86FC',
+        reminder.sobre || '',
+        imageUrl // (URL da imagem)
+    )
 
     if (result.success) {
         openSnackbar('Lembrete salvo com sucesso!', 'success')
-
-        if (subscription.plan === 'free') {
-            await recordFreeUsage(userId)
-        }
 
         addMessageWithTyping(props, {
             sender: 'bot', text: 'Seu lembrete foi criado!',
@@ -202,7 +244,17 @@ export const handleCancel = (props: HandlerProps) => {
     props.setChatHistory(prev => prev.filter(msg => !msg.component))
     addMessageToChat(props, { sender: 'user', text: `Cancelar` })
     addMessageWithTyping(props, { sender: 'bot', text: 'Como posso te ajudar a lembrar de algo novo?' })
-    props.setReminder({ title: null, date: null, time: null, recurrence: null })
+    props.setReminder({
+        title: null,
+        date: null,
+        time: null,
+        recurrence: null,
+        cor: '',
+        sobre: '',
+        img: '',
+        imageFile: null,
+        imagePreview: null
+    })
     props.setShowTextInput(true)
     props.setStep(ConversationStep.ASKING_TITLE)
 }

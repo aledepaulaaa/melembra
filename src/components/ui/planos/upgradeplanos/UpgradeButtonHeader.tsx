@@ -1,7 +1,6 @@
 //bora-app/src/components/ui/UpgradeButtonHeader.tsx
 import { useAppSelector } from "@/app/store/hooks"
 import { Button } from "@mui/material"
-// CORREÇÃO: Mudar a importação do useRouter
 import { useRouter } from 'next/navigation' 
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 
@@ -21,7 +20,7 @@ export default function UpgradeButtonHeader() {
             onClick={() => router.push('/planos')}
             sx={{ borderRadius: 4, textTransform: "none", fontWeight: "bold", p: 1 }}
         >
-            Assinar Plus
+            Assinar
         </Button>
     )
 }

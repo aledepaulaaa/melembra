@@ -2,7 +2,7 @@
 import { motion } from "framer-motion"
 import CheckIcon from '@mui/icons-material/Check'
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium'
-import { SubscriptionState } from "@/interfaces/IMeLembraPayment"
+import { SubscriptionState } from "@/interfaces/IBoraPayment"
 import { Grid, Card, CardContent, Typography, List, ListItem, ListItemIcon, ListItemText, Button, Box, Chip, CircularProgress, Stack } from "@mui/material"
 
 interface CardPlanoProps {

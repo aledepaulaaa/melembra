@@ -41,8 +41,10 @@ export default function PlanosPage() {
     const [dialogOpen, setDialogOpen] = React.useState(false)
 
      const planPriceIds = {
-        plus: process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID,
-        premium: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID,
+        // plus: process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID, // PRODUCTION
+        plus: process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID_DEV, // DEV
+        premium: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID_DEV, // DEV
+        // premium: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID, // PRODUCTION
     }
 
     const handleUpgradeClick = async (planId: 'plus' | 'premium') => {

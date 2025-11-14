@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import SendIcon from '@mui/icons-material/Send'
-import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminderForm'
+import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminder'
 import useReminderForm from '@/hooks/forms/useReminderForm'
 import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper } from '@mui/material'
 import { useAppSelector } from '@/app/store/hooks'
@@ -33,7 +33,7 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
                     variant="outlined"
                     onClick={() => router.push('/planos')}
                 >
-                    Assinar Plus
+                    Assinar
                 </Button>
             </Paper>
         </motion.div>
@@ -185,7 +185,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                         onChange={(e) => formState.setUserInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && onUserSubmit()}
                                         disabled={formState.isLoading}
-                                        placeholder={formState.step === ConversationStep.ASKING_TITLE ? "Lembrar de..." : "DDD + Número ou Enter para pular"}
+                                        placeholder={formState.step === ConversationStep.ASKING_TITLE ? "Bora lembrar horário da academia..." : "DDD + Número ou Enter para pular"}
                                         autoFocus
                                         slotProps={{
                                             input: {

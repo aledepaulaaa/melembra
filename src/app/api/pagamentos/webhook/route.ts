@@ -4,9 +4,9 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
 import { Timestamp } from 'firebase-admin/firestore'
-import { ISubscription, SubscriptionStatus } from '@/interfaces/IMeLembraPayment'
+import { ISubscription, SubscriptionStatus } from '@/interfaces/IBoraPayment'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_DEV!, {
     apiVersion: '2025-09-30.clover',
 })
 
@@ -18,14 +18,10 @@ const db = getFirebaseFirestore()
  */
 async function handleSubscriptionCreated(session: Stripe.Checkout.Session) {
     const firebaseUserId = session.metadata?.firebaseUserId
-    if (!firebaseUserId) {
-        throw new Error('Erro: firebaseUserId não encontrado nos metadados da sessão')
-    }
+    if (!firebaseUserId) { throw new Error('Erro: firebaseUserId não encontrado nos metadados da sessão')}
 
     // Busca os detalhes completos da assinatura
-    const subscription = await stripe.subscriptions.retrieve(
-        session.subscription as string
-    )
+    const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
 
     const subscriptionData: ISubscription = {
         userId: firebaseUserId,
@@ -97,7 +93,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.text()
         const signature = (await headers()).get('stripe-signature') as string
-        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET_DEV
 
         if (!webhookSecret) {
             console.error("❌ Segredo do Webhook não configurado.")
@@ -124,6 +120,9 @@ export async function POST(request: Request) {
             case 'customer.subscription.deleted':
                 console.log(`3. Processando '${event.type}'...`)
                 await handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
+                break
+            case 'customer.deleted':
+                console.log("3. Processando 'Customer Deletado!'...")
                 break
             default:
                 console.log(`-> Evento não tratado: ${event.type}`)

@@ -19,17 +19,17 @@ export default function SubscriptionStatusFooter({ desktopOpen }: { desktopOpen:
     // Componente para o menu expandido
     const expandedContent = (
         <Box sx={{ p: 2 }}>
-            {plan === 'plus' ? (
+            {plan === 'plus' || plan === 'premium' ? (
                 <Chip
                     icon={<DiamondOutlinedIcon />}
-                    label="Me Lembra Plus"
+                    label="Bora"
                     color="primary"
                     sx={{ width: '100%', cursor: 'pointer' }}
                     onClick={() => setDialogOpen(true)}
                 />
             ) : (
                 <Button variant="outlined" startIcon={<DiamondOutlinedIcon />} fullWidth onClick={() => router.push('/planos')}>
-                    Assinar Plus
+                    Assinar
                 </Button>
             )}
         </Box>
@@ -38,14 +38,14 @@ export default function SubscriptionStatusFooter({ desktopOpen }: { desktopOpen:
     // Componente para o menu encolhido
     const collapsedContent = (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 68 }}>
-            {plan === 'plus' ? (
+            {plan === 'plus' || plan === 'premium' ? (
                 <Tooltip title="Gerenciar Assinatura" placement="right">
                     <IconButton color="primary" onClick={() => setDialogOpen(true)}>
                         <DiamondOutlinedIcon />
                     </IconButton>
                 </Tooltip>
             ) : (
-                <Tooltip title="Fazer Upgrade para o Plus" placement="right">
+                <Tooltip title="Fazer Upgrade" placement="right">
                     <IconButton onClick={() => router.push('/planos')} color="primary">
                         <DiamondOutlinedIcon />
                     </IconButton>

@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
 
 // A exclamação (!) garante ao TypeScript que a variável de ambiente não será nula
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_DEV!, {
     apiVersion: '2025-09-30.clover',
 })
 

@@ -2,7 +2,7 @@
 // melemebra/src/components/ui/SubscriptionManagementDialog.tsx
 import React from 'react'
 import { useAppSelector } from '@/app/store/hooks'
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress } from '@mui/material'
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress, useTheme } from '@mui/material'
 
 interface Props {
     open: boolean
@@ -12,6 +12,7 @@ interface Props {
 export default function SubscriptionManagementDialog({ open, onClose }: Props) {
     const { user } = useAppSelector((state) => state.auth)
     const [isRedirecting, setIsRedirecting] = React.useState(false)
+    const theme = useTheme()
 
     const handleManageSubscription = async () => {
         if (!user) return
@@ -34,14 +35,22 @@ export default function SubscriptionManagementDialog({ open, onClose }: Props) {
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle fontWeight="bold">Gerenciar Assinatura Plus</DialogTitle>
+            <DialogTitle fontWeight="bold">Gerenciar Assinatura</DialogTitle>
             <DialogContent>
-                <Typography fontWeight="bold" variant="h6">
-                    Você será redirecionado para um portal seguro da Stripe para gerenciar seu plano, atualizar seu método de pagamento e ver seu histórico de faturas.
+                <Typography
+                    fontWeight="bold"
+                    variant="h6"
+                    gutterBottom
+                    sx={{
+                        color: theme.palette.mode === 'dark' ? '#fff' : '#000',
+                    }}
+                >
+                    Você será redirecionado para um portal seguro da Stripe para gerenciar seu plano,
+                    atualizar seu método de pagamento e ver seu histórico de faturas.
                 </Typography>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} variant="outlined">Cancelar</Button>
+                <Button onClick={onClose} color="error" variant="contained">Fechar</Button>
                 <Button onClick={handleManageSubscription} variant="contained" disabled={isRedirecting}>
                     {isRedirecting ? <CircularProgress size={24} /> : 'Ir para o Portal'}
                 </Button>

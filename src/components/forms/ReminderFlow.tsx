@@ -2,7 +2,7 @@
 //bora-app/src/components/ui/ReminderFlow.tsx
 import ReminderForm from '@/components/forms/ReminderForm'
 import { Container, Box } from '@mui/material'
-import { ReminderFormProps } from '@/interfaces/IReminderForm'
+import { ReminderFormProps } from '@/interfaces/IReminder'
 
 export default function ReminderFlow({ onChatStart }: ReminderFormProps) {
     return (

@@ -24,7 +24,7 @@ export const createCustomTheme = (mode: PaletteMode) => {
             },
             divider: mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
             primary: {
-                main: '#913ff5ff',
+                main: '#913FF5',
             },
             secondary: {
                 main: '#BB86FC',

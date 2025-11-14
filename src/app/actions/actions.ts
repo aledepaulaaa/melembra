@@ -65,18 +65,6 @@ export async function deleteReminder(reminderId: string) {
     }
 }
 
-export async function recordFreeUsage(userId: string) {
-    if (!userId) return { success: false, error: 'UserID obrigatório' }
-    try {
-        const userDocRef = db.collection('users').doc(userId)
-        await userDocRef.set({ lastFreeReminderAt: AdminTimestamp.now() }, { merge: true })
-        return { success: true }
-    } catch (error) {
-        console.error('Erro ao registrar uso gratuito:', error)
-        return { success: false, error: 'Falha ao registrar uso.' }
-    }
-}
-
 export async function saveUserProfile(userId: string, profileData: { name: string, nickname: string, whatsappNumber: string, email: string, userId: string }) {
     if (!userId) return { success: false, error: 'UserID obrigatório' }
     try {
@@ -114,8 +102,9 @@ export async function saveUserPhoneNumber(userId: string, phoneNumber: string) {
     }
 }
 
-export async function saveReminder(title: string, date: Date, userId: string,  recurrence: string) {
+export async function saveReminder(title: string, date: Date, userId: string,  recurrence: string, cor: string, sobre: string, img: string) {
     if (!userId || !title || !date) return { success: false, error: 'Dados do lembrete inválidos.' }
+
     try {
         const docRef = await db.collection('reminders').add({
             title,
@@ -124,7 +113,11 @@ export async function saveReminder(title: string, date: Date, userId: string,  r
             createdAt: AdminTimestamp.now(),
             sent: false,
             preNotificationSent: false,
-            recurrence: recurrence
+            recurrence: recurrence || 'Não repetir', // Garante um valor padrão
+            cor: cor || '#BB86FC',                   // Garante um valor padrão
+            sobre: sobre || '',                      // Garante um valor padrão
+            img: img || '',                          // Garante um valor padrão
+            completed: false                         // Boa prática iniciar como 'false'
         })
         return { success: true, reminderId: docRef.id }
     } catch (error) {
@@ -132,7 +125,6 @@ export async function saveReminder(title: string, date: Date, userId: string,  r
         return { success: false, error: 'Falha ao salvar lembrete.' }
     }
 }
-
 
 // --- FUNÇÕES DE AUTH (Já usavam Admin SDK, sem alterações) ---
 export async function createUser(userData: { email: string, password: string, name: string, nickname: string, whatsappNumber: string }) {
@@ -175,6 +167,11 @@ export async function getReminders(userId: string) {
             return {
                 id: doc.id,
                 ...data,
+                title: data.title,
+                cor: data.cor || '#BB86FC',
+                sobre: data.sobre || '',
+                img: data.img || '',
+                recurrence: data.recurrence || 'Não repetir',
                 // O Timestamp do Admin SDK também tem o método .toDate()
                 scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
                 createdAt: (data.createdAt as AdminTimestamp).toDate().toISOString(),

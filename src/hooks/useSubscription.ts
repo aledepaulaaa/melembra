@@ -9,7 +9,7 @@ import {
     setSubscriptionError,
 } from '@/app/store/slices/subscriptionSlice'
 import { useAppDispatch } from '@/app/store/hooks'
-import { ISubscription } from '@/interfaces/IMeLembraPayment'
+import { ISubscription } from '@/interfaces/IBoraPayment'
 
 export function useSubscription(userId: string | null) {
     const dispatch = useAppDispatch()

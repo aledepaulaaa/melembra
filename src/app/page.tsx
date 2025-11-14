@@ -58,16 +58,13 @@ export default function Home() {
                         >
                             <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 10 }}>
                                 <Typography
-                                    variant="h2"
+                                    variant="h1"
                                     fontWeight={900}
                                     textAlign="start"
                                     lineHeight={1}
-                                    component="h2"
-                                    sx={{
-                                        fontSize: { xs: 45, md: 60 }
-                                    }}
+                                    component="h1"
                                 >
-                                    Bora Lembrar?
+                                    Bora
                                 </Typography>
                                 <LogoAnimated size={55} />
                             </Box>

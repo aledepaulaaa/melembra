@@ -1,5 +1,5 @@
 //bora-app/src/app/store/slices/subscriptionSlice.ts
-import { ISubscription, SubscriptionState } from '@/interfaces/IMeLembraPayment'
+import { ISubscription, SubscriptionState } from '@/interfaces/IBoraPayment'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 // O estado inicial quando o app carrega
@@ -11,9 +11,9 @@ const initialState: SubscriptionState = {
 
 const getPlanFromPriceId = (priceId: string): 'plus' | 'premium' => {
     switch (priceId) {
-        case process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID:
+        case process.env.NEXT_PUBLIC_STRIPE_PLUS_PLAN_PRICE_ID_DEV:
             return 'plus';
-        case process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID:
+        case process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_PRICE_ID_DEV:
             return 'premium';
         default:
             return 'plus'; // Ou um valor padrão/erro
