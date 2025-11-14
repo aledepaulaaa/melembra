@@ -15,10 +15,10 @@ const compressionOptions = {
  * @returns {Promise<File>} - Uma promise que resolve para o arquivo de imagem comprimido.
  */
 export async function resizeImageToStorage(imageFile: File): Promise<File> {
-    console.log(`Tamanho original da imagem: ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`)
+    // console.log(`Tamanho original da imagem: ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`)
     try {
         const compressedFile = await imageCompression(imageFile, compressionOptions)
-        console.log(`Tamanho da imagem comprimida: ${(compressedFile.size / 1024).toFixed(2)} KB`)
+        // console.log(`Tamanho da imagem comprimida: ${(compressedFile.size / 1024).toFixed(2)} KB`)
         // O tipo já é definido nas opções, mas podemos criar um novo arquivo se precisarmos renomear
         return new File([compressedFile], "lembrete_personalizado.png", { type: 'image/png' })
     } catch (error) {

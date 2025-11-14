@@ -64,7 +64,7 @@ export interface HandlerProps {
 }
 
 // Definindo a paleta de cores permitida
-export const colorPalette = ['#913FF5', '#BB86FC', '#121212', '#FFFFFF']
+export const colorPalette = ['#913FF5', '#BB86FC', '#220a8dff', '#FFFFFF']
 
 export interface ReminderCustomizationFormProps {
     // Campos de estado

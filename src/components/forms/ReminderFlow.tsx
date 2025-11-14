@@ -26,6 +26,7 @@ export default function ReminderFlow({ onChatStart }: ReminderFormProps) {
         >
             <Box 
                 sx={{
+                    height: 'calc(100vh - 64px)',
                     width: '100%',
                     maxWidth: { xs: '100%', md: '800px' }, // Limita a largura em telas maiores
                     mx: 'auto', // Margem automática horizontal

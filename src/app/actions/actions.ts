@@ -197,7 +197,6 @@ export async function getUserPreferences(userId: string) {
     }
 }
 
-
 // --- FUNÇÕES ESPECIAIS (Leitura com Admin SDK por necessidade) ---
 export async function sendNotification(message: string, userId: string) {
     if (!userId) throw new Error('UserID é necessário')

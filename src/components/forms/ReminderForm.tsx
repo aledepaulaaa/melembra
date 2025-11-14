@@ -107,7 +107,8 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                     display: 'flex',
                     flexDirection: 'column',
                     bgcolor: 'transparent',
-                    overflowX: 'hidden',
+                    overflow: 'hidden',
+                    height: '100%',
                 }}
             >
                 {/* 2. Área de Chat: flexGrow: 1 para ocupar todo o espaço restante e overflowY: 'auto' para rolagem */}

@@ -5,7 +5,6 @@ import { saveReminder } from '@/app/actions/actions'
 import { ChatMessage, ConversationStep, HandlerProps } from '@/interfaces/IReminder'
 import { Button } from '@mui/material'
 import WhatsAppSettingsForm from './WhatsAppSettingsForm'
-import { resizeImageToStorage } from '@/app/lib/resizeImageToStorage'
 import { getDownloadURL, uploadBytes, ref } from 'firebase/storage'
 import { storage } from '@/app/lib/firebase'
 
@@ -175,7 +174,7 @@ export const moveToConfirmation = async (props: HandlerProps) => {
 }
 
 export const handleConfirmSave = async (props: HandlerProps) => {
-    const { reminder, router, subscription, userId, openSnackbar } = props
+    const { reminder, router, userId, openSnackbar } = props
     let imageUrl = reminder.img || ''
 
     if (!reminder.title || !reminder.date || !userId) {
@@ -189,13 +188,13 @@ export const handleConfirmSave = async (props: HandlerProps) => {
 
     if (reminder.imageFile) {
         try {
-            addMessageToChat(props, { sender: 'bot', text: 'Comprimindo imagem...' })
-            const compressedImage = await resizeImageToStorage(reminder.imageFile)
-
-            addMessageToChat(props, { sender: 'bot', text: 'Enviando para a nuvem...' })
-            const storageRef = ref(storage, `reminders/${userId}/${Date.now()}.png`)
-            const snapshot = await uploadBytes(storageRef, compressedImage)
+            addMessageToChat(props, { sender: 'bot', text: 'Enviando imagem para a nuvem...' })
+            
+            // O caminho do storage agora usa o nome do arquivo, que definimos na compressão
+            const storageRef = ref(storage, `reminders/${userId}/${Date.now()}_${reminder.imageFile.name}`)
+            const snapshot = await uploadBytes(storageRef, reminder.imageFile)
             imageUrl = await getDownloadURL(snapshot.ref)
+            
             addMessageToChat(props, { sender: 'bot', text: 'Imagem salva!' })
         } catch (error) {
             console.error("Erro no upload da imagem:", error)

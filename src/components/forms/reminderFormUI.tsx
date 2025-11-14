@@ -150,64 +150,81 @@ export const renderCustomizationPrompt = (props: HandlerProps) => {
     )
 }
 
-// --- NOVO COMPONENTE 2: O Formulário de Personalização ---
-// Este é o componente "wrapper" que renderiza nosso PremiumCustomizationForm
+// --- Formulário de Personalização ---
+// Este é o componente "wrapper" que renderiza nosso ReminderCustomizationForm
 const RenderFullCustomizationForm = (props: HandlerProps) => {
     const { reminder, setReminder } = props
     const { openSnackbar } = useSnackbar()
+    const [description, setDescription] = React.useState(reminder.sobre || '')
+    const [selectedColor, setSelectedColor] = React.useState(reminder.cor || '#BB86FC')
+    const [imageFile, setImageFile] = React.useState<File | null>(reminder.imageFile)
+    const [imagePreview, setImagePreview] = React.useState<string | null>(reminder.imagePreview)
     const [isUploading, setIsUploading] = React.useState(false) // Controle de upload local
 
     const handleImageSelect = async (file: File | null) => {
-        // Limpa a preview antiga se existir
-        if (reminder.imagePreview) {
-            URL.revokeObjectURL(reminder.imagePreview)
+        if (imagePreview) {
+            URL.revokeObjectURL(imagePreview)
         }
-
-        // Se o arquivo for nulo (removido pelo usuário), limpa o estado
         if (!file) {
-            setReminder(prev => ({ ...prev, imageFile: null, imagePreview: null }))
+            setImageFile(null)
+            setImagePreview(null)
             return
         }
-
-        setIsUploading(true) // <<--- 1. INICIA O FEEDBACK VISUAL
-
+        setIsUploading(true)
         try {
-            // 2. Comprime a imagem imediatamente após a seleção
             const compressedFile = await resizeImageToStorage(file)
-
             const previewUrl = URL.createObjectURL(compressedFile)
-
-            // 3. Atualiza o estado com o ARQUIVO COMPRIMIDO e o preview
-            setReminder(prev => ({ ...prev, imageFile: compressedFile, imagePreview: previewUrl }))
-
+            setImageFile(compressedFile) // Atualiza estado local
+            setImagePreview(previewUrl)   // Atualiza estado local
         } catch (error) {
-            // 4. Trata possíveis erros de compressão
             console.error("Erro ao processar imagem:", error)
-            openSnackbar("Não foi possível processar essa imagem. Tente outra.", "error")
-            // Limpa o estado em caso de erro
-            setReminder(prev => ({ ...prev, imageFile: null, imagePreview: null }))
+            openSnackbar("Não foi possível processar essa imagem.", "error")
+            setImageFile(null)
+            setImagePreview(null)
         } finally {
-            setIsUploading(false) // <<--- 5. PARA O FEEDBACK VISUAL (no sucesso ou falha)
+            setIsUploading(false)
         }
     }
 
     // O que acontece quando o usuário confirma a personalização
     const handleConfirm = () => {
-        // Apenas esconde o formulário e avança
+        // Cria um objeto com os dados de personalização atualizados
+        const updatedCustomization = {
+            sobre: description,
+            cor: selectedColor,
+            imageFile: imageFile,
+            imagePreview: imagePreview
+        }
+
+        // Atualiza o lembrete no estado global
+        setReminder(prev => ({
+            ...prev,
+            ...updatedCustomization
+        }))
+
+        const updatedHandlerProps = {
+            ...props,
+            reminder: {
+                ...props.reminder,
+                ...updatedCustomization
+            }
+        }
+
+        // continua o fluxo normal
         props.setChatHistory(prev => prev.filter(msg => !msg.component))
         Handlers.addMessageToChat(props, { sender: 'user', text: `Personalização definida.` })
-        Handlers.moveToConfirmation(props)
+        Handlers.moveToConfirmation(updatedHandlerProps)
     }
 
     return (
         <ReminderCustomizationForm
-            description={reminder.sobre || ''}
-            selectedColor={reminder.cor || '#BB86FC'}
-            imageFile={reminder.imageFile}
-            imagePreview={reminder.imagePreview}
+            description={description}
+            selectedColor={selectedColor}
+            imageFile={imageFile}
+            imagePreview={imagePreview}
             isUploading={isUploading}
-            onDescriptionChange={(text) => setReminder(prev => ({ ...prev, sobre: text }))}
-            onColorSelect={(color) => setReminder(prev => ({ ...prev, cor: color }))}
+            onDescriptionChange={setDescription} // Passa o setador local diretamente
+            onColorSelect={setSelectedColor}   // Passa o setador local diretamente
             onImageSelect={handleImageSelect}
             onConfirm={handleConfirm}
         />

@@ -2,6 +2,7 @@
 import React from 'react'
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 import CancelIcon from '@mui/icons-material/Cancel'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { Box, Button, TextField, IconButton, Stack, Typography, LinearProgress } from '@mui/material'
 import { colorPalette, ReminderCustomizationFormProps } from '@/interfaces/IReminder'
 
@@ -70,16 +71,31 @@ export default function ReminderCustomizationForm({
                             key={color}
                             onClick={() => onColorSelect(color)}
                             sx={{
-                                width: 30,
-                                height: 30,
+                                position: 'relative', // Necessário para posicionar o ícone
+                                width: 32,
+                                height: 32,
                                 borderRadius: '50%',
                                 backgroundColor: color,
                                 cursor: 'pointer',
-                                border: selectedColor === color ? '3px solid #BB86FC' : `1px solid ${color === '#FFFFFF' ? '#ccc' : 'transparent'}`,
+                                // Borda mais sutil, o ícone será o indicador principal
+                                border: `2px solid ${color === '#FFFFFF' ? '#ccc' : 'transparent'}`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                                 transition: 'transform 0.2s',
                                 '&:hover': { transform: 'scale(1.1)' }
                             }}
-                        />
+                        >
+                            {selectedColor === color && (
+                                <CheckCircleIcon
+                                    color="success"
+                                    sx={{
+                                        color: color === '#FFFFFF' || color === '#BB86FC' ? 'black' : 'white',
+                                        fontSize: 20
+                                    }}
+                                />
+                            )}
+                        </Box>
                     ))}
                 </Stack>
             </Box>
@@ -92,7 +108,7 @@ export default function ReminderCustomizationForm({
                     rows={3}
                     value={description}
                     onChange={(e) => onDescriptionChange(e.target.value)}
-                    slotProps={{ input: { sx: { maxLength: charLimit } } }}
+                    slotProps={{ htmlInput: { maxLength: charLimit }}}
                     helperText={`${charLimit - description.length} caracteres restantes`}
                 />
             </Box>

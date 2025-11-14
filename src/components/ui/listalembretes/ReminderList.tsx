@@ -77,8 +77,6 @@ export default function ReminderList() {
             <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                 Seus Lembretes
             </Typography>
-
-            {/* NOVO: Componente redesenhado com motion.div */}
             {reminders.length > 0 ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { staggerChildren: 0.1 } }}>
                     {reminders.map((reminder) => (
@@ -91,7 +89,7 @@ export default function ReminderList() {
                                     opacity: reminder.completed ? 0.7 : 1,
                                     transition: 'opacity 0.3s ease',
                                     borderLeft: `5px solid ${reminder.cor || '#BB86FC'}`,
-                                    '&:before': { display: 'none' }, // Remove a linha feia do topo do Accordion
+                                    '&:before': { display: 'none' },
                                     borderRadius: 2,
                                 }}
                             >
