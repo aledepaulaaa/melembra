@@ -2,9 +2,9 @@
 import React from 'react'
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
 import CancelIcon from '@mui/icons-material/Cancel'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import { Box, Button, TextField, IconButton, Stack, Typography, LinearProgress } from '@mui/material'
-import { colorPalette, ReminderCustomizationFormProps } from '@/interfaces/IReminder'
+import { HexColorPicker } from 'react-colorful'
+import { Box, Button, TextField, IconButton, Stack, Typography, LinearProgress, Popover } from '@mui/material'
+import { ReminderCustomizationFormProps } from '@/interfaces/IReminder'
 
 export default function ReminderCustomizationForm({
     description,
@@ -17,7 +17,11 @@ export default function ReminderCustomizationForm({
     onConfirm,
 }: ReminderCustomizationFormProps) {
     const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const colorInputRef = React.useRef<HTMLInputElement>(null)
     const charLimit = 200
+
+    const [pickerColor, setPickerColor] = React.useState<string>(selectedColor)
+    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null)
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -25,6 +29,18 @@ export default function ReminderCustomizationForm({
             onImageSelect(file)
         }
     }
+
+    // --- FUNÇÕES PARA CONTROLAR O POPOVER ---
+    const handleColorClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget) // Abre o popover no elemento clicado
+    }
+
+    const handleColorClose = () => {
+        setAnchorEl(null) // Fecha o popover
+    }
+
+    // Define se o popover está aberto
+    const isColorPickerOpen = Boolean(anchorEl)
 
     return (
         <Stack spacing={3} sx={{ mt: 2 }}>
@@ -66,38 +82,46 @@ export default function ReminderCustomizationForm({
             <Box>
                 <Typography variant="subtitle2" gutterBottom>Cor do Lembrete</Typography>
                 <Stack direction="row" spacing={1}>
-                    {colorPalette.map((color) => (
-                        <Box
-                            key={color}
-                            onClick={() => onColorSelect(color)}
-                            sx={{
-                                position: 'relative', // Necessário para posicionar o ícone
-                                width: 32,
-                                height: 32,
-                                borderRadius: '50%',
-                                backgroundColor: color,
-                                cursor: 'pointer',
-                                // Borda mais sutil, o ícone será o indicador principal
-                                border: `2px solid ${color === '#FFFFFF' ? '#ccc' : 'transparent'}`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'transform 0.2s',
-                                '&:hover': { transform: 'scale(1.1)' }
+                    <Box
+                        onClick={handleColorClick} // <-- Abre o popover
+                        title="Clique para escolher uma cor"
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            // O background é a cor JÁ CONFIRMADA
+                            backgroundColor: selectedColor,
+                            cursor: 'pointer',
+                            border: '2px solid rgba(0,0,0,0.2)',
+                        }}
+                    />
+                    {/* Exibe o código hexadecimal da cor confirmada */}
+                    <Typography variant="body2" color="text.secondary">{selectedColor}</Typography>
+                </Stack>
+                {/* O POPOVER COM O SELETOR DE CORES */}
+                <Popover
+                    open={isColorPickerOpen}
+                    anchorEl={anchorEl}
+                    onClose={handleColorClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                >
+                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <HexColorPicker color={pickerColor} onChange={setPickerColor} />
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => {
+                                onColorSelect(pickerColor) // Confirma a cor
+                                handleColorClose() // Fecha o popover
                             }}
                         >
-                            {selectedColor === color && (
-                                <CheckCircleIcon
-                                    color="success"
-                                    sx={{
-                                        color: color === '#FFFFFF' || color === '#BB86FC' ? 'black' : 'white',
-                                        fontSize: 20
-                                    }}
-                                />
-                            )}
-                        </Box>
-                    ))}
-                </Stack>
+                            Selecionar
+                        </Button>
+                    </Box>
+                </Popover>
             </Box>
             {/* Descrição */}
             <Box>
@@ -108,7 +132,7 @@ export default function ReminderCustomizationForm({
                     rows={3}
                     value={description}
                     onChange={(e) => onDescriptionChange(e.target.value)}
-                    slotProps={{ htmlInput: { maxLength: charLimit }}}
+                    slotProps={{ htmlInput: { maxLength: charLimit } }}
                     helperText={`${charLimit - description.length} caracteres restantes`}
                 />
             </Box>
