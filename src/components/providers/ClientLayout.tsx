@@ -39,12 +39,13 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             <AppBar
                 position="fixed"
                 elevation={0}
-                sx={{
+                sx={(theme) => ({
                     backgroundColor: "transparent",
                     display: { xs: 'flex', md: 'none' },
                     width: '100%',
                     boxShadow: 0,
-                }}
+                    zIndex: theme.zIndex.appBar,
+                })}
             >
                 <Toolbar>
                     <IconButton

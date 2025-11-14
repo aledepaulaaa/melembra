@@ -8,7 +8,7 @@ import SubscriptionStatus from './SubscriptionStatus'
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
 import RoofingRoundedIcon from '@mui/icons-material/RoofingRounded'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip } from '@mui/material'
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip, useTheme } from '@mui/material'
 
 const defaultDrawerWidth = 240
 
@@ -30,6 +30,7 @@ export default function SideNav({
 }: SideNavProps) {
     const router = useRouter()
     const pathname = usePathname()
+    const theme = useTheme()
 
     const menuItems = [
         { text: 'Início', path: '/', icon: <RoofingRoundedIcon /> },
@@ -106,7 +107,7 @@ export default function SideNav({
                                         minWidth: 0,
                                         mr: desktopOpen ? 3 : 'auto',
                                         justifyContent: 'center',
-                                        color: 'inherit',
+                                        color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main,
                                     }}
                                 >
                                     {item.icon}
@@ -114,6 +115,7 @@ export default function SideNav({
                                 <ListItemText
                                     primary={item.text}
                                     sx={{ 
+                                        color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main,
                                         opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity'),
                                         fontWeight: "bold"
                                      }}

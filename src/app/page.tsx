@@ -1,7 +1,7 @@
 'use client'
 //bora-app/src/app/page.tsx
 import React from 'react'
-import { Box, Skeleton, Typography } from '@mui/material'
+import { Box, Skeleton, Typography, useTheme } from '@mui/material'
 import ReminderFlow from '@/components/forms/ReminderFlow'
 import { AnimatePresence, motion } from 'framer-motion'
 import WelcomeInstallDialog from '@/components/ui/dialogs/WelcomeInstallDialog'
@@ -10,6 +10,7 @@ import { useAppSelector } from './store/hooks'
 
 export default function Home() {
     const { status } = useAppSelector((state) => state.auth)
+    const theme = useTheme()
     const [isChatStarted, setIsChatStarted] = React.useState(false)
 
     if (status === 'loading') {
@@ -38,6 +39,9 @@ export default function Home() {
                 flexGrow: 1,
                 display: 'flex',
                 flexDirection: 'column',
+                width: '100%',
+                position: 'relative',
+                zIndex: 0,
             }}
         >
             <WelcomeInstallDialog />
@@ -63,6 +67,7 @@ export default function Home() {
                                     textAlign="start"
                                     lineHeight={1}
                                     component="h1"
+                                    sx={{ color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main }}
                                 >
                                     Bora
                                 </Typography>
