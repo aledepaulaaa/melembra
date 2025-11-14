@@ -9,6 +9,23 @@ export const metadata: Metadata = {
         default: 'Aplicativo - Bora',
     },
     description: 'Nunca mais esqueça de nada.',
+    openGraph: {
+        title: 'Bora - Vou te lembrar de tudo!',
+        description: 'Organize sua vida com lembretes inteligentes via WhatsApp.',
+        url: 'https://www.aplicativobora.com.br',
+        siteName: 'Bora',
+        // URL da imagem para aparecer no compartilhamento
+        images: [{ url: 'https://www.aplicativobora.com.br/bora_share_logo.png' }],
+        locale: 'pt_BR',
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Bora - Seu Assistente Pessoal de Lembretes',
+        description: 'Nunca mais esqueça de nada com lembretes inteligentes via WhatsApp.',
+        images: ['https://www.aplicativobora.com.br/bora_share_logo.png'],
+        // creator: '@seu_usuario_no_twitter', // Opcional
+    },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

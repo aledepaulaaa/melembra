@@ -1,13 +1,22 @@
 //bora-app/src/theme/theme.ts
 import { createTheme, PaletteMode } from '@mui/material'
-import { Gabarito } from 'next/font/google'
+import { Montserrat } from 'next/font/google'
+import { Livvic } from 'next/font/google'
 
-// 1. Definição da fonte movida para cá
-export const gabarito = Gabarito({
+// Fonte para títulos
+export const livvic = Livvic({
     weight: ['400', '500', '700', '900'],
     subsets: ['latin'],
     display: 'swap',
 })
+
+// Fonte para Descrições
+export const montserrat = Montserrat({
+    weight: ['400', '500', '700', '900'],
+    subsets: ['latin'],
+    display: 'swap',
+})
+
 
 // 2. Função que cria o tema com base no modo (light ou dark)
 export const createCustomTheme = (mode: PaletteMode) => {
@@ -31,7 +40,42 @@ export const createCustomTheme = (mode: PaletteMode) => {
             },
         },
         typography: {
-            fontFamily: gabarito.style.fontFamily,
+            h1: {
+                fontFamily: livvic.style.fontFamily,
+                color: mode === 'dark' ? '#FFFFFF' : '#913ff5ff',
+            },
+            h2: {
+                fontFamily: livvic.style.fontFamily,
+                color: mode === 'dark' ? '#FFFFFF' : '#913ff5ff',
+            },
+            h3: {
+                fontFamily: livvic.style.fontFamily,
+                color: mode === 'dark' ? '#FFFFFF' : '#913ff5ff',
+            },
+            h4: {
+                fontFamily: livvic.style.fontFamily
+            },
+            h5: {
+                fontFamily: livvic.style.fontFamily
+            },
+            h6: {
+                fontFamily: montserrat.style.fontFamily
+            },
+            body1: {
+                fontFamily: montserrat.style.fontFamily
+            },
+            body2: {
+                fontFamily: montserrat.style.fontFamily
+            },
+            subtitle1:{
+                fontFamily: montserrat.style.fontFamily
+            },
+            subtitle2:{
+                fontFamily: montserrat.style.fontFamily
+            },
+            caption: {
+                fontFamily: montserrat.style.fontFamily
+            }
         },
         components: {
             MuiCssBaseline: {
@@ -39,7 +83,7 @@ export const createCustomTheme = (mode: PaletteMode) => {
                     body: {
                         background: mode === 'dark' ? '#000000' : '#FFFFFF',
                         color: mode === 'dark' ? '#FFFFFF' : '#000000',
-                        fontFamily: gabarito.style.fontFamily,
+                        fontFamily: montserrat.style.fontFamily
                     },
                 },
             },
