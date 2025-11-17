@@ -61,17 +61,17 @@ export default function Home() {
                             exit={{ opacity: 0, y: -10 }}
                         >
                             <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 10 }}>
+                                <LogoAnimated size={55} />
                                 <Typography
-                                    variant="h1"
-                                    fontWeight={900}
-                                    textAlign="start"
                                     lineHeight={1}
-                                    component="h1"
+                                    fontWeight={900}
+                                    variant="h2"
+                                    textAlign="start"
+                                    component="h2"
                                     sx={{ color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main }}
                                 >
                                     Bora
                                 </Typography>
-                                <LogoAnimated size={55} />
                             </Box>
                         </motion.div>
                     )}

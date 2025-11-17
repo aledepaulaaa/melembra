@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         url: 'https://www.aplicativobora.com.br',
         siteName: 'Bora',
         // URL da imagem para aparecer no compartilhamento
-        images: [{ url: 'https://www.aplicativobora.com.br/bora_share_logo.png' }],
+        images: [{ url: 'https://www.aplicativobora.com.br/bora_share.png' }],
         locale: 'pt_BR',
         type: 'website',
     },
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         card: 'summary_large_image',
         title: 'Bora - Seu Assistente Pessoal de Lembretes',
         description: 'Nunca mais esqueça de nada com lembretes inteligentes via WhatsApp.',
-        images: ['https://www.aplicativobora.com.br/bora_share_logo.png'],
+        images: ['https://www.aplicativobora.com.br/bora_share.png'],
         // creator: '@seu_usuario_no_twitter', // Opcional
     },
 }
