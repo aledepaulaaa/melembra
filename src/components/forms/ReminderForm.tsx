@@ -10,7 +10,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import SendIcon from '@mui/icons-material/Send'
 import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminder'
 import useReminderForm from '@/hooks/forms/useReminderForm'
-import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper } from '@mui/material'
 import { useAppSelector } from '@/app/store/hooks'
 import { db } from '@/app/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
@@ -18,6 +17,7 @@ import { isToday } from 'date-fns'
 import UsageCountdown from '../ui/planos/upgradeplanos/UsageCountdown'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
+import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper } from '@mui/material'
 
 const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
     const router = useRouter()
@@ -161,13 +161,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                             exit={{ opacity: 0, y: 10 }}
                         >
                             <Box className="animated-border"
-                                sx={{
-                                    borderRadius: '20px',
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    p: 1,
-                                }}
-                            >
+                                sx={{ borderRadius: '20px', display: "flex", justifyContent: "center", p: 1 }}>
                                 <Box
                                     sx={{
                                         p: 2,
@@ -186,16 +180,9 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                         onChange={(e) => formState.setUserInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && onUserSubmit()}
                                         disabled={formState.isLoading}
-                                        placeholder={formState.step === ConversationStep.ASKING_TITLE ? "Bora lembrar horário da academia..." : "DDD + Número ou Enter para pular"}
+                                        placeholder={formState.step === ConversationStep.ASKING_TITLE ? "Bora, me lembra de..." : "DDD + Número ou Enter para pular"}
                                         autoFocus
-                                        slotProps={{
-                                            input: {
-                                                sx: {
-                                                    borderRadius: 4,
-                                                    p: 4
-                                                }
-                                            }
-                                        }}
+                                        slotProps={{ input: { sx: { borderRadius: 4, p: 4 } } }}
                                     />
                                     <IconButton color="primary" onClick={onUserSubmit} disabled={formState.isLoading}>
                                         {formState.isLoading ? <CircularProgress size={24} /> : <SendIcon />}
