@@ -3,7 +3,6 @@
 import { Box, Typography, Paper } from '@mui/material'
 import InstallPrompt from "@/components/ui/pwa/InstallPrompt"
 import PushNotificationManager from '@/components/ui/pwa/PushNotificationManager'
-import TipNotificationToggle from '@/components/ui/theme/TipNotificationToggle'
 
 export default function SettingsPage() {
     return (
@@ -20,7 +19,6 @@ export default function SettingsPage() {
                 <Typography variant="h4" m={2} component="h2" fontWeight={900} gutterBottom>Configurações</Typography>
                 <InstallPrompt />
                 <PushNotificationManager />
-                {/* <TipNotificationToggle /> */}
             </Paper>
         </Box>
     )
