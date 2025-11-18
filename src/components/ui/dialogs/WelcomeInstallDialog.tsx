@@ -30,7 +30,7 @@ export default function WelcomeInstallDialog() {
         const hasSeenDialog = localStorage.getItem('hasSeenInstallDialog')
         setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream)
 
-        if (isStandalone || hasSeenDialog) return
+        if (isStandalone) return
 
         const handleBeforeInstallPrompt = (event: Event) => {
             event.preventDefault()
