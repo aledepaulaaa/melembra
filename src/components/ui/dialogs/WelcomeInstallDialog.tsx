@@ -68,7 +68,7 @@ export default function WelcomeInstallDialog() {
 
     return (
         <Dialog
-            open={true}
+            open={isOpen}
             onClose={handleClose}
             PaperProps={{
                 sx: {
@@ -83,12 +83,18 @@ export default function WelcomeInstallDialog() {
             <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
                     <LogoBora size={65} />
-                    <Typography variant="h4" component="span" fontWeight="bold">Oi sou o Bora!</Typography>
+                    <Typography
+                        variant="h4"
+                        component="span"
+                        fontWeight="bold"
+                    >
+                        Oi sou o Bora!
+                    </Typography>
                 </Box>
             </DialogTitle>
             <DialogContent sx={{ textAlign: 'center' }}>
                 <DialogContentText sx={{ color: "inherit", fontSize: 20, mb: 2 }}>
-                    Tenha uma experiência completa <br/>instalando o app <b>Bora.</b>
+                    Tenha uma experiência completa <br />instalando o app <b>Bora.</b>
                 </DialogContentText>
                 {isIOS && (
                     <Accordion>
