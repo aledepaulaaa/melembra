@@ -12,6 +12,7 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    useTheme,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import IosShareIcon from '@mui/icons-material/IosShare'
@@ -24,13 +25,14 @@ export default function WelcomeInstallDialog() {
     const [isOpen, setIsOpen] = React.useState(false)
     const [installPrompt, setInstallPrompt] = React.useState<any>(null)
     const [isIOS, setIsIOS] = React.useState(false)
+    const theme = useTheme()
 
     React.useEffect(() => {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches
         const hasSeenDialog = localStorage.getItem('hasSeenInstallDialog')
         setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream)
 
-        if (isStandalone) return
+        if (isStandalone || hasSeenDialog) return
 
         const handleBeforeInstallPrompt = (event: Event) => {
             event.preventDefault()
@@ -87,13 +89,20 @@ export default function WelcomeInstallDialog() {
                         variant="h4"
                         component="span"
                         fontWeight="bold"
+                        sx={{ color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main }}
                     >
                         Oi sou o Bora!
                     </Typography>
                 </Box>
             </DialogTitle>
             <DialogContent sx={{ textAlign: 'center' }}>
-                <DialogContentText sx={{ color: "inherit", fontSize: 20, mb: 2 }}>
+                <DialogContentText
+                    sx={{
+                        fontSize: 20,
+                        mb: 2,
+                        color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main
+                    }}
+                >
                     Tenha uma experiência completa <br />instalando o app <b>Bora.</b>
                 </DialogContentText>
                 {isIOS && (

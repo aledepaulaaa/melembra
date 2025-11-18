@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import WelcomeInstallDialog from '@/components/ui/dialogs/WelcomeInstallDialog'
 import LogoAnimated from '@/components/ui/logo/LogoAnimated'
 import { useAppSelector } from './store/hooks'
+import InstallPrompt from '@/components/ui/pwa/InstallPrompt'
 
 export default function Home() {
     const { status } = useAppSelector((state) => state.auth)

@@ -1,125 +1,3 @@
-// 'use client'
-// //bora-app/src/components/InstallPrompt.tsx
-// import React from 'react'
-// import {
-//     Button,
-//     Box,
-//     Typography,
-//     Paper,
-//     Dialog,
-//     DialogTitle,
-//     DialogContent,
-//     DialogContentText,
-//     DialogActions,
-// } from '@mui/material'
-// import AddToHomeScreenIcon from '@mui/icons-material/AddToHomeScreen'
-// import IosShareIcon from '@mui/icons-material/IosShare' // Ícone de compartilhamento do iOS
-
-// export default function InstallPrompt() {
-//     // ALTERADO: Tipagem correta para o evento
-//     const [promptEvent, setPromptEvent] = React.useState<BeforeInstallPromptEvent | null>(null)
-//     const [isAppInstalled, setIsAppInstalled] = React.useState(false)
-//     const [isIOS, setIsIOS] = React.useState(false)
-//     const [iosDialogOpen, setIosDialogOpen] = React.useState(false)
-
-//     React.useEffect(() => {
-//         if (window.matchMedia('(display-mode: standalone)').matches) {
-//             setIsAppInstalled(true)
-//         }
-
-//         const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-//         setIsIOS(isIOSDevice)
-
-//         // O TypeScript agora entende o tipo 'beforeinstallprompt'
-//         const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
-//             event.preventDefault()
-//             setPromptEvent(event)
-//         }
-
-//         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
-
-//         return () => {
-//             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
-//         }
-//     }, [])
-
-//     const handleInstallClick = () => {
-//         // Cenário 1: Dispositivo iOS -> Mostra o dialog de instruções
-//         if (isIOS) {
-//             setIosDialogOpen(true)
-//             return
-//         }
-
-//         // Cenário 2: Android/Desktop com prompt disponível -> Mostra o prompt nativo
-//         if (promptEvent) {
-//             promptEvent.prompt() // O TypeScript não reclama mais!
-//             return
-//         }
-
-//         // Cenário 3 (Fallback): Navegadores que não disparam o evento, mas suportam PWA
-//         // A melhor abordagem aqui é não fazer nada ou mostrar um alerta mais amigável
-//         // se você tiver certeza de que o navegador é compatível.
-//         // Por segurança, o botão pode simplesmente não fazer nada se não houver um prompt.
-//         // O alert anterior era a causa do problema visual.
-//         console.log('O prompt de instalação nativo não está disponível neste momento.')
-//     }
-
-//     // CORREÇÃO: Só mostra o botão se houver uma ação possível (iOS ou prompt disponível)
-//     const canInstall = isIOS || !!promptEvent;
-
-//     if (isAppInstalled || !canInstall) {
-//         return null // Não renderiza o componente se o app já estiver instalado ou se não for instalável
-//     }
-
-//     return (
-//         <>
-//             <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
-//                 <Typography variant="h6" gutterBottom>Instalar Aplicativo</Typography>
-//                 <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
-//                     Tenha uma experiência mais rápida e integrada adicionando o Bora à sua tela de início.
-//                 </Typography>
-//                 <Button
-//                     variant="contained"
-//                     startIcon={<AddToHomeScreenIcon />}
-//                     onClick={handleInstallClick}
-//                 >
-//                     Instalar App
-//                 </Button>
-//             </Paper>
-//             {/* Dialog com instruções para iOS */}
-//             <Dialog
-//                 open={iosDialogOpen}
-//                 onClose={() => setIosDialogOpen(false)}
-//                 aria-labelledby="ios-install-title"
-//             >
-//                 <DialogTitle id="ios-install-title" sx={{ textAlign: "center", fontSize: 22 }}>Instalar no seu iPhone ou iPad</DialogTitle>
-//                 <DialogContent>
-//                     <DialogContentText component="div">
-//                         <Typography component="h5" textAlign="center" fontWeight="bold" color="textPrimary" mb={4}>
-//                             Para instalar o Bora <br />siga estes passos simples:
-//                         </Typography>
-//                     </DialogContentText>
-//                     <Box component="ol" sx={{ pl: 2, mt: 2 }}>
-//                         <li>
-//                             <Typography variant="subtitle1" mb={2}>Toque no botão "Compartilhar" <IosShareIcon sx={{ verticalAlign: 'middle', mx: 0.5 }} /> no menu do Safari ou Chrome.</Typography>
-//                         </li>
-//                         <li>
-//                             <Typography variant="subtitle1" mb={2}>Role para baixo e selecione "Adicionar à Tela de Início".</Typography>
-//                         </li>
-//                         <li>
-//                             <Typography variant="subtitle1">Confirme tocando em "Adicionar" no canto superior direito.</Typography>
-//                         </li>
-//                     </Box>
-//                 </DialogContent>
-//                 <DialogActions>
-//                     <Button onClick={() => setIosDialogOpen(false)} variant="contained" color="primary">
-//                         Entendi
-//                     </Button>
-//                 </DialogActions>
-//             </Dialog>
-//         </>
-//     )
-// }
 'use client'
 // bora-app/src/components/ui/pwa/InstallPrompt.tsx (caminho ajustado para refletir a importação)
 import React from 'react'
@@ -133,9 +11,10 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    useTheme,
 } from '@mui/material'
 import AddToHomeScreenIcon from '@mui/icons-material/AddToHomeScreen'
-import IosShareIcon from '@mui/icons-material/IosShare' 
+import IosShareIcon from '@mui/icons-material/IosShare'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline' // Novo ícone de sucesso
 
 // A tipagem global BeforeInstallPromptEvent deve ser definida em um arquivo .d.ts no seu projeto
@@ -158,7 +37,8 @@ export default function InstallPrompt() {
     const [promptEvent, setPromptEvent] = React.useState<BeforeInstallPromptEvent | null>(null)
     const [isAppInstalled, setIsAppInstalled] = React.useState(false)
     const [isIOS, setIsIOS] = React.useState(false)
-    const [iosDialogOpen, setIosDialogOpen] = React.useState(false)
+    const [iosDialogOpen, setIosDialogOpen] = React.useState(true)
+    const theme = useTheme()
 
     React.useEffect(() => {
         // 1. Verificar se o PWA está instalado
@@ -182,7 +62,7 @@ export default function InstallPrompt() {
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener)
         }
     }, [])
-    
+
     // CORREÇÃO: Limpar o evento se o usuário recusar/aceitar (melhora a UX)
     React.useEffect(() => {
         // Esta lógica deve ser refinada dentro do handleInstallClick
@@ -197,21 +77,21 @@ export default function InstallPrompt() {
 
         if (promptEvent) {
             // Mostra o prompt de instalação nativo
-            promptEvent.prompt() 
-            
+            promptEvent.prompt()
+
             // Espera a escolha do usuário
             const { outcome } = await promptEvent.userChoice
-            
+
             if (outcome === 'accepted') {
                 console.log('Usuário aceitou a instalação do PWA')
                 // O estado 'isAppInstalled' será atualizado pelo listener 'appinstalled' (idealmente)
             } else {
                 console.log('Usuário recusou a instalação do PWA')
             }
-            
+
             // Limpa o evento, impedindo que o prompt apareça novamente até que uma nova condição seja atendida
             // setPromptEvent(null)
-            
+
             return
         }
 
@@ -221,9 +101,9 @@ export default function InstallPrompt() {
     // Só mostra o botão de instalação se for iOS OU o evento prompt estiver disponível.
     // E, claro, se o app AINDA não estiver instalado.
     const shouldShowInstallPrompt = !isAppInstalled && (isIOS || !!promptEvent)
-    
+
     // --- Renderização do Status ---
-    
+
     // 1. Se o App já estiver instalado
     if (isAppInstalled) {
         return (
@@ -238,14 +118,20 @@ export default function InstallPrompt() {
             </Paper>
         )
     }
-    
+
     // 2. Se o botão de instalação deve aparecer
     if (shouldShowInstallPrompt) {
         return (
             <>
                 <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
                     <Typography variant="h6" gutterBottom>Instalar Aplicativo</Typography>
-                    <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
+                    <Typography
+                        variant="subtitle1"
+                        sx={{
+                            mb: 2,
+                            color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main
+                        }}
+                    >
                         Tenha uma experiência mais rápida e integrada adicionando o Bora à sua tela de início.
                     </Typography>
                     <Button
@@ -262,24 +148,48 @@ export default function InstallPrompt() {
                     onClose={() => setIosDialogOpen(false)}
                     aria-labelledby="ios-install-title"
                 >
-                    <DialogTitle id="ios-install-title" sx={{ textAlign: "center", fontSize: 22 }}>Instalar no seu iPhone ou iPad</DialogTitle>
+                    <DialogTitle
+                        id="ios-install-title"
+                        sx={{
+                            textAlign: "center",
+                            fontSize: 22,
+                            color: "#fff"
+                        }}
+                    >
+                        Instalar no seu iPhone ou iPad
+                    </DialogTitle>
                     <DialogContent>
                         <DialogContentText component="div">
-                             <Typography component="h5" textAlign="center" fontWeight="bold" color="textPrimary" mb={4}>
-                                 Para instalar o Bora <br />siga estes passos simples:
-                             </Typography>
-                         </DialogContentText>
-                         <Box component="ol" sx={{ pl: 2, mt: 2 }}>
-                             <li>
-                                 <Typography variant="subtitle1" mb={2}>Toque no botão "Compartilhar" <IosShareIcon sx={{ verticalAlign: 'middle', mx: 0.5 }} /> na barra inferior do Safari.</Typography>
-                             </li>
-                             <li>
-                                 <Typography variant="subtitle1" mb={2}>Role para baixo e selecione **"Adicionar à Tela de Início"**.</Typography>
-                             </li>
-                             <li>
-                                 <Typography variant="subtitle1">Confirme tocando em "Adicionar" no canto superior direito.</Typography>
-                             </li>
-                         </Box>
+                            <Typography
+                                component="h5"
+                                textAlign="center"
+                                fontWeight="bold"
+                                mb={4}
+                                sx={{
+                                    color: "#fff"
+                                }}
+                            >
+                                Para instalar o Bora <br />siga estes passos simples:
+                            </Typography>
+                        </DialogContentText>
+                        <Box component="ol" sx={{ pl: 2, mt: 2, color: "#fff" }}>
+                            <li>
+                                <Typography
+                                    variant="subtitle1"
+                                    mb={2}
+                                >
+                                    Toque no botão "Compartilhar"
+                                    <IosShareIcon sx={{ verticalAlign: 'middle', mx: 0.5 }} />
+                                    na barra inferior do Safari.
+                                </Typography>
+                            </li>
+                            <li>
+                                <Typography variant="subtitle1" mb={2}>Role para baixo e selecione **"Adicionar à Tela de Início"**.</Typography>
+                            </li>
+                            <li>
+                                <Typography variant="subtitle1">Confirme tocando em "Adicionar" no canto superior direito.</Typography>
+                            </li>
+                        </Box>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setIosDialogOpen(false)} variant="contained" color="primary">
@@ -290,7 +200,7 @@ export default function InstallPrompt() {
             </>
         )
     }
-    
+
     // 3. Fallback (Não instalado, mas indisponível/não suportado)
     return null;
 }
