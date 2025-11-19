@@ -47,3 +47,5 @@ src/app/lib/melmebra.json
 # next-pwa cache files
 public/workbox-*.js
 public/worker-*.js
+
+INSTRUCOES.md
