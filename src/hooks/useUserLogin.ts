@@ -4,8 +4,10 @@ import { auth } from '@/app/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { resetUserPassword } from '@/app/actions/actions'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
+import { useRouter } from 'next/navigation'
 
 export default function useUserLogin() {
+    const router = useRouter()
     const { openSnackbar } = useSnackbar()
     const [isLoading, setIsLoading] = useState(false)
     const [email, setEmail] = useState('')
@@ -23,6 +25,7 @@ export default function useUserLogin() {
         try {
             await signInWithEmailAndPassword(auth, email, password)
             openSnackbar('Login efetuado com sucesso!', 'success')
+            router.push('/')
             // O onAuthStateChanged vai cuidar de atualizar a UI
         } catch (error: any) {
             // Lida com erros comuns do Firebase

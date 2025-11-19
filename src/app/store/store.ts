@@ -1,4 +1,4 @@
-//bora-app/src/app/store/store.ts
+//appbora/src/app/store/store.ts
 import { configureStore } from '@reduxjs/toolkit'
 import reminderReducer from './slices/reminderSlice'
 import subscriptionReducer from './slices/subscriptionSlice'

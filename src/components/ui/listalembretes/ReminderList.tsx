@@ -10,7 +10,7 @@ import { Reminder } from '@/interfaces/IReminder'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { useAppSelector } from '@/app/store/hooks'
 import { deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
-import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button, Paper } from '@mui/material'
+import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button, Paper, Grid } from '@mui/material'
 
 export default function ReminderList() {
     const { openSnackbar } = useSnackbar()
@@ -59,22 +59,22 @@ export default function ReminderList() {
     // Skeleton de carregamento (sem alterações)
     if (loading || status === 'loading') {
         return (
-            <Box sx={{ width: '100%'}}>
+            <Box sx={{ width: '100%' }}>
                 <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                     Seus Lembretes
                 </Typography>
                 <Stack spacing={2}>
-                    <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2}} />
-                    <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2}} />
-                    <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2}} />
+                    <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
+                    <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
+                    <Skeleton variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
                 </Stack>
             </Box>
         )
     }
 
     return (
-        <Box sx={{ width: '100%'}}>
-            <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
+        <Box sx={{ ml: -1 }}>
+             <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                 Seus Lembretes
             </Typography>
             {reminders.length > 0 ? (
@@ -120,13 +120,13 @@ export default function ReminderList() {
                                         {/* EXIBIÇÃO DA DESCRIÇÃO (se existir) */}
                                         {reminder.sobre && (
                                             <Stack direction="row" spacing={1} alignItems="flex-start">
-                                                 <NotesIcon fontSize="small" color="action" />
+                                                <NotesIcon fontSize="small" color="action" />
                                                 <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>{reminder.sobre}</Typography>
                                             </Stack>
                                         )}
                                         {/* INFORMAÇÕES DE AGENDAMENTO */}
                                         <Stack direction="row" spacing={1} alignItems="center">
-                                             <EventIcon fontSize="small" color="action" />
+                                            <EventIcon fontSize="small" color="action" />
                                             <Typography variant="body2" color="text.secondary">
                                                 {new Date(reminder.scheduledAt).toLocaleString('pt-BR')}
                                                 {reminder.recurrence && ` (${reminder.recurrence})`}

@@ -1,5 +1,5 @@
 'use client'
-// melemebra/src/components/forms/WhatsAppSettingsForm.tsx
+//appbora/src/components/forms/WhatsAppSettingsForm.tsx
 import React from 'react'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '@/app/lib/firebase'
@@ -11,7 +11,6 @@ import InfoIcon from '@mui/icons-material/InfoOutlined'
 import { TextField, Button, Typography, Paper, Skeleton, Divider, Stack, InputAdornment, IconButton, CircularProgress } from '@mui/material'
 import WhatsAppInfoDialog from '../ui/dialogs/WhatsAppInfoDialog'
 
-// Ajuste na prop: onSave agora pode receber o número ou nada
 export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: string) => void }) {
     const { user } = useAppSelector((state) => state.auth)
     const userId = user?.uid
@@ -23,18 +22,22 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
     const [isInfoDialogOpen, setIsInfoDialogOpen] = React.useState(false)
     const [isSaving, setIsSaving] = React.useState(false)
 
-    // 3. Usar o hook para gerenciar o estado e a validação
-    const { value: newNumber, setValue: setNewNumber, isValidating, handleValidate } = useWhatsAppInput()
+    // 1. Usar o novo hook simplificado.
+    const { value: newNumber, setValue: setNewNumber, cleanNumber } = useWhatsAppInput()
 
     React.useEffect(() => {
         const fetchPhoneNumber = async () => {
-            if (!userId) { setLoading(false); return }
+            // Esta lógica só roda se houver um usuário, o que é perfeito.
+            if (!userId) {
+                setLoading(false)
+                return
+            }
             const docRef = doc(db, 'users', userId)
             const docSnap = await getDoc(docRef)
             if (docSnap.exists() && docSnap.data()?.whatsappNumber) {
                 const number = docSnap.data().whatsappNumber
                 setExistingNumber(number)
-                setNewNumber(number)
+                setNewNumber(number) // Pré-popula o input com o número salvo
             }
             setLoading(false)
         }
@@ -43,40 +46,25 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
 
     const handleUseExisting = () => {
         openSnackbar(`Usando o número salvo.`, 'info')
-        onSave(existingNumber!) // Continua o fluxo com o número existente
+        onSave(existingNumber!)
     }
 
+    // 2. A lógica principal é ajustada aqui.
     const handleSaveAndContinue = async () => {
-        if (!userId) return
-
-        // Valida o número primeiro
-        const validationResult = await handleValidate()
-
-        // Se a validação retornar erro explícito, para aqui.
-        if (!validationResult.success) {
-            openSnackbar(validationResult.error!, 'error')
-            return
+        // Se o usuário estiver logado, salvamos o número no banco de dados.
+        if (userId) {
+            setIsSaving(true)
+            await saveUserPhoneNumber(userId, cleanNumber)
+            setIsSaving(false)
         }
 
-        // Se a validação for inconclusiva, avisa o usuário.
-        if (validationResult.inconclusive) {
-            openSnackbar('Não foi possível validar o número agora, mas ele será salvo.', 'warning')
-        } else {
-            // Se a validação teve sucesso, mostra a mensagem de sucesso.
-            openSnackbar(validationResult.message!, 'success')
-        }
-
-        // --- A LÓGICA DE SALVAR COMEÇA AQUI ---
-        setIsSaving(true)
-        const cleanNumber = newNumber.replace(/\D/g, '')
-        await saveUserPhoneNumber(userId, cleanNumber)
-        setIsSaving(false)
-
-        onSave(cleanNumber) // Continua o fluxo
+        // INDEPENDENTEMENTE de estar logado ou não, continuamos o fluxo
+        // da conversa passando o número limpo para o componente pai.
+        onSave(cleanNumber)
     }
 
     const handleSkip = () => {
-        onSave()
+        onSave() // Continua o fluxo sem um número
     }
 
     if (loading) {
@@ -86,6 +74,10 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
     return (
         <>
             <Paper elevation={0} sx={{ p: 2, borderRadius: 2, bgcolor: 'transparent', boxShadow: 'none' }}>
+                {/* 3. A renderização condicional continua válida:
+                    - Se o usuário está logado e tem um número, mostra a opção de usar o existente.
+                    - Se está deslogado, 'existingNumber' será nulo, então mostra o input diretamente.
+                */}
                 {existingNumber && !showEdit ? (
                     <Stack spacing={1}>
                         <Typography variant="body2">Usar o número salvo?</Typography>
@@ -99,7 +91,7 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
                         <TextField
                             fullWidth
                             label="Nº WhatsApp"
-                            placeholder="+55 (XX) 9XXXX-XXXX"
+                            placeholder="+55 (XX) XXXX-XXXX"
                             variant="outlined"
                             size="small"
                             value={formatDisplayNumber(newNumber)}
@@ -116,8 +108,8 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
                                 }
                             }}
                         />
-                        <Button onClick={handleSaveAndContinue} disabled={isValidating || isSaving} variant="contained">
-                            {isValidating || isSaving ? <CircularProgress size={24} /> : 'Validar e Continuar'}
+                        <Button onClick={handleSaveAndContinue} disabled={isSaving} variant="contained">
+                            {isSaving ? <CircularProgress size={24} /> : 'Continuar'}
                         </Button>
                     </Stack>
                 )}
@@ -126,7 +118,6 @@ export default function WhatsAppSettingsForm({ onSave }: { onSave: (number?: str
                     Pular por agora
                 </Button>
             </Paper>
-            {/* 5. Renderiza o Dialog reutilizável */}
             <WhatsAppInfoDialog open={isInfoDialogOpen} onClose={() => setIsInfoDialogOpen(false)} />
         </>
     )

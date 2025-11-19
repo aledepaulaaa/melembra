@@ -1,4 +1,4 @@
-//bora-app/src/app/layout.tsx
+//appbora/src/app/layout.tsx
 import React from 'react'
 import ClientLayout from '@/components/providers/ClientLayout'
 import type { Metadata } from 'next'

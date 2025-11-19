@@ -1,5 +1,5 @@
 'use client'
-//bora-app/src/components/ui/ReminderFlow.tsx
+//appbora/src/components/ui/ReminderFlow.tsx
 import ReminderForm from '@/components/forms/ReminderForm'
 import { Container, Box } from '@mui/material'
 import { ReminderFormProps } from '@/interfaces/IReminder'

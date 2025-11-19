@@ -1,10 +1,13 @@
 'use client'
-// melemebra/src/components/ui/auth/AuthManager.tsx
-import React, { useEffect } from 'react'
+//appbora/src/components/ui/auth/AuthManager.tsx
+import React from 'react'
 import { auth } from '@/app/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { useAppDispatch } from '@/app/store/hooks'
 import { setAuthUser, clearAuthUser } from '@/app/store/slices/authSlice'
+import Cookies from 'js-cookie'
+
+const AUTH_COOKIE_NAME = 'firebase-auth-token'
 
 /**
  * AuthListener é um componente "invisível" que sincroniza o estado de
@@ -14,8 +17,8 @@ import { setAuthUser, clearAuthUser } from '@/app/store/slices/authSlice'
 function AuthListener() {
     const dispatch = useAppDispatch()
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+    React.useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // Se um usuário for encontrado, serializamos e despachamos para o Redux.
                 dispatch(setAuthUser({
@@ -23,9 +26,19 @@ function AuthListener() {
                     email: user.email,
                     isAnonymous: user.isAnonymous,
                 }))
+
+                const token = await user.getIdToken()
+                Cookies.set(AUTH_COOKIE_NAME, token, {
+                    expires: 7, // Expira em 7 dias
+                    secure: process.env.NODE_ENV === 'production',
+                    path: '/'
+                })
+
             } else {
                 // Se não houver usuário, limpamos o estado no Redux.
                 dispatch(clearAuthUser())
+
+                Cookies.remove(AUTH_COOKIE_NAME, { path: '/' })
             }
         })
         // A função de limpeza é chamada quando o componente é desmontado

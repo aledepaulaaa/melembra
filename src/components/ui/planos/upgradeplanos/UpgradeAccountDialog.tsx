@@ -1,5 +1,5 @@
 'use client'
-// melemebra/src/components/ui/UpgradeAccountDialog.tsx
+//appbora/src/components/ui/UpgradeAccountDialog.tsx
 import { useRouter } from 'next/navigation'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 
@@ -13,7 +13,7 @@ export default function UpgradeAccountDialog({ open, onClose }: Props) {
 
     const handleCreateAccount = () => {
         onClose()
-        router.push('/perfil')
+        router.push('/criarconta')
     }
 
     return (

@@ -54,7 +54,7 @@ export default function PlanosPage() {
         }
 
         if (!userId) {
-            router.push("/perfil")
+            router.push("/")
             return
         }
 

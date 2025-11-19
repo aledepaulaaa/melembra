@@ -1,4 +1,4 @@
-// melemebra/src/app/store/slices/authSlice.ts
+//appbora/src/app/store/slices/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 // O objeto User do Firebase não é serializável, então pegamos só o que precisamos.

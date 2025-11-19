@@ -1,4 +1,4 @@
-// melemebra/src/app/api/pagamentos/manage-plan/route.ts (NOVO ARQUIVO)
+// melemebra/src/app/api/pagamentos/manage-plan/route.ts
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         // Cria uma sessão do Portal de Faturamento
         const portalSession = await stripe.billingPortal.sessions.create({
             customer: stripeCustomerId,
-            return_url: `${baseUrl}/perfil`, // Para onde o usuário volta após sair do portal
+            return_url: `${baseUrl}/`, // Para onde o usuário volta após sair do portal
         })
 
         return NextResponse.json({ url: portalSession.url })

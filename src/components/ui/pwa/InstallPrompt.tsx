@@ -37,7 +37,7 @@ export default function InstallPrompt() {
     const [promptEvent, setPromptEvent] = React.useState<BeforeInstallPromptEvent | null>(null)
     const [isAppInstalled, setIsAppInstalled] = React.useState(false)
     const [isIOS, setIsIOS] = React.useState(false)
-    const [iosDialogOpen, setIosDialogOpen] = React.useState(true)
+    const [iosDialogOpen, setIosDialogOpen] = React.useState(false)
     const theme = useTheme()
 
     React.useEffect(() => {
@@ -124,7 +124,6 @@ export default function InstallPrompt() {
         return (
             <>
                 <Paper elevation={0} sx={{ p: 3, borderRadius: 2, mt: 3, boxShadow: 0 }}>
-                    <Typography variant="h6" gutterBottom>Instalar Aplicativo</Typography>
                     <Typography
                         variant="subtitle1"
                         sx={{
@@ -132,7 +131,7 @@ export default function InstallPrompt() {
                             color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main
                         }}
                     >
-                        Tenha uma experiência mais rápida e integrada adicionando o Bora à sua tela de início.
+                        Tenha uma experiência mais rápida e integrada adicionando o <b>Bora</b> à sua tela de início.
                     </Typography>
                     <Button
                         variant="contained"

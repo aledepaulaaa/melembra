@@ -1,4 +1,4 @@
-//bora-app/src/app/lib/firebase-admin.ts
+//appbora/src/app/lib/firebase-admin.ts
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'

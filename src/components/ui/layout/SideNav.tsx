@@ -1,16 +1,18 @@
 'use client'
-//bora-app/src/components/ui/SideNav.tsx
+// bora-app/src/components/ui/SideNav.tsx
 import ThemeSwitcher from '../theme/ThemeSwitcher'
+import { menuItems } from './menuItems'
 import LogoAnimated from '../logo/LogoAnimated'
 import { useRouter, usePathname } from 'next/navigation'
-import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
 import SubscriptionStatus from './SubscriptionStatus'
-import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
-import RoofingRoundedIcon from '@mui/icons-material/RoofingRounded'
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip, useTheme } from '@mui/material'
 
-const defaultDrawerWidth = 240
+// Importações necessárias para a autenticação
+import { signOut } from 'firebase/auth'
+import { auth } from '@/app/lib/firebase'
+import { useSnackbar } from '@/contexts/SnackbarProvider'
+
+const defaultDrawerWidth = 250
 
 interface SideNavProps {
     mobileOpen: boolean
@@ -20,6 +22,9 @@ interface SideNavProps {
     drawerWidth?: number
     miniWidth?: number
 }
+
+// Lembre-se de ajustar o menuItems.ts para que 'Sair' tenha uma ação
+// Ex: { text: 'Sair', action: 'logout', icon: <LogoutIcon /> }
 
 export default function SideNav({
     mobileOpen,
@@ -31,23 +36,36 @@ export default function SideNav({
     const router = useRouter()
     const pathname = usePathname()
     const theme = useTheme()
+    const { openSnackbar } = useSnackbar() // Hook para notificações
 
-    const menuItems = [
-        { text: 'Início', path: '/', icon: <RoofingRoundedIcon /> },
-        { text: 'Lembretes', path: '/lembretes', icon: <ScheduleRoundedIcon /> },
-        { text: 'Perfil', path: '/perfil', icon: <AccountCircleOutlinedIcon /> },
-        { text: 'Configurações', path: '/configuracoes', icon: <TuneRoundedIcon /> },
-    ]
+    // Função para lidar com o logout do usuário
+    const handleLogout = async () => {
+        try {
+            await signOut(auth)
+            openSnackbar('Você foi desconectado com segurança.', 'info')
+            router.push('/login') // Redireciona para a tela de login
+        } catch (error) {
+            console.error("Erro ao fazer logout:", error)
+            openSnackbar('Ocorreu um erro ao tentar sair.', 'error')
+        }
+    }
+
+    // Função central para lidar com cliques nos itens do menu
+    const handleMenuItemClick = (item: (typeof menuItems)[0]) => {
+        if (item.action === 'logout') {
+            handleLogout()
+        } else if (item.path) {
+            router.push(item.path)
+        }
+
+        // Fecha o menu mobile se estiver aberto
+        if (mobileOpen) {
+            handleDrawerToggle()
+        }
+    }
 
     const drawerContent = (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-                backgroundColor: "transparent"
-            }}
-        >
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: "transparent" }}>
             {/* --- SEÇÃO SUPERIOR --- */}
             <Box>
                 {/* Container da Logo que desaparece */}
@@ -66,13 +84,11 @@ export default function SideNav({
                         <LogoAnimated size={40} />
                     </Toolbar>
                 </Box>
-                {/* --- A CORREÇÃO ESTÁ AQUI --- */}
                 {/* ThemeSwitcher que SÓ aparece quando o menu está ENCOLHIDO */}
                 <Box sx={(theme) => ({
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    // Define uma altura fixa para ocupar o espaço da logo quando encolhido
                     height: desktopOpen ? 0 : 64,
                     transition: theme.transitions.create('opacity'),
                     opacity: desktopOpen ? 0 : 1,
@@ -88,11 +104,10 @@ export default function SideNav({
                     <ListItem key={item.text} disablePadding sx={{ display: 'block' }}>
                         <Tooltip title={desktopOpen ? '' : item.text} placement="right">
                             <ListItemButton
-                                selected={pathname === item.path}
-                                onClick={() => {
-                                    router.push(item.path)
-                                    if (mobileOpen) handleDrawerToggle()
-                                }}
+                                // O item 'Sair' não terá um 'path', então a seleção não se aplica
+                                selected={item.path ? pathname === item.path : false}
+                                // AQUI ESTÁ A MUDANÇA PRINCIPAL
+                                onClick={() => handleMenuItemClick(item)}
                                 sx={(theme) => ({
                                     minHeight: 48,
                                     justifyContent: 'center',
@@ -114,11 +129,11 @@ export default function SideNav({
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.text}
-                                    sx={{ 
+                                    sx={{
                                         color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main,
                                         opacity: desktopOpen ? 1 : 0, transition: (t) => t.transitions.create('opacity'),
                                         fontWeight: "bold"
-                                     }}
+                                    }}
                                 />
                             </ListItemButton>
                         </Tooltip>

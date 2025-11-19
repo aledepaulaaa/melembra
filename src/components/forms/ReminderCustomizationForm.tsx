@@ -17,7 +17,6 @@ export default function ReminderCustomizationForm({
     onConfirm,
 }: ReminderCustomizationFormProps) {
     const fileInputRef = React.useRef<HTMLInputElement>(null)
-    const colorInputRef = React.useRef<HTMLInputElement>(null)
     const charLimit = 200
 
     const [pickerColor, setPickerColor] = React.useState<string>(selectedColor)

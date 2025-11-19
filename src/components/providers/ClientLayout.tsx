@@ -1,5 +1,5 @@
 'use client'
-//bora-app/src/components/providers/ClientLayout.tsx
+//appbora/src/components/providers/ClientLayout.tsx
 import React from "react"
 import { store } from "@/app/store/store"
 import { Provider } from "react-redux"
@@ -11,9 +11,10 @@ import ThemeSwitcher from "../ui/theme/ThemeSwitcher"
 import MenuIconCustom from "../ui/layout/MenuIconCustom"
 import PageTransition from "./PageTransition"
 import UpgradeButtonHeader from "../ui/planos/upgradeplanos/UpgradeButtonHeader"
-import { Box, AppBar, Toolbar, IconButton, useTheme } from "@mui/material"
 import { SnackbarProvider } from "@/contexts/SnackbarProvider"
 import { useAppSelector } from "@/app/store/hooks"
+import UnauthenticatedHeader from "../ui/layout/UnauthenticatedHeader"
+import { Box, AppBar, Toolbar, IconButton, useTheme, Skeleton } from "@mui/material"
 
 const drawerWidth = 240
 const miniWidth = 64
@@ -22,8 +23,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     const [mobileOpen, setMobileOpen] = React.useState(false)
     const [desktopOpen, setDesktopOpen] = React.useState(true)
     const theme = useTheme()
-    const { user } = useAppSelector((state) => state.auth)
 
+    // --- MUDANÇA 1: Obter 'user' E 'status' do Redux ---
+    const { user, status } = useAppSelector((state) => state.auth)
+
+    // O hook continua aqui. Ele receberá 'undefined' se o usuário estiver deslogado,
+    // o que é um comportamento esperado que o hook deve saber lidar.
     useSubscription(user?.uid as string)
 
     const handleMobileToggle = () => setMobileOpen((s) => !s)
@@ -33,6 +38,43 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         ? theme.palette.primary.main
         : theme.palette.secondary.main
 
+    // --- MUDANÇA 2: Renderizar um loader enquanto a autenticação é verificada ---
+    if (status === 'loading') {
+        return (
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+                <Skeleton variant="rectangular" animation="wave" width={210} height={118} />
+                <Skeleton variant="rectangular" animation="wave" width={210} height={118} />
+                <Skeleton variant="rectangular" animation="wave" width={210} height={118} />
+            </Box>
+        )
+    }
+
+    // --- MUDANÇA 3: Renderizar o layout PÚBLICO se o usuário NÃO estiver logado ---
+    if (!user) {
+        return (
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <UnauthenticatedHeader />
+                <Box
+                    component="main"
+                    sx={{
+                        flexGrow: 1,
+                        p: 3,
+                        minHeight: '100vh',
+                        display: 'flex',
+                        alignItems: "center",
+                        flexDirection: 'column',
+                    }}
+                >
+                    <Toolbar /> {/* Espaçador para o Header fixo */}
+                    <PageTransition>
+                        {children}
+                    </PageTransition>
+                </Box>
+            </Box>
+        )
+    }
+
+    // --- MUDANÇA 4: O código original agora só é renderizado se o usuário ESTIVER LOGADO ---
     return (
         <Box sx={{ display: 'flex', overflowX: 'hidden' }}>
             {/* AppBar mobile (hamburger) */}
@@ -133,7 +175,6 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     )
 }
 
-// 2. O componente `ClientLayout` agora só é responsável por criar os Providers.
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     return (
         <Provider store={store}>

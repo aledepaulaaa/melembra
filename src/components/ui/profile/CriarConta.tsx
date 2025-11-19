@@ -1,11 +1,10 @@
 'use client'
-// melemebra/src/components/ui/UserCreateProfile.tsx
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+//appbora/src/components/ui/CriarConta.tsx
 import useUserCreateProfile from '@/hooks/useUserCreateProfile'
 import { VisibilityOff, Visibility } from '@mui/icons-material'
-import { Box, TextField, Button, Accordion, AccordionSummary, AccordionDetails, Typography, CircularProgress, Stack, IconButton, InputAdornment } from '@mui/material'
+import { Box, TextField, Button, Typography, CircularProgress, Stack, IconButton, InputAdornment } from '@mui/material'
 
-export default function UserCreateProfile() {
+export default function CriarConta() {
     const {
         isLoading,
         formData,
@@ -39,6 +38,14 @@ export default function UserCreateProfile() {
                     fullWidth
                 />
                 <TextField
+                    name="whatsappNumber"
+                    label="Nº WhatsApp Ex: 55318415-6789 *"
+                    placeholder='Seu número do WhatsApp'
+                    value={formData.whatsappNumber}
+                    onChange={handleInputChange}
+                    fullWidth
+                />
+                <TextField
                     name="password"
                     sx={{ mb: 2 }}
                     label="Senha *"
@@ -62,31 +69,6 @@ export default function UserCreateProfile() {
                         ),
                     }}
                 />
-                <Accordion sx={{ boxShadow: 0, '&:before': { display: 'none' } }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography color="text.secondary">Dados Opcionais</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Stack spacing={2}>
-                            <TextField
-                                name="nickname"
-                                label="Apelido"
-                                placeholder='seunickname'
-                                value={formData.nickname}
-                                onChange={handleInputChange}
-                                fullWidth
-                            />
-                            <TextField
-                                name="whatsappNumber"
-                                label="Nº WhatsApp (Ex: 55119...)"
-                                placeholder='Seu número do WhatsApp'
-                                value={formData.whatsappNumber}
-                                onChange={handleInputChange}
-                                fullWidth
-                            />
-                        </Stack>
-                    </AccordionDetails>
-                </Accordion>
                 <Button variant="contained" onClick={handleCreateAccount} disabled={isLoading} fullWidth>
                     {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Criar Minha Conta'}
                 </Button>

@@ -27,16 +27,6 @@ export default function RemindersPage() {
     }
 
     return (
-        <Box
-            sx={{
-                minHeight: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                p: 2
-            }}
-        >
-            <ReminderList />
-        </Box>
+        <ReminderList />
     )
 }

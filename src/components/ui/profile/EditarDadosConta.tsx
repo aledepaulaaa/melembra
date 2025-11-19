@@ -1,5 +1,5 @@
 'use client'
-// melemebra/src/components/ui/profile/UserEditProfile.tsx
+//appbora/src/components/ui/profile/EditarDadosConta.tsx
 import React from 'react'
 import { doc, getDoc } from 'firebase/firestore'
 import { auth, db } from '@/app/lib/firebase'
@@ -12,14 +12,14 @@ import WhatsAppInfoDialog from '../dialogs/WhatsAppInfoDialog'
 import { useWhatsAppInput, formatDisplayNumber } from '@/hooks/useWhatsAppInput'
 import { Button, CircularProgress, Skeleton, Stack, TextField, InputAdornment, IconButton } from '@mui/material'
 
-export default function UserEditProfile() {
+export default function EditarDadosConta() {
     const { openSnackbar } = useSnackbar()
     const { user } = useAppSelector((state) => state.auth)
     const userId = user?.uid
 
     const [loading, setLoading] = React.useState(true)
     const [isSaving, setIsSaving] = React.useState(false)
-    const [profile, setProfile] = React.useState<Omit<IUserData, 'password' | 'email'>>({ name: '', nickname: '', whatsappNumber: '' })
+    const [profile, setProfile] = React.useState<Omit<IUserData, 'password' | 'email'>>({ name: '', whatsappNumber: '' })
     const [isInfoDialogOpen, setIsInfoDialogOpen] = React.useState(false)
 
     // 3. Usar o hook para gerenciar o estado e a validação do WhatsApp
@@ -34,7 +34,6 @@ export default function UserEditProfile() {
                 const data = docSnap.data()
                 setProfile({
                     name: data.name || '',
-                    nickname: data.nickname || '',
                     whatsappNumber: data.whatsappNumber || '',
                 })
                 // Inicializa o hook do WhatsApp com o valor do banco de dados
@@ -87,12 +86,11 @@ export default function UserEditProfile() {
         <>
             <Stack spacing={2}>
                 <TextField name="name" label="Nome Completo *" value={profile.name} onChange={handleInputChange} fullWidth />
-                <TextField name="nickname" label="Apelido" value={profile.nickname} onChange={handleInputChange} fullWidth />
                 <TextField
                     fullWidth
                     name="whatsappNumber"
                     label="WhatsApp"
-                    placeholder="+55 (DDD) 9XXXX-XXXX"
+                    placeholder="+55 (DDD) XXXX-XXXX"
                     // 4. Mostra o número formatado
                     value={formatDisplayNumber(whatsappNumber)}
                     onChange={(e) => setWhatsappNumber(e.target.value)}

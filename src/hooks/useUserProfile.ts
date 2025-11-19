@@ -1,12 +1,12 @@
-// melemebra/src/hooks/useUserProfile.ts (VERSÃO SIMPLIFICADA)
-import { useState } from "react"
+//appbora/src/hooks/useUserProfile.ts
+import React from "react"
 import { resetUserPassword } from "@/app/actions/actions"
 import { useSnackbar } from "@/contexts/SnackbarProvider"
 
 export default function useUserProfile() {
     const { openSnackbar } = useSnackbar()
-    const [dialogOpen, setDialogOpen] = useState(false)
-    const [resetEmail, setResetEmail] = useState('')
+    const [dialogOpen, setDialogOpen] = React.useState(false)
+    const [resetEmail, setResetEmail] = React.useState('')
 
     const handlePasswordReset = async () => {
         if (!resetEmail) return

@@ -65,7 +65,7 @@ export async function deleteReminder(reminderId: string) {
     }
 }
 
-export async function saveUserProfile(userId: string, profileData: { name: string, nickname: string, whatsappNumber: string, email: string, userId: string }) {
+export async function saveUserProfile(userId: string, profileData: { name: string, whatsappNumber: string, email: string, userId: string }) {
     if (!userId) return { success: false, error: 'UserID obrigatório' }
     try {
         const userDocRef = db.collection('users').doc(userId)
@@ -127,12 +127,12 @@ export async function saveReminder(title: string, date: Date, userId: string,  r
 }
 
 // --- FUNÇÕES DE AUTH (Já usavam Admin SDK, sem alterações) ---
-export async function createUser(userData: { email: string, password: string, name: string, nickname: string, whatsappNumber: string }) {
-    const { email, password, name, nickname, whatsappNumber } = userData
+export async function createUser(userData: { email: string, password: string, name: string, whatsappNumber: string }) {
+    const { email, password, name, whatsappNumber } = userData
     try {
         const userRecord = await adminAuth.createUser({ email, password, displayName: name })
         const userId = userRecord.uid
-        await saveUserProfile(userId, { name, nickname, whatsappNumber, email, userId })
+        await saveUserProfile(userId, { name, whatsappNumber, email, userId })
         return { success: true, userId }
     } catch (error: any) {
         if (error.code === 'auth/email-already-exists') {

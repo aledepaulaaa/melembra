@@ -1,7 +1,8 @@
 'use client'
-//bora-app/src/components/ui/LogoAnimated.tsx
+//appbora/src/components/ui/LogoAnimated.tsx
 import { useTheme } from '@mui/material/styles'
 import { motion, Variants } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
 interface LogoProps {
     size?: number
@@ -10,6 +11,7 @@ interface LogoProps {
 export default function LogoAnimated({ size = 40 }: LogoProps) {
     const theme = useTheme()
     const isDarkMode = theme.palette.mode === 'dark'
+    const router = useRouter()
 
     // --- ANIMAÇÃO ---
     // 1. Variante para o container dos pontos.
@@ -61,6 +63,7 @@ export default function LogoAnimated({ size = 40 }: LogoProps) {
             initial="rest"
             whileHover="hover"
             animate="interval" // Animação do balão
+            onClick={() => router.push('/')}
         >
             <svg width="100%" height="100%" viewBox="0 0 642 643" fill="none" xmlns="http://www.w3.org/2000/svg">
                 {isDarkMode ? (

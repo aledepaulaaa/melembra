@@ -1,19 +1,35 @@
 'use client'
+//appbora/src/components/ui/profile/LogarNaConta.tsx
 import useUserLogin from '@/hooks/useUserLogin'
-// melemebra/src/components/ui/profile/UserLoginProfile.tsx
 import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { TextField, Button, CircularProgress, Stack, InputAdornment, IconButton, Link, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import LogoAnimated from '../logo/LogoAnimated'
+import { TextField, Button, CircularProgress, Stack, InputAdornment, 
+IconButton, Link, Dialog, DialogActions, DialogContent, DialogTitle, Box, Typography, useTheme } from '@mui/material'
 
-export default function UserLoginProfile() {
+export default function LogarNaConta() {
+    const theme = useTheme()
     const {
         isLoading, email, setEmail, password, setPassword, showPassword,
-        toggleShowPassword, handleLogin, handlePasswordReset,setResetEmail,
+        toggleShowPassword, handleLogin, handlePasswordReset, setResetEmail,
         dialogOpen, openResetDialog, closeResetDialog, resetEmail
     } = useUserLogin()
 
     return (
         <>
-            <Stack spacing={2} sx={{ mt: 2 }}>
+            <Stack spacing={4} sx={{ mt: 2 }}>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 10 }}>
+                    <LogoAnimated size={55} />
+                    <Typography
+                        lineHeight={1}
+                        fontWeight={900}
+                        variant="h2"
+                        textAlign="start"
+                        component="h2"
+                        sx={{ color: theme.palette.mode === 'dark' ? '#fff' : theme.palette.primary.main }}
+                    >
+                        Bora
+                    </Typography>
+                </Box>
                 <TextField label="E-mail" type="email" placeholder='seuemail@email.com' value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
                 <TextField
                     label="Senha"
@@ -53,7 +69,7 @@ export default function UserLoginProfile() {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeResetDialog}>Cancelar</Button>
+                    <Button onClick={closeResetDialog} variant="contained" color="error">Cancelar</Button>
                     <Button onClick={handlePasswordReset} variant="contained">Enviar Link</Button>
                 </DialogActions>
             </Dialog>
