@@ -23,7 +23,7 @@ export default function EditarDadosConta() {
     const [isInfoDialogOpen, setIsInfoDialogOpen] = React.useState(false)
 
     // 3. Usar o hook para gerenciar o estado e a validação do WhatsApp
-    const { value: whatsappNumber, setValue: setWhatsappNumber, isValidating, handleValidate } = useWhatsAppInput()
+    const { value: whatsappNumber, setValue: setWhatsappNumber } = useWhatsAppInput()
 
     React.useEffect(() => {
         const fetchProfile = async () => {
@@ -55,19 +55,6 @@ export default function EditarDadosConta() {
             return
         }
         setIsSaving(true)
-        
-        // Valida o número de WhatsApp ANTES de salvar
-        const validationResult = await handleValidate()
-        if (!validationResult.success) {
-            // Se a validação falhar explicitamente (número inválido)
-            openSnackbar(validationResult.error, 'error')
-            setIsSaving(false)
-            return // Bloqueia o salvamento
-        }
-        if (validationResult.inconclusive) {
-            // Se a API externa estiver fora do ar ou incerta, avisa o usuário mas permite salvar
-            openSnackbar('Não foi possível validar o número agora, mas ele foi salvo. Verifique se está correto.', 'warning')
-        }
 
         const cleanNumber = whatsappNumber.replace(/\D/g, '')
         const userEmail = auth.currentUser?.email || ''
@@ -111,8 +98,8 @@ export default function EditarDadosConta() {
                         }
                     }}
                 />
-                <Button onClick={handleSave} variant="contained" disabled={isSaving || isValidating}>
-                    {isSaving || isValidating ? <CircularProgress size={24} /> : 'Salvar Alterações'}
+                <Button onClick={handleSave} variant="contained" disabled={isSaving}>
+                    {isSaving ? <CircularProgress size={24} /> : 'Salvar Alterações'}
                 </Button>
             </Stack>
             {/* 5. Renderiza o Dialog reutilizável */}
