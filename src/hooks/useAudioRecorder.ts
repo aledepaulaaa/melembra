@@ -50,6 +50,7 @@ export default function useAudioRecorder(): UseAudioRecorderReturn {
         chunksRef.current = []
 
         try {
+            // Configuração otimizada para IA (evita cortes de voz)
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: false, // Desliga cancelamento de eco (ajuda a não cortar a voz)
@@ -60,10 +61,20 @@ export default function useAudioRecorder(): UseAudioRecorderReturn {
             })
             streamRef.current = stream
 
-            // Preferência por 'audio/webm' que é nativo e leve para o Chrome/Google API
-            // Fallback para padrão do navegador se webm não existir
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : ''
-            const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
+
+            // Tenta usar codecs modernos e robustos
+            // Prioridade: WebM Opus (padrão Android/PC) -> MP4 (Safari novo) -> Padrão do navegador
+            let options: MediaRecorderOptions = {}
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                options = { mimeType: 'audio/webm;codecs=opus' }
+            } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                options = { mimeType: 'audio/webm' }
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                // Fallback para iOS/Safari (atenção: backend precisaria suportar MP4, mas o Google prefere WebM/Linear16)
+                // Por enquanto, a maioria dos Androids cairá no primeiro if.
+                options = { mimeType: 'audio/mp4' }
+            }
+            const mediaRecorder = new MediaRecorder(stream, options)
 
             mediaRecorderRef.current = mediaRecorder
 
@@ -74,7 +85,7 @@ export default function useAudioRecorder(): UseAudioRecorderReturn {
             }
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(chunksRef.current, { type: mimeType || 'audio/webm' })
+                const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' })
                 setAudioBlob(blob)
             }
 

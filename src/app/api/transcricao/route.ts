@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         // O Google Speech-to-Text aceita 'WEBM_OPUS' nativamente
         const formatConfig = {
             encoding: 'WEBM_OPUS',
-            // sampleRateHertz: 48000, // Padrão comum, mas o Google pode detectar auto em alguns casos
+            sampleRateHertz: 48000, // Padrão comum, mas o Google pode detectar auto em alguns casos
         }
 
         const transcription = await transcribeShortAudio(buffer, formatConfig)
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ text: transcription })
 
     } catch (error) {
-        console.error('Error processing audio:', error)
-        return NextResponse.json({ error: 'Failed to transcribe audio' }, { status: 500 })
+        console.error('Erro ao processar áudio:', error)
+        return NextResponse.json({ error: 'Falha ao transcrever áudio' }, { status: 500 })
     }
 }

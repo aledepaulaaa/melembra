@@ -22,7 +22,7 @@ const speechClient = new SpeechClient({
  */
 export async function transcribeShortAudio(
     audioBuffer: Buffer,
-    formatConfig: { encoding: 'LINEAR16' | 'MP3' | 'WEBM_OPUS' | string },
+    formatConfig: { encoding: 'LINEAR16' | 'MP3' | 'WEBM_OPUS' | string, sampleRateHertz: number },
     languageCode: string = 'pt-BR'
 ): Promise<string> {
 
@@ -34,6 +34,7 @@ export async function transcribeShortAudio(
     // 2. Configure a requisição
     const config = {
         encoding: formatConfig.encoding,
+        sampleRateHertz: formatConfig.sampleRateHertz,
         languageCode: languageCode,
     }
 
@@ -64,6 +65,6 @@ export async function transcribeShortAudio(
 
     } catch (error) {
         console.error('❌ Erro ao transcrever áudio:', error)
-        throw new Error(`Speech-to-Text API failed: ${error}`)
+        throw new Error(`Speech-to-Text API failed: ${JSON.stringify(error)}`)
     }
 }
