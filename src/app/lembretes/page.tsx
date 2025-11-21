@@ -1,5 +1,5 @@
 'use client'
-//bora-app/src/app/lembretes/page.tsx
+//appbora/src/app/lembretes/page.tsx
 import { Box, Skeleton } from '@mui/material'
 import ReminderList from '../../components/ui/listalembretes/ReminderList'
 import { useAppSelector } from '../store/hooks'

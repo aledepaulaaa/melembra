@@ -14,28 +14,25 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Text is required' }, { status: 400 })
         }
 
-         const prompt = `
-            Você é uma API que converte linguagem natural em JSON para um app de lembretes.
-            Hoje é: ${currentDate} (Data e Hora do usuário).
+        const prompt = `
+            Você é uma API (JSON) que estrutura lembretes.
+            Referência Agora: ${currentDate}.
+            Frase do usuário: "${text}".
 
-            Instrução: Analise a frase: "${text}".
+            Instruções:
+            1. Analise a frase e extraia os dados.
+            2. Tente inferir a CATEGORIA baseada no contexto (Ex: 'Remédio' -> 'Saúde', 'Pagar luz' -> 'Financeiro', 'Estudar' -> 'Estudos', 'Limpar' -> 'Casa', 'Reunião' -> 'Trabalho'). Se não souber, use 'Geral'.
+            3. DATA: Formato YYYY-MM-DD. Calcule baseado no 'Agora'. Se não mencionar, retorne null.
+            4. HORA: Formato HH:mm. Se não mencionar, retorne null.
             
-            Regras de Data:
-            1. Se o usuário disser "amanhã", calcule a data baseada no "Hoje é" acima.
-            2. O campo 'date' DEVE ser estritamente no formato "YYYY-MM-DD" (Ex: 2025-11-20).
-            3. Se não houver data, retorne null.
-            
-            Regras de Hora:
-            1. O campo 'time' deve ser "HH:mm" (24h). Ex: "08:00", "14:30".
-            2. Se não houver hora, retorne null.
-
-            Retorne APENAS este JSON sem formatação markdown:
+            Retorne APENAS este JSON:
             {
-                "title": "Resumo curto da ação",
+                "title": "O que lembrar (resumido)",
                 "date": "YYYY-MM-DD" ou null,
                 "time": "HH:mm" ou null,
-                "description": "Detalhes adicionais se houver",
-                "recurrence": "Não repetir" (ou Diariamente, Semanalmente, Mensalmente)
+                "description": "Detalhes extras ou null",
+                "recurrence": "Não repetir" (ou Diariamente, Semanalmente, Mensalmente),
+                "category": "Nome da Categoria Inferida"
             }
         `
 
@@ -43,12 +40,12 @@ export async function POST(request: Request) {
         const response = await result.response
         let jsonText = response.text()
 
-        // Limpeza básica caso o modelo retorne ```json ... ```
+        // Limpeza de markdown caso a IA mande ```json
         jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim()
 
         const data = JSON.parse(jsonText)
-
         return NextResponse.json({ data })
+
     } catch (error) {
         console.error('Error analyzing text with Gemini:', error)
         return NextResponse.json({ error: 'Failed to analyze content' }, { status: 500 })

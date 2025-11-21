@@ -1,5 +1,5 @@
 'use client'
-//bora-app/src/components/ui/SubscriptionStatus.tsx
+//appbora/src/components/ui/SubscriptionStatus.tsx
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppSelector } from '@/app/store/hooks'

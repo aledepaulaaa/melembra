@@ -13,8 +13,7 @@ import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined'
 import TextsmsOutlinedIcon from '@mui/icons-material/TextsmsOutlined'
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined'
-import MicIcon from '@mui/icons-material/Mic' // Opcional, para animação se quiser
-
+import MicIcon from '@mui/icons-material/Mic'
 import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminder'
 import useReminderForm from '@/hooks/forms/useReminderForm'
 import { useAppSelector } from '@/app/store/hooks'
@@ -89,6 +88,21 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     // Props unificadas para os Handlers
     const handlerProps = { ...formState, userId, router, onChatStart, subscription, openSnackbar }
 
+    // Se o histórico estiver vazio, o bot dá as boas-vindas para iniciar o fluxo e mostrar as categorias
+    React.useEffect(() => {
+        if (formState.chatHistory.length === 0) {
+            // Pequeno timeout para não conflitar com a montagem inicial
+            const timer = setTimeout(() => {
+                Handlers.addMessageToChat(handlerProps, {
+                    sender: 'bot',
+                    text: 'Olá! Bora lembrar do que hoje?'
+                })
+            }, 500)
+            return () => clearTimeout(timer)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     // --- PROCESSAMENTO DE ÁUDIO ---
     // Monitora quando o blob de áudio é gerado (ao soltar o botão ou acabar o tempo)
     React.useEffect(() => {
@@ -114,7 +128,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
             <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: 'transparent', overflow: 'hidden', height: '100%', position: 'relative' }}>
-                {/* --- BOTÃO NOVO CHAT (Canto Superior Direito) --- */}
+                {/* --- BOTÃO CHAT (Canto Superior Direito) --- */}
                 {formState.chatHistory.length > 0 && (
                     <Box sx={{ position: 'absolute', top: 10, right: 15, zIndex: 10 }}>
                         <Tooltip title="Novo Lembrete">
@@ -150,9 +164,15 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 </Button>
                                             )}
                                             {/* Renderização condicional dos passos do fluxo */}
-                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_DATE && <UI.RenderDatePicker {...handlerProps} />}
-                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_TIME && <UI.RenderTimeClockWithConfirm {...handlerProps} />}
-                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_RECURRENCE && <UI.RenderRecurrenceButtons {...handlerProps} formattedTime={formState.reminder.time || ''} />}
+                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_CATEGORY && (
+                                                <UI.RenderCategorySelector {...handlerProps} />
+                                            )}
+                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_DATE
+                                                && <UI.RenderDatePicker {...handlerProps} />}
+                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_TIME
+                                                && <UI.RenderTimeClockWithConfirm {...handlerProps} />}
+                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_RECURRENCE
+                                                && <UI.RenderRecurrenceButtons {...handlerProps} formattedTime={formState.reminder.time || ''} />}
 
                                             {isLastBotMessage && formState.step === ConversationStep.ASKING_CUSTOMIZATION && lastUserMessage === 'Sim, quero personalizar.' && (
                                                 <UI.RenderFullCustomizationForm {...handlerProps} />
@@ -212,7 +232,6 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 >
                                                     <MicIcon color="error" sx={{ fontSize: 28 }} />
                                                 </motion.div>
-
                                                 {/* Texto do Timer com largura fixa para não tremer */}
                                                 <Typography variant="body1" color="error" fontWeight={600}>
                                                     <Box component="span" sx={{ minWidth: '45px', display: 'inline-block' }}>
@@ -242,10 +261,16 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 onChange={(e) => formState.setUserInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && onUserSubmit()}
                                                 disabled={formState.isLoading}
-                                                placeholder={formState.step === ConversationStep.ASKING_TITLE ? "Digite ou grave um áudio..." : "Responda..."}
+                                                placeholder={
+                                                    formState.step === ConversationStep.ASKING_CATEGORY
+                                                        ? "Selecione acima ou digite uma nova..."
+                                                        : formState.step === ConversationStep.ASKING_TITLE
+                                                            ? "Qual o título do lembrete?"
+                                                            : "Responda..."
+                                                }
                                                 autoFocus
                                                 slotProps={{ input: { disableUnderline: true } }} // Remove linha do standard
-                                                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 4, px: 2, py: 1}}
+                                                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 4, px: 2, py: 1 }}
                                             />
                                             <Stack direction="row" spacing={1}>
                                                 {/* Botão de Áudio (só aparece se input estiver vazio ou a critério) */}

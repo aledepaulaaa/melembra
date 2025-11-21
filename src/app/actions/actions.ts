@@ -1,7 +1,6 @@
 //bora-app/src/app/actions/actions.ts
 'use server'
 import webpush from 'web-push'
-// 1. IMPORTAÇÕES SEPARADAS: Admin para escrita, Cliente para leitura.
 import { getFirebaseFirestore as getAdminDb, getFirebaseAuth } from '../lib/firebase-admin'
 import { Timestamp as AdminTimestamp } from 'firebase-admin/firestore'
 
@@ -50,6 +49,40 @@ export async function updateReminderStatus(reminderId: string, completed: boolea
     } catch (error) {
         console.error('Erro ao atualizar status do lembrete:', error)
         return { success: false, error: 'Falha ao atualizar o lembrete.' }
+    }
+}
+
+// --- Arquivar Lembrete ---
+export async function archiveReminder(reminderId: string) {
+    if (!reminderId) return { success: false, error: 'ID do lembrete é obrigatório.' }
+    try {
+        const reminderRef = db.collection('reminders').doc(reminderId)
+        // Define archived como true
+        await reminderRef.update({ archived: true })
+        return { success: true }
+    } catch (error) {
+        console.error('Erro ao arquivar lembrete:', error)
+        return { success: false, error: 'Falha ao arquivar o lembrete.' }
+    }
+}
+
+// Reutilizar Lembrete (Desarquivar e Resetar) ---
+export async function reuseReminder(reminderId: string) {
+    if (!reminderId) return { success: false, error: 'ID do lembrete é obrigatório.' }
+    try {
+        const reminderRef = db.collection('reminders').doc(reminderId)
+        // Reseta para não arquivado e não completado, atualizando a data de criação
+        await reminderRef.update({
+            archived: false,
+            completed: false,
+            createdAt: AdminTimestamp.now()
+            // Nota: A data agendada (scheduledAt) fica a antiga. 
+            // Idealmente o usuário editaria a data depois, ou você pode setar para "amanhã" aqui.
+        })
+        return { success: true }
+    } catch (error) {
+        console.error('Erro ao reutilizar lembrete:', error)
+        return { success: false, error: 'Falha ao reutilizar o lembrete.' }
     }
 }
 
@@ -102,7 +135,16 @@ export async function saveUserPhoneNumber(userId: string, phoneNumber: string) {
     }
 }
 
-export async function saveReminder(title: string, date: Date, userId: string,  recurrence: string, cor: string, sobre: string, img: string) {
+export async function saveReminder(
+    title: string,
+    date: Date,
+    userId: string,
+    recurrence: string,
+    cor: string,
+    sobre: string,
+    img: string,
+    category: string = 'Geral'
+) {
     if (!userId || !title || !date) return { success: false, error: 'Dados do lembrete inválidos.' }
 
     try {
@@ -113,12 +155,22 @@ export async function saveReminder(title: string, date: Date, userId: string,  r
             createdAt: AdminTimestamp.now(),
             sent: false,
             preNotificationSent: false,
-            recurrence: recurrence || 'Não repetir', // Garante um valor padrão
-            cor: cor || '#BB86FC',                   // Garante um valor padrão
-            sobre: sobre || '',                      // Garante um valor padrão
-            img: img || '',                          // Garante um valor padrão
-            completed: false                         // Boa prática iniciar como 'false'
+            recurrence: recurrence || 'Não repetir',
+            cor: cor || '#BB86FC',
+            sobre: sobre || '',
+            img: img || '',
+            category: category || 'Geral',
+            archived: false,
+            completed: false
         })
+
+        // 2. ATUALIZAÇÃO CRÍTICA: Registrar o uso no perfil do usuário
+        // Isso é o que vai travar o usuário Free na próxima tentativa
+        const userRef = db.collection('users').doc(userId)
+        await userRef.update({
+            lastFreeReminderAt: AdminTimestamp.now()
+        })
+
         return { success: true, reminderId: docRef.id }
     } catch (error) {
         console.error('Erro ao salvar lembrete:', error)
@@ -153,14 +205,16 @@ export async function resetUserPassword(email: string) {
     }
 }
 
-// --- FUNÇÕES DE LEITURA (Usam o Cliente SDK para respeitar as regras de segurança) ---
 export async function getReminders(userId: string) {
     if (!userId) return { success: false, error: 'UserID obrigatório.' }
     try {
-        // --- CORREÇÃO AQUI: Convertido para o Admin SDK ---
         const remindersRef = db.collection('reminders')
-        const q = remindersRef.where('userId', '==', userId).orderBy('scheduledAt', 'asc')
-        const querySnapshot = await q.get() // O método .get() é do Admin SDK
+        const q = remindersRef
+            .where('userId', '==', userId)
+            .where('archived', '==', false)
+            .orderBy('scheduledAt', 'asc')
+
+        const querySnapshot = await q.get()
 
         const reminders = querySnapshot.docs.map((doc) => {
             const data = doc.data()
@@ -171,17 +225,49 @@ export async function getReminders(userId: string) {
                 cor: data.cor || '#BB86FC',
                 sobre: data.sobre || '',
                 img: data.img || '',
+                category: data.category || 'Geral',
                 recurrence: data.recurrence || 'Não repetir',
-                // O Timestamp do Admin SDK também tem o método .toDate()
                 scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
                 createdAt: (data.createdAt as AdminTimestamp).toDate().toISOString(),
             }
         })
         return { success: true, reminders }
-        // --- FIM DA CORREÇÃO ---
     } catch (error) {
         console.error('Erro ao buscar lembretes:', error)
         return { success: false, error: 'Falha ao buscar lembretes.' }
+    }
+}
+
+// --- FUNÇÃO PARA BUSCA DE LEMBRETES ARQUIVADOS ---
+export async function getArchivedReminders(userId: string) {
+    if (!userId) return { success: false, error: 'UserID obrigatório.' }
+    try {
+        const remindersRef = db.collection('reminders')
+        const q = remindersRef
+            .where('userId', '==', userId)
+            .where('archived', '==', true) // Busca apenas arquivados
+            .orderBy('createdAt', 'desc') // Ordena pelos mais recentes criados/arquivados
+
+        const querySnapshot = await q.get()
+
+        const reminders = querySnapshot.docs.map((doc) => {
+            const data = doc.data()
+            return {
+                id: doc.id,
+                ...data,
+                title: data.title,
+                cor: data.cor || '#BB86FC',
+                sobre: data.sobre || '',
+                img: data.img || '',
+                category: data.category || 'Geral',
+                scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
+                createdAt: (data.createdAt as AdminTimestamp).toDate().toISOString(),
+            }
+        })
+        return { success: true, reminders }
+    } catch (error) {
+        console.error('Erro ao buscar arquivados:', error)
+        return { success: false, error: 'Falha ao buscar arquivados.' }
     }
 }
 
@@ -194,6 +280,46 @@ export async function getUserPreferences(userId: string) {
     } catch (error) {
         console.error('Erro ao buscar preferências:', error)
         return { success: false, error: 'Falha ao buscar preferências.' }
+    }
+}
+
+// --- Função para Buscar APENAS o próximo lembrete futuro ---
+export async function getNextUpcomingReminder(userId: string) {
+    if (!userId) return { success: false, error: 'UserID obrigatório.' }
+    try {
+        const now = new Date()
+        const remindersRef = db.collection('reminders')
+
+        const q = remindersRef
+            .where('userId', '==', userId)
+            .where('completed', '==', false) // Apenas não concluídos
+            .where('archived', '==', false)  // Apenas não arquivados
+            .where('scheduledAt', '>', AdminTimestamp.fromDate(now)) // Apenas no futuro
+            .orderBy('scheduledAt', 'asc') // O mais próximo primeiro
+            .limit(1) // Pega só um
+
+        const querySnapshot = await q.get()
+
+        if (querySnapshot.empty) {
+            return { success: true, reminder: null }
+        }
+
+        const doc = querySnapshot.docs[0]
+        const data = doc.data()
+
+        const reminder = {
+            id: doc.id,
+            ...data,
+            title: data.title,
+            cor: data.cor || '#BB86FC',
+            category: data.category || 'Geral',
+            scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
+        }
+
+        return { success: true, reminder }
+    } catch (error) {
+        console.error('Erro ao buscar próximo lembrete:', error)
+        return { success: false, error: 'Falha ao buscar.' }
     }
 }
 

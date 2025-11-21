@@ -1,16 +1,14 @@
 'use client'
-// bora-app/src/components/ui/SideNav.tsx
+//appbora/src/components/ui/SideNav.tsx
 import ThemeSwitcher from '../theme/ThemeSwitcher'
 import { menuItems } from './menuItems'
 import LogoAnimated from '../logo/LogoAnimated'
 import { useRouter, usePathname } from 'next/navigation'
 import SubscriptionStatus from './SubscriptionStatus'
-import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip, useTheme } from '@mui/material'
-
-// Importações necessárias para a autenticação
 import { signOut } from 'firebase/auth'
 import { auth } from '@/app/lib/firebase'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
+import { Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Tooltip, useTheme } from '@mui/material'
 
 const defaultDrawerWidth = 250
 
@@ -22,9 +20,6 @@ interface SideNavProps {
     drawerWidth?: number
     miniWidth?: number
 }
-
-// Lembre-se de ajustar o menuItems.ts para que 'Sair' tenha uma ação
-// Ex: { text: 'Sair', action: 'logout', icon: <LogoutIcon /> }
 
 export default function SideNav({
     mobileOpen,

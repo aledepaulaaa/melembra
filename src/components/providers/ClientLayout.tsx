@@ -15,6 +15,7 @@ import { SnackbarProvider } from "@/contexts/SnackbarProvider"
 import { useAppSelector } from "@/app/store/hooks"
 import UnauthenticatedHeader from "../ui/layout/UnauthenticatedHeader"
 import { Box, AppBar, Toolbar, IconButton, useTheme, Skeleton } from "@mui/material"
+import NextReminderHeader from "../ui/layout/NextReminderHeader"
 
 const drawerWidth = 240
 const miniWidth = 64
@@ -49,7 +50,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         )
     }
 
-    // --- MUDANÇA 3: Renderizar o layout PÚBLICO se o usuário NÃO estiver logado ---
+    // --- Renderizar o layout PÚBLICO se o usuário NÃO estiver logado ---
     if (!user) {
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -74,7 +75,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         )
     }
 
-    // --- MUDANÇA 4: O código original agora só é renderizado se o usuário ESTIVER LOGADO ---
+    // --- O código original agora só é renderizado se o usuário ESTIVER LOGADO ---
     return (
         <Box sx={{ display: 'flex', overflowX: 'hidden' }}>
             {/* AppBar mobile (hamburger) */}
@@ -100,6 +101,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     </IconButton>
                     <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
                         <UpgradeButtonHeader />
+                        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            <NextReminderHeader />
+                        </Box>
                     </Box>
                     <ThemeSwitcher />
                 </Toolbar>
@@ -163,9 +167,15 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                         position: 'absolute',
                         alignItems: 'center',
                         top: 5,
+                        gap: 2, // Espaçamento entre o Upgrade e o Reminder
+                        width: '100%', // Garante centralização
+                        pointerEvents: 'none' // Permite clicar nos elementos abaixo se não clicar nos botões
                     }}
                 >
-                    <UpgradeButtonHeader />
+                    <Box sx={{ pointerEvents: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <UpgradeButtonHeader />
+                        <NextReminderHeader /> {/* --- CHIP NO DESKTOP --- */}
+                    </Box>
                 </Toolbar>
                 <PageTransition>
                     {children}

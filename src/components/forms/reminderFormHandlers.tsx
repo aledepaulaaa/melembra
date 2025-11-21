@@ -105,6 +105,7 @@ export const handleConfirmSave = async (props: HandlerProps) => {
                 cor: reminder.cor,
                 sobre: reminder.sobre,
                 imageBase64: reminder.imageBase64,
+                category: reminder.category
             },
             history: chatHistory,
         }
@@ -139,9 +140,14 @@ export const handleConfirmSave = async (props: HandlerProps) => {
     addMessageToChat(props, { sender: 'bot', text: 'Salvando seu lembrete...' })
 
     const result = await saveReminder(
-        reminder.title, reminder.date, userId,
-        reminder.recurrence || 'Não repetir', reminder.cor,
-        reminder.sobre || '', imageUrl
+        reminder.title,
+        reminder.date,
+        userId,
+        reminder.recurrence || 'Não repetir',
+        reminder.cor,
+        reminder.sobre || '',
+        imageUrl,
+        reminder.category || 'Geral'
     )
 
     if (result.success) {
@@ -149,6 +155,22 @@ export const handleConfirmSave = async (props: HandlerProps) => {
         addMessageWithTyping(props, {
             sender: 'bot', text: 'Seu lembrete foi criado!',
         })
+
+        // LÓGICA DE BLOQUEIO IMEDIATO PARA FREE
+        if (props.subscription.plan === 'free') {
+            // Pequeno delay para o usuário ler a mensagem de sucesso
+            setTimeout(() => {
+                props.router.refresh()
+                props.router.push('/lembretes')
+            }, 2000)
+        } else {
+            // Se for Premium, mostra botão de "Novo Lembrete" ou reseta o chat
+            addMessageToChat(props, {
+                sender: 'bot',
+                text: 'Quer criar outro? Só clicar no ícone de novo chat lá em cima!'
+            })
+        }
+
     } else {
         openSnackbar(result.error || 'Falha ao salvar lembrete.', 'error')
         addMessageWithTyping(props, { sender: 'bot', text: `Ocorreu um erro: ${result.error}` })
@@ -162,10 +184,24 @@ export const handleCancel = (props: HandlerProps) => {
     props.setReminder({
         title: null, date: null, time: null, recurrence: null,
         cor: '#BB86FC', sobre: '', img: '', imageFile: null,
-        imagePreview: null, imageBase64: null
+        imagePreview: null, imageBase64: null, category: null
     })
     props.setShowTextInput(true)
     props.setStep(ConversationStep.ASKING_TITLE)
+}
+
+// --- FUNÇÃO Seleção de Categoria via Chip ---
+export const handleCategorySelect = (props: HandlerProps, category: string) => {
+    props.setReminder(prev => ({ ...prev, category }))
+
+    // UX: Mostra o que foi selecionado
+    addMessageToChat(props, { sender: 'user', text: `Categoria: ${category}` })
+
+    // Avança
+    addMessageWithTyping(props, { sender: 'bot', text: 'Sobre o que é o seu lembrete?' })
+
+    props.setStep(ConversationStep.ASKING_TITLE)
+    props.setShowTextInput(true) // Garante que o input apareça para digitar o título
 }
 
 export const handleUserInput = (props: HandlerProps, value: string, chatHistoryLength: number) => {
@@ -176,18 +212,22 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
     addMessageToChat(props, { sender: 'user', text: trimmedValue || "Pular" })
 
     switch (props.step) {
+        case ConversationStep.ASKING_CATEGORY:
+            // Se o usuário digitou algo na etapa de categoria (ex: clicou em "Outra"), salvamos como categoria
+            if (!trimmedValue) return
+            props.setReminder(prev => ({ ...prev, category: trimmedValue }))
+            addMessageWithTyping(props, { sender: 'bot', text: 'Entendi. E o que devo lembrar?' })
+            props.setStep(ConversationStep.ASKING_TITLE)
+            break
+
         case ConversationStep.ASKING_TITLE:
             if (!trimmedValue) {
                 props.openSnackbar("Seu lembrete precisa de um nome.", 'error')
-                addMessageToChat(props, { sender: 'bot', text: 'Por favor, me diga o que você quer lembrar.' })
                 return
             }
             props.setReminder(prev => ({ ...prev, title: trimmedValue }))
-            addMessageWithTyping(props, {
-                sender: 'bot',
-                text: getRandomDateResponse(trimmedValue),
-            })
-            props.setShowTextInput(false)
+            addMessageWithTyping(props, { sender: 'bot', text: 'Para quando devo agendar?' }) // Simplificado, pode usar getRandomDateResponse
+            props.setShowTextInput(false) // Esconde teclado para mostrar DatePicker
             props.setStep(ConversationStep.ASKING_DATE)
             break
         case ConversationStep.ASKING_NOTIFICATIONS:
@@ -202,18 +242,18 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
  */
 export const handleNewChat = (props: HandlerProps) => {
     // 1. Limpa histórico no Redux
-    props.dispatch(clearChatHistory())
+    props.dispatch(require('@/app/store/slices/reminderSlice').clearChatHistory())
 
     // 2. Reseta estado local do lembrete
     props.setReminder({
         title: null, date: null, time: null, recurrence: null,
         cor: '#BB86FC', sobre: '', img: '', imageFile: null,
-        imagePreview: null, imageBase64: null
+        imagePreview: null, imageBase64: null, category: null
     })
 
     // 3. Reseta passos e inputs
-    props.setStep(ConversationStep.ASKING_TITLE)
-    props.setShowTextInput(true)
+    props.setStep(ConversationStep.ASKING_CATEGORY)
+    props.setShowTextInput(false)
     props.setUserInput('')
     props.setIsLoading(false)
 
@@ -229,89 +269,72 @@ export const handleNewChat = (props: HandlerProps) => {
  */
 export const handleVoiceProcess = async (props: HandlerProps, audioBlob: Blob) => {
     if (!audioBlob) return
-
     props.setIsLoading(true)
 
-    // 1. UX: Adiciona mensagem temporária do usuário
+    // UX Feedback
     addMessageToChat(props, { sender: 'user', text: '🎤 ...' })
-
-    // 2. UX: Bot avisa que está ouvindo
     addMessageWithTyping(props, { sender: 'bot', text: 'Ouvindo...' }, 100)
 
     try {
-        // --- TRANSCRICAO ---
+        // 1. Transcrição
         const formData = new FormData()
         formData.append('file', audioBlob)
-
-        const transResponse = await fetch('/api/transcricao', {
-            method: 'POST',
-            body: formData
-        })
-
-        if (!transResponse.ok) throw new Error('Erro na transcrição')
-
+        const transResponse = await fetch('/api/transcricao', { method: 'POST', body: formData })
+        if (!transResponse.ok) throw new Error('Erro transcrição')
         const { text: transcribedText } = await transResponse.json()
 
-        // AQUI ESTÁ A MÁGICA DA UX PERFEITA:
-        // Atualiza o "🎤 ..." do usuário com o texto real que ele falou
         props.dispatch(updateLastMessage({ sender: 'user', text: transcribedText }))
-
-        // Atualiza o "Ouvindo..." do bot para algo indicando processamento da IA
         props.dispatch(updateLastMessage({ sender: 'bot', text: 'Analisando...' }))
 
-
-        // --- ANÁLISE GEMINI ---
-        // (Atenção: ajuste o endpoint conforme definimos na Etapa 1, você disse que renomeou para api/gemini)
+        // 2. Inteligência Gemini
         const analyzeResponse = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                text: transcribedText,
-                currentDate: new Date().toISOString()
-            })
+            body: JSON.stringify({ text: transcribedText, currentDate: new Date().toISOString() })
         })
-
-        if (!analyzeResponse.ok) throw new Error('Erro na inteligência')
-
+        if (!analyzeResponse.ok) throw new Error('Erro IA')
         const { data } = await analyzeResponse.json()
 
-        // Popula o estado
-        let newDate = null
-        if (data.date) {
-            // Truque para evitar problemas de fuso horário (UTC vs Local):
-            // Criamos a data setando o horário para meio-dia (T12:00:00), 
-            // assim qualquer fuso -3h ou +3h continua caindo no mesmo dia.
-            newDate = new Date(`${data.date}T12:00:00`)
-        } else {
-            // Se a IA não achou data, define hoje
-            newDate = new Date()
-        }
+        // 3. Processamento dos Dados (Smart Logic)
+        let newDate = data.date ? new Date(`${data.date}T12:00:00`) : null
 
+        // Atualiza estado com TUDO que a IA encontrou
         props.setReminder(prev => ({
             ...prev,
             title: data.title || transcribedText,
-            sobre: data.description || '',
-            date: newDate,
-            time: data.time || null,
-            recurrence: data.recurrence || 'Não repetir'
+            sobre: data.description || prev.sobre,
+            date: newDate || prev.date, // Mantém anterior se IA retornar null (caso de edição futura)
+            time: data.time || prev.time,
+            recurrence: data.recurrence || 'Não repetir',
+            category: data.category || prev.category || 'Geral' // IA infere ou mantemos o que user escolheu
         }))
 
         props.setShowTextInput(false)
 
-        // Substitui o "Analisando..." pela resposta final
-        props.dispatch(updateLastMessage({
-            sender: 'bot',
-            text: `Entendido! Criei o lembrete: "${data.title}".\nDeseja personalizar algo ou salvar?`
-        }))
+        // --- LÓGICA DE PULO DE ETAPAS (SMART SKIP) ---
 
-        props.setStep(ConversationStep.ASKING_CUSTOMIZATION)
+        // Cenário 1: IA detectou Título, Data e Hora -> Vai direto para confirmar/personalizar
+        if (data.title && data.date && data.time) {
+            props.dispatch(updateLastMessage({
+                sender: 'bot',
+                text: `Entendi! "${data.title}" em ${data.date} às ${data.time} (${data.category}).\nDeseja personalizar ou salvar?`
+            }))
+            props.setStep(ConversationStep.ASKING_CUSTOMIZATION)
+        }
+        // Cenário 2: IA detectou Data mas não Hora
+        else if (data.date && !data.time) {
+            props.dispatch(updateLastMessage({ sender: 'bot', text: `Certo, dia ${data.date}. Qual o horário?` }))
+            props.setStep(ConversationStep.ASKING_TIME)
+        }
+        // Cenário 3: Faltou Data (mesmo tendo título)
+        else {
+            props.dispatch(updateLastMessage({ sender: 'bot', text: `Entendi "${data.title}". Para qual dia?` }))
+            props.setStep(ConversationStep.ASKING_DATE)
+        }
 
     } catch (error) {
         console.error(error)
-        props.openSnackbar('Não consegui entender o áudio perfeitamente.', 'error')
-
-        // Se falhar, atualiza para mensagem de erro
-        props.dispatch(updateLastMessage({ sender: 'bot', text: 'Tive um problema para ouvir. Tente escrever.' }))
+        props.dispatch(updateLastMessage({ sender: 'bot', text: 'Não entendi bem. Pode digitar?' }))
         props.setShowTextInput(true)
     } finally {
         props.setIsLoading(false)

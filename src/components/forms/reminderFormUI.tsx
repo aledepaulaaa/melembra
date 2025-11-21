@@ -2,16 +2,69 @@
 // appbora/src/lib/forms/reminderFormUI.tsx
 import React from 'react'
 import { motion } from 'framer-motion'
-import { HandlerProps } from '@/interfaces/IReminder'
+import { defaultCategories, HandlerProps } from '@/interfaces/IReminder'
 import DiamondIcon from '@mui/icons-material/Diamond'
 import * as Handlers from './reminderFormHandlers'
 import { MobileDatePicker, TimeClock } from '@mui/x-date-pickers'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
-import { Box, Button, IconButton, Stack, Tooltip, Typography } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import { Box, Button, Chip, IconButton, Stack, Tooltip, Typography } from '@mui/material'
 import ReminderCustomizationForm from './ReminderCustomizationForm'
 import { resizeImageToStorage } from '@/app/lib/resizeImageToStorage'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { fileToBase64 } from '@/app/utils/base64'
+
+// --- COMPONENTE DE CATEGORIAS ---
+export const RenderCategorySelector = (props: HandlerProps) => {
+
+    const handleCustomCategory = () => {
+        // Se o usuário clicar em "Adicionar/Outro", focamos no input para ele digitar
+        Handlers.addMessageToChat(props, { sender: 'bot', text: 'Qual o nome da nova categoria?' })
+        props.setShowTextInput(true)
+        // Mantemos o step mas indicamos que o próximo input será a categoria customizada
+        // Podemos tratar isso no handleUserInput verificando se o reminder.category ainda é null
+    }
+
+    return (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Selecione uma categoria para começar:
+            </Typography>
+            <Stack direction="row" flexWrap="wrap" gap={1}>
+                {defaultCategories.map((cat, index) => (
+                    <Chip
+                        key={cat}
+                        label={cat}
+                        onClick={() => Handlers.handleCategorySelect(props, cat)}
+                        sx={{
+                            cursor: 'pointer',
+                            bgcolor: 'background.paper',
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            '&:hover': { bgcolor: 'primary.main', color: 'white', borderColor: 'primary.main' }
+                        }}
+                        component={motion.div}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    />
+                ))}
+                {/* Opção de Nova Categoria */}
+                <Chip
+                    icon={<AddIcon />}
+                    label="Outra"
+                    variant="outlined"
+                    onClick={() => {
+                        Handlers.addMessageToChat(props, { sender: 'user', text: 'Outra categoria' })
+                        Handlers.addMessageWithTyping(props, { sender: 'bot', text: 'Qual nome você quer dar para essa categoria?' })
+                        props.setShowTextInput(true)
+                        // Pequeno hack: o próximo texto digitado será tratado como categoria no handleUserInput
+                    }}
+                    sx={{ cursor: 'pointer' }}
+                />
+            </Stack>
+        </motion.div>
+    )
+}
 
 // --- Componentes de UI  ---
 export const RenderDatePicker = (props: HandlerProps) => {

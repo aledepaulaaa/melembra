@@ -4,28 +4,31 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DeleteIcon from '@mui/icons-material/Delete'
+import SourceOutlinedIcon from '@mui/icons-material/SourceOutlined'
+import ArchiveIcon from '@mui/icons-material/Archive'
 import EventIcon from '@mui/icons-material/Event'
 import NotesIcon from '@mui/icons-material/Notes'
 import { Reminder } from '@/interfaces/IReminder'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { useAppSelector } from '@/app/store/hooks'
-import { deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
-import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button, Paper, Grid } from '@mui/material'
+import { archiveReminder, deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
+import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button, Paper, Grid, Fab, Tooltip } from '@mui/material'
+import ArchivedRemindersDialog from '../dialogs/ArchivedRemindersDialog'
 
 export default function ReminderList() {
     const { openSnackbar } = useSnackbar()
     const [reminders, setReminders] = React.useState<Reminder[]>([])
     const [loading, setLoading] = React.useState(true)
+    const [openArchives, setOpenArchives] = React.useState(false)
     const { user, status } = useAppSelector((state) => state.auth)
     const userId = user?.uid
 
-    // Função para buscar os lembretes (sem alteração na lógica)
     const fetchReminders = async () => {
         if (!userId) return
         setLoading(true)
         const result = await getReminders(userId)
         if (result.success && result.reminders) {
-            setReminders(result.reminders as Reminder[]) // Usando a interface atualizada
+            setReminders(result.reminders as Reminder[])
         } else {
             console.error(result.error)
         }
@@ -38,11 +41,23 @@ export default function ReminderList() {
         }
     }, [userId, status])
 
-    // Funções de manipulação (sem alteração na lógica)
     const handleStatusChange = async (reminderId: string, newStatus: boolean) => {
         setReminders(reminders.map(r => r.id === reminderId ? { ...r, completed: newStatus } : r))
         await updateReminderStatus(reminderId, newStatus)
         fetchReminders()
+    }
+
+    // --- Lógica de Arquivar ---
+    const handleArchive = async (reminderId: string) => {
+        // Remove da lista visualmente na hora
+        setReminders(reminders.filter(r => r.id !== reminderId))
+        const result = await archiveReminder(reminderId)
+        if (result.success) {
+            openSnackbar('Lembrete arquivado!', 'success')
+        } else {
+            openSnackbar('Erro ao arquivar.', 'error')
+            fetchReminders() // Reverte se der erro
+        }
     }
 
     const handleDelete = async (reminderId: string) => {
@@ -74,7 +89,7 @@ export default function ReminderList() {
 
     return (
         <Box sx={{ ml: -1 }}>
-             <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
+            <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                 Seus Lembretes
             </Typography>
             {reminders.length > 0 ? (
@@ -99,7 +114,15 @@ export default function ReminderList() {
                                             {reminder.title}
                                         </Typography>
                                     </Box>
-                                    <Chip label={reminder.completed ? "Concluído" : "Agendado"} color={reminder.completed ? "default" : "secondary"} size="small" />
+                                    {/* Chip de Categoria (se existir) */}
+                                    {reminder.category && reminder.category !== 'Geral' && (
+                                        <Chip label={reminder.category} size="small" sx={{ mr: 1 }} />
+                                    )}
+                                    <Chip
+                                        label={reminder.completed ? "Concluído" : "Agendado"}
+                                        color={reminder.completed ? "default" : "secondary"}
+                                        size="small"
+                                    />
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <Stack spacing={2}>
@@ -138,9 +161,16 @@ export default function ReminderList() {
                                                 control={<Switch checked={!!reminder.completed} onChange={(e) => handleStatusChange(reminder.id, e.target.checked)} />}
                                                 label="Concluído"
                                             />
+                                            {/* Renderiza BOTÃO ARQUIVAR se estiver concluído */}
                                             {reminder.completed && (
-                                                <Button variant="outlined" color="error" size="small" startIcon={<DeleteIcon />} onClick={() => handleDelete(reminder.id)}>
-                                                    Apagar
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    size="small"
+                                                    startIcon={<ArchiveIcon />}
+                                                    onClick={() => handleArchive(reminder.id)}
+                                                >
+                                                    Arquivar
                                                 </Button>
                                             )}
                                         </Stack>
@@ -155,6 +185,24 @@ export default function ReminderList() {
                     Você ainda não tem lembretes salvos. Crie o seu primeiro!
                 </Typography>
             )}
+            {/* --- Botão flutuante (Histórico) --- */}
+            <Tooltip title="Histórico / Arquivados">
+                <Fab
+                    color="primary"
+                    aria-label="arquivos"
+                    sx={{ position: 'fixed', bottom: 80, right: 16 }} // Ajuste a posição conforme necessário
+                    onClick={() => setOpenArchives(true)}
+                >
+                    <SourceOutlinedIcon />
+                </Fab>
+            </Tooltip>
+            {/* --- DIALOG DE ARQUIVADOS --- */}
+            <ArchivedRemindersDialog
+                open={openArchives}
+                onClose={() => setOpenArchives(false)}
+                userId={userId || ''}
+                onUpdate={fetchReminders} // Atualiza a lista principal se restaurar algo
+            />
         </Box>
     )
 }
