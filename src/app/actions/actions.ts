@@ -220,15 +220,15 @@ export async function getReminders(userId: string) {
             const data = doc.data()
             return {
                 id: doc.id,
-                ...data,
                 title: data.title,
+                completed: data.completed,
                 cor: data.cor || '#BB86FC',
                 sobre: data.sobre || '',
                 img: data.img || '',
                 category: data.category || 'Geral',
                 recurrence: data.recurrence || 'Não repetir',
-                scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
-                createdAt: (data.createdAt as AdminTimestamp).toDate().toISOString(),
+                scheduledAt: data.scheduledAt ? (data.scheduledAt as AdminTimestamp).toDate().toISOString() : new Date().toISOString(),
+                createdAt: data.createdAt ? (data.createdAt as AdminTimestamp).toDate().toISOString() : new Date().toISOString(),
             }
         })
         return { success: true, reminders }
@@ -254,14 +254,15 @@ export async function getArchivedReminders(userId: string) {
             const data = doc.data()
             return {
                 id: doc.id,
-                ...data,
                 title: data.title,
+                completed: data.completed,
                 cor: data.cor || '#BB86FC',
                 sobre: data.sobre || '',
                 img: data.img || '',
                 category: data.category || 'Geral',
-                scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
-                createdAt: (data.createdAt as AdminTimestamp).toDate().toISOString(),
+                recurrence: data.recurrence || 'Não repetir',
+                scheduledAt: data.scheduledAt ? (data.scheduledAt as AdminTimestamp).toDate().toISOString() : new Date().toISOString(),
+                createdAt: data.createdAt ? (data.createdAt as AdminTimestamp).toDate().toISOString() : new Date().toISOString(),
             }
         })
         return { success: true, reminders }
@@ -309,13 +310,12 @@ export async function getNextUpcomingReminder(userId: string) {
 
         const reminder = {
             id: doc.id,
-            ...data,
             title: data.title,
             cor: data.cor || '#BB86FC',
             category: data.category || 'Geral',
             scheduledAt: (data.scheduledAt as AdminTimestamp).toDate().toISOString(),
+            createdAt: data.createdAt ? (data.createdAt as AdminTimestamp).toDate().toISOString() : new Date().toISOString(),
         }
-
         return { success: true, reminder }
     } catch (error) {
         console.error('Erro ao buscar próximo lembrete:', error)
