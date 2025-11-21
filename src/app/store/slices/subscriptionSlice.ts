@@ -1,4 +1,4 @@
-//bora-app/src/app/store/slices/subscriptionSlice.ts
+//appbora/src/app/store/slices/subscriptionSlice.ts
 import { ISubscription, SubscriptionState } from '@/interfaces/IBoraPayment'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 

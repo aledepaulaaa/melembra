@@ -11,8 +11,11 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import SendIcon from '@mui/icons-material/Send'
 import DiamondOutlinedIcon from '@mui/icons-material/DiamondOutlined'
 import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined'
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import TextsmsOutlinedIcon from '@mui/icons-material/TextsmsOutlined'
 import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import CategoryIcon from '@mui/icons-material/Category'
 import MicIcon from '@mui/icons-material/Mic'
 import { ConversationStep, ReminderFormProps } from '@/interfaces/IReminder'
 import useReminderForm from '@/hooks/forms/useReminderForm'
@@ -23,7 +26,7 @@ import { isToday } from 'date-fns'
 import UsageCountdown from '@/components/ui/planos/upgradeplanos/UsageCountdown'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import AuthPromptDialog from '@/components/ui/dialogs/AuthPromptDialog'
-import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper, Tooltip, Stack } from '@mui/material'
+import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper, Tooltip, Stack, Menu, MenuItem, ListItemIcon, ListItemText, useTheme } from '@mui/material'
 
 const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
     const router = useRouter()
@@ -33,7 +36,7 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
                 <Typography variant="h6" fontWeight={700}>Limite diário atingido!</Typography>
                 <Typography sx={{ my: 1 }}>Seu próximo lembrete gratuito estará disponível em:</Typography>
                 {lastUsage && <UsageCountdown lastUsageTime={lastUsage} />}
-                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, assine o plus.</Typography>
+                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, assine um plano.</Typography>
                 <Button startIcon={<DiamondOutlinedIcon />} variant="outlined" onClick={() => router.push('/planos')}>
                     Assinar
                 </Button>
@@ -54,8 +57,12 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     const { openSnackbar } = useSnackbar()
     const [isBlocked, setIsBlocked] = React.useState(false)
     const [lastUsage, setLastUsage] = React.useState<Date | null>(null)
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+    const openMenu = Boolean(anchorEl)
     const { user, status: authStatus } = useAppSelector((state) => state.auth)
     const userId = user?.uid
+    const theme = useTheme()
+    const isPremium = plan === 'premium'
 
     // --- Lógica de Bloqueio (Planos) ---
     React.useEffect(() => {
@@ -89,38 +96,70 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     const handlerProps = { ...formState, userId, router, onChatStart, subscription, openSnackbar }
 
     // Se o histórico estiver vazio, o bot dá as boas-vindas para iniciar o fluxo e mostrar as categorias
-    React.useEffect(() => {
-        if (formState.chatHistory.length === 0) {
-            // Pequeno timeout para não conflitar com a montagem inicial
-            const timer = setTimeout(() => {
-                Handlers.addMessageToChat(handlerProps, {
-                    sender: 'bot',
-                    text: 'Olá! Bora lembrar do que hoje?'
-                })
-            }, 500)
-            return () => clearTimeout(timer)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    // React.useEffect(() => {
+    //     if (formState.chatHistory.length === 0) {
+    //         // Pequeno timeout para não conflitar com a montagem inicial
+    //         Handlers.addMessageToChat(handlerProps, {
+    //             sender: 'bot',
+    //             text: 'Olá! Bora lembrar do que hoje?'
+    //         })
+    //     }
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [])
 
     // --- PROCESSAMENTO DE ÁUDIO ---
     // Monitora quando o blob de áudio é gerado (ao soltar o botão ou acabar o tempo)
     React.useEffect(() => {
         if (audioRecorder.audioBlob) {
-            // Chama o handler que criamos na Etapa 3
             Handlers.handleVoiceProcess(handlerProps, audioRecorder.audioBlob)
-            // Reseta o áudio para permitir nova gravação limpa
             audioRecorder.resetAudio()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [audioRecorder.audioBlob])
 
     const onUserSubmit = () => {
+        onChatStart()
         Handlers.handleUserInput(handlerProps, formState.userInput, formState.chatHistory.length)
         formState.setUserInput('')
     }
 
+    const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget)
+    }
+    const handleMenuClose = () => {
+        setAnchorEl(null)
+    }
+    const handleCategoryOption = () => {
+        handleMenuClose()
+        onChatStart() // Ativa logo
+        // Aciona o fluxo de categoria manualmente
+        Handlers.triggerCategoryFlow(handlerProps)
+    }
+
     const messageVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }
+
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+    const handleImageUploadClick = () => {
+        handleMenuClose() // Fecha o menu
+        if (fileInputRef.current) {
+            fileInputRef.current.click() // Abre o seletor de arquivos nativo
+        }
+    }
+
+    // 2. Ação quando o usuário seleciona a foto
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (file) {
+            onChatStart() // Garante que a UI reaja (logo embaça)
+            // Chama o handler de processamento (Vision + Gemini)
+            Handlers.handleImageProcess(handlerProps, file)
+        }
+        // Limpa o input para permitir selecionar a mesma foto novamente se quiser
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
 
     if (authStatus === 'loading') return <CircularProgress />
     if (isBlocked) return <UpgradeBlocker lastUsage={lastUsage} />
@@ -128,18 +167,25 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
             <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: 'transparent', overflow: 'hidden', height: '100%', position: 'relative' }}>
+                <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                />
                 {/* --- BOTÃO CHAT (Canto Superior Direito) --- */}
-                {formState.chatHistory.length > 0 && (
-                    <Box sx={{ position: 'absolute', top: 10, right: 15, zIndex: 10 }}>
+                {formState.chatHistory.length > 1 && (
+                    <Box sx={{ position: 'absolute', top: 30, right: 15, zIndex: 10 }}>
                         <Tooltip title="Novo Lembrete">
                             <IconButton
+                                size="large"
                                 onClick={() => Handlers.handleNewChat(handlerProps)}
                                 sx={{
                                     bgcolor: 'background.paper',
                                     boxShadow: 1,
-                                    '&:hover': { bgcolor: 'background.default' }
+                                    '&:hover': { bgcolor: 'background.default', boxShadow: 1 }
                                 }}
-                                size="large"
                             >
                                 <TextsmsOutlinedIcon color="primary" fontSize="small" />
                             </IconButton>
@@ -158,11 +204,11 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                     <Box sx={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start', my: 1 }}>
                                         <Box sx={{ bgcolor: msg.sender === 'user' ? 'primary.main' : 'background.paper', p: 1.5, borderRadius: 2, maxWidth: '80%' }}>
                                             {msg.text && <Typography sx={{ whiteSpace: 'pre-wrap' }}>{msg.text}</Typography>}
-                                            {msg.text === 'Seu lembrete foi criado!' && (
+                                            {/* {msg.text === 'Seu lembrete foi criado!' && (
                                                 <Button variant="outlined" sx={{ mt: 1 }} onClick={() => router.push('/lembretes')}>
                                                     Ver meus lembretes
                                                 </Button>
-                                            )}
+                                            )} */}
                                             {/* Renderização condicional dos passos do fluxo */}
                                             {isLastBotMessage && formState.step === ConversationStep.ASKING_CATEGORY && (
                                                 <UI.RenderCategorySelector {...handlerProps} />
@@ -173,10 +219,6 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 && <UI.RenderTimeClockWithConfirm {...handlerProps} />}
                                             {isLastBotMessage && formState.step === ConversationStep.ASKING_RECURRENCE
                                                 && <UI.RenderRecurrenceButtons {...handlerProps} formattedTime={formState.reminder.time || ''} />}
-
-                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_CUSTOMIZATION && lastUserMessage === 'Sim, quero personalizar.' && (
-                                                <UI.RenderFullCustomizationForm {...handlerProps} />
-                                            )}
                                             {isLastBotMessage && formState.step === ConversationStep.ASKING_CUSTOMIZATION && lastUserMessage !== 'Sim, quero personalizar.' && (
                                                 <UI.RenderCustomizationPrompt {...handlerProps} />
                                             )}
@@ -200,18 +242,18 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                 {/* --- ÁREA DE INPUT / GRAVAÇÃO --- */}
                 <AnimatePresence>
                     {formState.showTextInput && (
-                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
-                            <Box className="animated-border" sx={{ borderRadius: '20px', display: "flex", justifyContent: "center", p: 1 }}>
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} style={{ padding: 8 }}>
+                            <Box className="animated-border" sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: '20px', display: "flex", justifyContent: "center", p: 0.5 }}>
                                 <Box
                                     sx={{
                                         p: 1,
                                         pl: 2,
                                         display: 'flex',
-                                        alignItems: 'center',
+                                        alignItems: 'flex-end',
                                         width: '100%',
                                         borderRadius: '19px',
                                         bgcolor: 'var(--background)',
-                                        minHeight: '64px' // Altura fixa para evitar pulos na troca de UI
+                                        minHeight: '56px' // Altura fixa para evitar pulos na troca de UI
                                     }}
                                 >
                                     {/* --- MODO GRAVAÇÃO --- */}
@@ -235,7 +277,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 {/* Texto do Timer com largura fixa para não tremer */}
                                                 <Typography variant="body1" color="error" fontWeight={600}>
                                                     <Box component="span" sx={{ minWidth: '45px', display: 'inline-block' }}>
-                                                        0:{audioRecorder.timeLeft < 10 ? `0${audioRecorder.timeLeft}` : audioRecorder.timeLeft}
+                                                        Gravando... 0:{audioRecorder.timeLeft < 10 ? `0${audioRecorder.timeLeft}` : audioRecorder.timeLeft}
                                                     </Box>
                                                 </Typography>
                                             </Stack>
@@ -252,6 +294,35 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                     ) : (
                                         /* --- MODO TEXTO (PADRÃO) --- */
                                         <>
+                                            {/* --- BOTÃO MAIS (+) / MENU --- */}
+                                            <IconButton onClick={handleMenuClick}
+                                                sx={{
+                                                    color: 'text.secondary',
+                                                    mb: 0.5,
+                                                    ml: 0.5
+                                                }}
+                                            >
+                                                <AddCircleOutlineIcon fontSize="medium" />
+                                            </IconButton>
+                                            <Menu
+                                                anchorEl={anchorEl}
+                                                open={openMenu}
+                                                onClose={handleMenuClose}
+                                                anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                                transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                                PaperProps={{ sx: { borderRadius: 3, mb: 1 } }}
+                                            >
+                                                <MenuItem onClick={handleCategoryOption}>
+                                                    <ListItemIcon><CategoryIcon fontSize="small" /></ListItemIcon>
+                                                    <ListItemText>Categorias</ListItemText>
+                                                </MenuItem>
+                                                <MenuItem onClick={handleImageUploadClick} disabled={!isPremium}>
+                                                    <ListItemIcon><ImageOutlinedIcon fontSize="small" /></ListItemIcon>
+                                                    <ListItemText>
+                                                        Anexar Imagem {!isPremium && "(Premium)"}
+                                                    </ListItemText>
+                                                </MenuItem>
+                                            </Menu>
                                             <TextField
                                                 fullWidth
                                                 variant="standard" // Standard para limpar visualmente
@@ -261,30 +332,31 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 onChange={(e) => formState.setUserInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && onUserSubmit()}
                                                 disabled={formState.isLoading}
+                                                sx={{ mx: 1 }}
+                                                autoFocus
                                                 placeholder={
                                                     formState.step === ConversationStep.ASKING_CATEGORY
-                                                        ? "Selecione acima ou digite uma nova..."
-                                                        : formState.step === ConversationStep.ASKING_TITLE
-                                                            ? "Qual o título do lembrete?"
-                                                            : "Responda..."
+                                                        ? "Digite o nome da categoria..."
+                                                        : "Bora..."
                                                 }
-                                                autoFocus
-                                                slotProps={{ input: { disableUnderline: true } }} // Remove linha do standard
-                                                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 4, px: 2, py: 1 }}
+                                                slotProps={{
+                                                    input: {
+                                                        disableUnderline: true,
+                                                        style: { paddingBottom: 12, paddingLeft: 8 }
+                                                    }
+                                                }}
                                             />
-                                            <Stack direction="row" spacing={1}>
-                                                {/* Botão de Áudio (só aparece se input estiver vazio ou a critério) */}
-                                                {formState.userInput.length === 0 && (
-                                                    <Tooltip title="Gravar áudio (Max 20s)">
-                                                        <IconButton
-                                                            onClick={audioRecorder.startRecording}
-                                                            disabled={formState.isLoading}
-                                                            color="primary"
-                                                        >
-                                                            <KeyboardVoiceOutlinedIcon />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
+                                            <Stack direction="row" spacing={0.5} sx={{ mb: 0.5, mr: 0.5 }}>
+                                                {/* Botão de Áudio */}
+                                                <Tooltip title="Gravar áudio (Max 20s)">
+                                                    <IconButton
+                                                        onClick={audioRecorder.startRecording}
+                                                        disabled={formState.isLoading}
+                                                        color="primary"
+                                                    >
+                                                        <KeyboardVoiceOutlinedIcon />
+                                                    </IconButton>
+                                                </Tooltip>
                                                 <IconButton
                                                     color="primary"
                                                     onClick={onUserSubmit}

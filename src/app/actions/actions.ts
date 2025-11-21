@@ -351,3 +351,28 @@ export async function sendNotification(message: string, userId: string) {
         return { success: false, error: 'Erro ao enviar notificação push' }
     }
 }
+
+export async function snoozeReminder(reminderId: string, minutesToAdd: number) {
+    if (!reminderId) return { success: false }
+    try {
+        const reminderRef = db.collection('reminders').doc(reminderId)
+        const doc = await reminderRef.get()
+        const currentData = doc.data()
+
+        if (!currentData) throw new Error("Lembrete não encontrado")
+
+        // Calcula nova data baseada na ATUAL (agora + soneca), não na original
+        const now = new Date()
+        const newScheduledAt = new Date(now.getTime() + minutesToAdd * 60000)
+
+        await reminderRef.update({
+            scheduledAt: AdminTimestamp.fromDate(newScheduledAt),
+            sent: false, // Reseta para o cron pegar de novo
+            preNotificationSent: false
+        })
+        return { success: true, newDate: newScheduledAt.toISOString() }
+    } catch (error) {
+        console.error(error)
+        return { success: false }
+    }
+}

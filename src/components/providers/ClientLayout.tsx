@@ -16,6 +16,7 @@ import { useAppSelector } from "@/app/store/hooks"
 import UnauthenticatedHeader from "../ui/layout/UnauthenticatedHeader"
 import { Box, AppBar, Toolbar, IconButton, useTheme, Skeleton } from "@mui/material"
 import NextReminderHeader from "../ui/layout/NextReminderHeader"
+import PaymentStatusHandler from "../ui/planos/PaymentStatusHandler"
 
 const drawerWidth = 240
 const miniWidth = 64
@@ -176,6 +177,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                         <NextReminderHeader />
                     </Box>
                 </Toolbar>
+                <PaymentStatusHandler /> 
                 <PageTransition>
                     {children}
                 </PageTransition>

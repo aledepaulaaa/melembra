@@ -91,7 +91,7 @@ export default function PlanosPage() {
                     <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h4" component="h1" fontWeight={700} sx={{ ml: 2 }}>
-                    Faça um upgrade no seu plano
+                    Faça um upgrade no seu Bora
                 </Typography>
             </Box>
             <motion.div variants={containerVariants} initial="hidden" animate="visible">

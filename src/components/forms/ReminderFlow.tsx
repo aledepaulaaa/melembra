@@ -24,14 +24,7 @@ export default function ReminderFlow({ onChatStart }: ReminderFormProps) {
                 zIndex: 1200, // Garante que fique acima de outros elementos
             }}
         >
-            <Box 
-                sx={{
-                    height: 'calc(100vh - 64px)',
-                    width: '100%',
-                    maxWidth: { xs: '100%', md: '800px' }, // Limita a largura em telas maiores
-                    mx: 'auto', // Margem automática horizontal
-                }}
-            >
+            <Box  sx={{ height: 'calc(100vh - 64px)', width: '100%', maxWidth: { xs: '100%', md: '800px' }, mx: 'auto' }}>
                 <ReminderForm onChatStart={onChatStart} />
             </Box>
         </Container>

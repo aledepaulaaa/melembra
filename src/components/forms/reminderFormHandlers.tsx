@@ -5,7 +5,6 @@ import { HandlerProps, ConversationStep, SerializableChatMessage } from '@/inter
 import { getDownloadURL, uploadBytes, ref } from 'firebase/storage'
 import { storage } from '@/app/lib/firebase'
 import { addChatMessage, clearChatHistory, updateLastMessage } from '@/app/store/slices/reminderSlice'
-import { getRandomDateResponse } from '@/app/lib/dateRequestResponses'
 
 /**
  * Adiciona uma mensagem serializável ao store do Redux.
@@ -13,6 +12,61 @@ import { getRandomDateResponse } from '@/app/lib/dateRequestResponses'
  */
 export const addMessageToChat = (props: HandlerProps, message: Omit<SerializableChatMessage, 'id'>) => {
     props.dispatch(addChatMessage({ ...message, id: Date.now() }))
+}
+
+// Função auxiliar para chamar a IA (reutilizável p/ Texto e Áudio)
+const processTextWithAI = async (props: HandlerProps, textToAnalyze: string) => {
+    try {
+        props.setIsLoading(true)
+        props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({
+            sender: 'bot', text: 'Analisando...'
+        }))
+
+        const analyzeResponse = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: textToAnalyze,
+                currentDate: new Date().toISOString() // Envia a hora atual do usuário
+            })
+        })
+
+        const { data } = await analyzeResponse.json()
+
+        // Lógica de processamento (igual a que fizemos antes)
+        let newDate = data.date ? new Date(`${data.date}T12:00:00`) : null
+
+        props.setReminder(prev => ({
+            ...prev,
+            title: data.title || textToAnalyze,
+            date: newDate || prev.date,
+            time: data.time || prev.time,
+            category: data.category || prev.category || 'Geral'
+        }))
+
+        props.setShowTextInput(false)
+
+        // Smart Skip Logic
+        if (data.title && data.date && data.time) {
+            props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({
+                sender: 'bot',
+                text: `Entendi! "${data.title}" para ${new Date(`${data.date}T${data.time}`).toLocaleString('pt-BR')}.\nDeseja personalizar?`
+            }))
+            props.setStep(ConversationStep.ASKING_CUSTOMIZATION)
+        } else if (data.date && !data.time) {
+            props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({ sender: 'bot', text: `Certo, dia ${data.date}. Qual horário?` }))
+            props.setStep(ConversationStep.ASKING_TIME)
+        } else {
+            // Fallback padrão
+            props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({ sender: 'bot', text: 'Para quando devo agendar?' }))
+            props.setStep(ConversationStep.ASKING_DATE)
+        }
+
+    } catch (e) {
+        console.error(e)
+    } finally {
+        props.setIsLoading(false)
+    }
 }
 
 /**
@@ -211,6 +265,11 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
     const trimmedValue = value.trim()
     addMessageToChat(props, { sender: 'user', text: trimmedValue || "Pular" })
 
+    if ((props.step === ConversationStep.ASKING_TITLE || props.step === ConversationStep.ASKING_CATEGORY) && trimmedValue.length > 15) {
+        processTextWithAI(props, trimmedValue)
+        return
+    }
+
     switch (props.step) {
         case ConversationStep.ASKING_CATEGORY:
             // Se o usuário digitou algo na etapa de categoria (ex: clicou em "Outra"), salvamos como categoria
@@ -242,7 +301,7 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
  */
 export const handleNewChat = (props: HandlerProps) => {
     // 1. Limpa histórico no Redux
-    props.dispatch(require('@/app/store/slices/reminderSlice').clearChatHistory())
+    props.dispatch(clearChatHistory())
 
     // 2. Reseta estado local do lembrete
     props.setReminder({
@@ -252,13 +311,18 @@ export const handleNewChat = (props: HandlerProps) => {
     })
 
     // 3. Reseta passos e inputs
-    props.setStep(ConversationStep.ASKING_CATEGORY)
-    props.setShowTextInput(false)
     props.setUserInput('')
+    props.setShowTextInput(true)
     props.setIsLoading(false)
+    props.setStep(ConversationStep.ASKING_TITLE)
 
-    // 4. Inicia conversa novamente (opcional, dependendo se você quer que o bot fale primeiro ou não)
-    props.onChatStart() // props que chama a função de inicializar o chat de novo, basicamente um "Oi" novamente
+    setTimeout(() => {
+        props.onChatStart()
+        addMessageToChat(props, {
+            sender: 'bot',
+            text: 'Novo lembrete! O que manda?'
+        })
+    }, 100)
 }
 
 /**
@@ -336,6 +400,45 @@ export const handleVoiceProcess = async (props: HandlerProps, audioBlob: Blob) =
         console.error(error)
         props.dispatch(updateLastMessage({ sender: 'bot', text: 'Não entendi bem. Pode digitar?' }))
         props.setShowTextInput(true)
+    } finally {
+        props.setIsLoading(false)
+    }
+}
+
+export const triggerCategoryFlow = (props: HandlerProps) => {
+    // Bot pergunta qual categoria
+    addMessageToChat(props, { sender: 'user', text: 'Definir Categoria' })
+    addMessageWithTyping(props, {
+        sender: 'bot',
+        text: 'Ok, selecione uma abaixo ou clique em "Outra" para criar uma nova:'
+    })
+
+    // Muda o passo para renderizar os chips
+    props.setStep(ConversationStep.ASKING_CATEGORY)
+    props.setShowTextInput(true)
+}
+
+export const handleImageProcess = async (props: HandlerProps, imageFile: File) => {
+    props.setIsLoading(true)
+    addMessageToChat(props, { sender: 'user', text: '📷 [Analisando imagem...]' })
+
+    try {
+        const formData = new FormData()
+        formData.append('file', imageFile)
+
+        // 1. Cloud Vision
+        const visionRes = await fetch('/api/vision', { method: 'POST', body: formData })
+        if (!visionRes.ok) throw new Error('Erro na visão')
+        const { text: imageDescription } = await visionRes.json()
+
+        // 2. Envia descrição para o Gemini criar o lembrete
+        // O Gemini vai receber: "Texto detectado: Boleto nubank vencimento 20/11..."
+        // E vai retornar o JSON do lembrete pronto.
+        await processTextWithAI(props, `Crie um lembrete baseado nesta imagem: ${imageDescription}`)
+
+    } catch (error) {
+        console.error(error)
+        addMessageToChat(props, { sender: 'bot', text: 'Não consegui ler essa imagem. Tente uma mais clara.' })
     } finally {
         props.setIsLoading(false)
     }

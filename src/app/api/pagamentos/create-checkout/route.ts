@@ -1,4 +1,4 @@
-//bora-app/src/app/api/pagamentos/create-checkout/route.ts
+//appbora/src/app/api/pagamentos/create-checkout/route.ts
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
@@ -26,9 +26,7 @@ async function findOrCreateStripeCustomer(userId: string): Promise<string> {
     const customer = await stripe.customers.create({
         // Opcional: Adicione o email se você já o tiver
         // email: user.email, 
-        metadata: {
-            firebaseUserId: userId,
-        },
+        metadata: { firebaseUserId: userId },
     })
 
     // 3. Salva o novo ID no documento do usuário no Firestore
@@ -52,7 +50,7 @@ export async function POST(request: Request) {
 
         // Obtém o ID do cliente da Stripe (cria se não existir)
         const stripeCustomerId = await findOrCreateStripeCustomer(userId)
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.aplicativobora.com.br'
 
         // Cria a sessão de Checkout na Stripe
         const session = await stripe.checkout.sessions.create({

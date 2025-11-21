@@ -1,4 +1,4 @@
-//bora-app/src/interfaces/IBoraPayments.ts
+//appbora/src/interfaces/IBoraPayments.ts
 import { Timestamp } from "firebase-admin/firestore"
 
 /**
@@ -10,13 +10,15 @@ import { Timestamp } from "firebase-admin/firestore"
  * - incomplete: Pagamento inicial não foi concluído
  * - unpaid: Pagamento falhou e a assinatura foi movida para este estado
  */
-export type SubscriptionStatus =
-    | 'active'
-    | 'trialing'
-    | 'past_due'
-    | 'canceled'
-    | 'incomplete'
-    | 'unpaid'
+export type SubscriptionStatus = 
+  | 'active' 
+  | 'canceled' 
+  | 'incomplete' 
+  | 'incomplete_expired' 
+  | 'past_due' 
+  | 'paused' 
+  | 'trialing' 
+  | 'unpaid'
 
 /**
  * Estrutura do documento de assinatura que será salvo no Firestore
@@ -28,19 +30,19 @@ export interface ISubscription {
     stripeSubscriptionId: string
     stripePriceId: string
     status: SubscriptionStatus
-    // Timestamps do Firestore para gerenciar o período da assinatura
     currentPeriodStart: Timestamp
     currentPeriodEnd: Timestamp
-    createdAt: Timestamp
-    canceledAt?: Timestamp
-    endedAt?: Timestamp
+    createdAt: Timestamp | null
+    canceledAt?: Timestamp | null
+    endedAt?: Timestamp | null
+    cancelAtPeriodEnd?: boolean
 }
 
 // Define o formato do nosso estado de assinatura
 export interface SubscriptionState {
-    plan: 'free' | 'plus' | 'premium' | 'canceled' // Planos simples para a UI
+    plan: 'free' | 'plus' | 'premium' | 'canceled'
     status: 'loading' | 'active' | 'inactive' | 'error'
-    data: ISubscription | null // Opcional: Armazenar todos os dados se precisar
+    data: ISubscription | null
 }
 
 /**

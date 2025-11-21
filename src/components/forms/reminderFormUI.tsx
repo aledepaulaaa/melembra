@@ -16,17 +16,11 @@ import { fileToBase64 } from '@/app/utils/base64'
 
 // --- COMPONENTE DE CATEGORIAS ---
 export const RenderCategorySelector = (props: HandlerProps) => {
-
-    const handleCustomCategory = () => {
-        // Se o usuário clicar em "Adicionar/Outro", focamos no input para ele digitar
-        Handlers.addMessageToChat(props, { sender: 'bot', text: 'Qual o nome da nova categoria?' })
-        props.setShowTextInput(true)
-        // Mantemos o step mas indicamos que o próximo input será a categoria customizada
-        // Podemos tratar isso no handleUserInput verificando se o reminder.category ainda é null
-    }
-
     return (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+        >
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 Selecione uma categoria para começar:
             </Typography>

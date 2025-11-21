@@ -1,4 +1,4 @@
-// melemebra/src/app/api/pagamentos/manage-plan/route.ts
+//appbora/src/app/api/pagamentos/manage-plan/route.ts
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getFirebaseFirestore } from '@/app/lib/firebase-admin'
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
             return new NextResponse('ID de cliente da Stripe não encontrado', { status: 404 })
         }
 
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://aplicativobora.com.br'
 
         // Cria uma sessão do Portal de Faturamento
         const portalSession = await stripe.billingPortal.sessions.create({

@@ -1,4 +1,4 @@
-//bora-app/src/components/ui/UpgradeButtonHeader.tsx
+//appbora/src/components/ui/UpgradeButtonHeader.tsx
 import { useAppSelector } from "@/app/store/hooks"
 import { Button } from "@mui/material"
 import { useRouter } from 'next/navigation' 
@@ -18,7 +18,7 @@ export default function UpgradeButtonHeader() {
             variant="outlined"
             startIcon={<DiamondOutlinedIcon fontSize="large" />}
             onClick={() => router.push('/planos')}
-            sx={{ borderRadius: 4, textTransform: "none", fontWeight: "bold", p: 1 }}
+            sx={{ borderRadius: 4, textTransform: "none", fontWeight: "bold", p: 1, mt: 0.8 }}
         >
             Assinar
         </Button>

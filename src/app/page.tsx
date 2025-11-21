@@ -100,10 +100,10 @@ export default function Home() {
             sx={{
                 flexGrow: 1,
                 display: 'flex',
+                overflow: 'hidden',
                 flexDirection: 'column',
                 width: '100%',
                 position: 'relative',
-                zIndex: 0,
             }}
         >
             <WelcomeInstallDialog />
@@ -119,10 +119,16 @@ export default function Home() {
                     {!isChatStarted && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: "easeInOut" }}
                             exit={{ opacity: 0, y: -10 }}
+                            animate={{
+                                opacity: isChatStarted ? 0.1 : 1,
+                                scale: isChatStarted ? 0.9 : 1,
+                                filter: isChatStarted ? 'blur(6px)' : 'blur(0px)',
+                                y: isChatStarted ? -50 : 0
+                            }}
                         >
-                            <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 10 }}>
+                            <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 15, pb: 2 }}>
                                 <LogoAnimated size={55} />
                                 <Typography
                                     lineHeight={1}
@@ -139,7 +145,9 @@ export default function Home() {
                     )}
                 </AnimatePresence>
             </Box>
-            <ReminderFlow onChatStart={() => setIsChatStarted(true)} />
+            <Box sx={{ flexGrow: 1, zIndex: 10, position: 'relative' }}>
+                <ReminderFlow onChatStart={() => setIsChatStarted(true)} />
+            </Box>
         </Box>
     )
 }
