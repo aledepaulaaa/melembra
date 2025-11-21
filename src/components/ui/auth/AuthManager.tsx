@@ -25,6 +25,7 @@ function AuthListener() {
                     uid: user.uid,
                     email: user.email,
                     isAnonymous: user.isAnonymous,
+                    avatar: user.photoURL,
                 }))
 
                 const token = await user.getIdToken()
