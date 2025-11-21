@@ -33,7 +33,7 @@ export default function WhatsAppInfoDialog({ open, onClose }: Props) {
                     </Alert>
                     <Alert severity='info' sx={{ fontSize: 16}}>
                         Existem casos também onde o número salvo no WhatsApp pode ser: **+55(DDD)8334-7898** sem o dígito (9) e que também é aceito.
-                        Recomendamos verificar seu número correto em seu whatsapp antes de salvar aqui no Me Lembra.
+                        Recomendamos verificar seu número correto em seu whatsapp antes de salvar aqui no Bora.
                     </Alert>
                 </DialogContentText>
             </DialogContent>

@@ -147,7 +147,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                     </Box>
                 )}
                 {/* --- ÁREA DE CHAT --- */}
-                <Box ref={chatContainerRef} sx={{ flexGrow: 1, overflowY: 'auto', p: 2, pb: 10, '&::-webkit-scrollbar': { width: '8px' } }}>
+                <Box ref={chatContainerRef} sx={{ flexGrow: 1, overflowY: 'auto', p: 8, pb: 10, '&::-webkit-scrollbar': { width: '8px' } }}>
                     <AnimatePresence>
                         {formState.chatHistory.map((msg, index) => {
                             const isLastBotMessage = msg.sender === 'bot' && index === formState.chatHistory.length - 1

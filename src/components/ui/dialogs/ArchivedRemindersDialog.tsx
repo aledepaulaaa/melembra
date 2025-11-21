@@ -95,7 +95,7 @@ export default function ArchivedRemindersDialog({ open, onClose, userId, onUpdat
                             >
                                 <ListItemText
                                     primary={
-                                        <Stack direction="row" alignItems="center" gap={1}>
+                                        <Stack  direction="row" alignItems="center" gap={1}>
                                             <Typography fontWeight={600}>{item.title}</Typography>
                                             {item.category && <Chip label={item.category} size="small" style={{ fontSize: '0.6rem' }} />}
                                         </Stack>
@@ -108,6 +108,7 @@ export default function ArchivedRemindersDialog({ open, onClose, userId, onUpdat
                                             </Typography>
                                         </Stack>
                                     }
+                                    slotProps={{ primary: { component: 'div'}, secondary: { component: 'div' } }}
                                 />
                             </ListItem>
                         ))}

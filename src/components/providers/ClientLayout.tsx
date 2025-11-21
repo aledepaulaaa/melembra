@@ -99,9 +99,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     >
                         <MenuIconCustom color={iconColor} />
                     </IconButton>
-                    <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
+                    <Box sx={{ flexGrow: 1, textAlign: 'center', }}>
                         <UpgradeButtonHeader />
-                        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                        <Box sx={{ display: { xs: 'flex', sm: 'block' }, justifyContent: 'center', mt: 1, mb: 0.8 }}>
                             <NextReminderHeader />
                         </Box>
                     </Box>
@@ -168,13 +168,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                         alignItems: 'center',
                         top: 5,
                         gap: 2, // Espaçamento entre o Upgrade e o Reminder
-                        width: '100%', // Garante centralização
                         pointerEvents: 'none' // Permite clicar nos elementos abaixo se não clicar nos botões
                     }}
                 >
                     <Box sx={{ pointerEvents: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
                         <UpgradeButtonHeader />
-                        <NextReminderHeader /> {/* --- CHIP NO DESKTOP --- */}
+                        <NextReminderHeader />
                     </Box>
                 </Toolbar>
                 <PageTransition>

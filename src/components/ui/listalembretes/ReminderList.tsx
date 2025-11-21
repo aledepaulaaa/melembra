@@ -1,9 +1,8 @@
 'use client'
-//bora-app/src/components/ui/ReminderList.tsx
+//appbora/src/components/ui/ReminderList.tsx
 import React from 'react'
 import { motion } from 'framer-motion'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import DeleteIcon from '@mui/icons-material/Delete'
 import SourceOutlinedIcon from '@mui/icons-material/SourceOutlined'
 import ArchiveIcon from '@mui/icons-material/Archive'
 import EventIcon from '@mui/icons-material/Event'
@@ -11,9 +10,9 @@ import NotesIcon from '@mui/icons-material/Notes'
 import { Reminder } from '@/interfaces/IReminder'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { useAppSelector } from '@/app/store/hooks'
-import { archiveReminder, deleteReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
-import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button, Paper, Grid, Fab, Tooltip } from '@mui/material'
+import { archiveReminder, getReminders, updateReminderStatus } from '@/app/actions/actions'
 import ArchivedRemindersDialog from '../dialogs/ArchivedRemindersDialog'
+import { Box, Typography, Skeleton, Accordion, AccordionDetails, AccordionSummary, Chip, FormControlLabel, Switch, Stack, Button, Paper, Fab, Tooltip } from '@mui/material'
 
 export default function ReminderList() {
     const { openSnackbar } = useSnackbar()
@@ -23,28 +22,32 @@ export default function ReminderList() {
     const { user, status } = useAppSelector((state) => state.auth)
     const userId = user?.uid
 
-    const fetchReminders = async () => {
+    const hasFetched = React.useRef(false)
+
+    const fetchReminders = React.useCallback(async (force = false) => {
         if (!userId) return
+
+        if (hasFetched.current && !force) return
+
         setLoading(true)
         const result = await getReminders(userId)
         if (result.success && result.reminders) {
             setReminders(result.reminders as Reminder[])
-        } else {
-            console.error(result.error)
+            hasFetched.current = true
         }
         setLoading(false)
-    }
+    }, [userId])
 
     React.useEffect(() => {
-        if (status !== 'loading') {
+        if (status !== 'loading' && userId) {
             fetchReminders()
         }
-    }, [userId, status])
+    }, [userId, status, fetchReminders])
 
     const handleStatusChange = async (reminderId: string, newStatus: boolean) => {
         setReminders(reminders.map(r => r.id === reminderId ? { ...r, completed: newStatus } : r))
         await updateReminderStatus(reminderId, newStatus)
-        fetchReminders()
+        fetchReminders(true)
     }
 
     // --- Lógica de Arquivar ---
@@ -57,17 +60,6 @@ export default function ReminderList() {
         } else {
             openSnackbar('Erro ao arquivar.', 'error')
             fetchReminders() // Reverte se der erro
-        }
-    }
-
-    const handleDelete = async (reminderId: string) => {
-        setReminders(reminders.filter(r => r.id !== reminderId))
-        const result = await deleteReminder(reminderId)
-        if (result.success) {
-            openSnackbar('Lembrete apagado!', 'success')
-        } else {
-            openSnackbar('Erro ao apagar. Recarregando lista...', 'error')
-            fetchReminders()
         }
     }
 
@@ -88,7 +80,7 @@ export default function ReminderList() {
     }
 
     return (
-        <Box sx={{ ml: -1 }}>
+        <Box sx={{ ml: -1, mt: 5 }}>
             <Typography variant="h4" fontWeight={900} component="h2" gutterBottom>
                 Seus Lembretes
             </Typography>

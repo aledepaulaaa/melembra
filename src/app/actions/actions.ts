@@ -1,4 +1,4 @@
-//bora-app/src/app/actions/actions.ts
+//appbora/src/app/actions/actions.ts
 'use server'
 import webpush from 'web-push'
 import { getFirebaseFirestore as getAdminDb, getFirebaseAuth } from '../lib/firebase-admin'
@@ -98,7 +98,15 @@ export async function deleteReminder(reminderId: string) {
     }
 }
 
-export async function saveUserProfile(userId: string, profileData: { name: string, whatsappNumber: string, email: string, userId: string }) {
+export async function saveUserProfile(
+    userId: string,
+    profileData: {
+        name: string,
+        whatsappNumber: string,
+        email: string,
+        userId: string,
+        avatar: string | null
+    }) {
     if (!userId) return { success: false, error: 'UserID obrigatório' }
     try {
         const userDocRef = db.collection('users').doc(userId)
@@ -184,7 +192,7 @@ export async function createUser(userData: { email: string, password: string, na
     try {
         const userRecord = await adminAuth.createUser({ email, password, displayName: name })
         const userId = userRecord.uid
-        await saveUserProfile(userId, { name, whatsappNumber, email, userId })
+        await saveUserProfile(userId, { name, whatsappNumber, email, userId, avatar: null })
         return { success: true, userId }
     } catch (error: any) {
         if (error.code === 'auth/email-already-exists') {

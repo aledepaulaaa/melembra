@@ -1,7 +1,7 @@
 'use client'
 // appbora/src/components/ui/layout/NextReminderHeader.tsx
 import React from 'react'
-import { Chip, Fade } from '@mui/material'
+import { Chip, Fade, useTheme } from '@mui/material'
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm'
 import { useAppSelector } from '@/app/store/hooks'
 import { getNextUpcomingReminder } from '@/app/actions/actions'
@@ -9,6 +9,7 @@ import { Reminder } from '@/interfaces/IReminder'
 import NextReminderDialog from '../dialogs/NextReminderDialog'
 
 export default function NextReminderHeader() {
+    const theme = useTheme()
     const { user } = useAppSelector((state) => state.auth)
     const [nextReminder, setNextReminder] = React.useState<Reminder | null>(null)
     const [openDialog, setOpenDialog] = React.useState(false)
@@ -42,7 +43,7 @@ export default function NextReminderHeader() {
                         bgcolor: 'rgba(255, 255, 255, 0.1)', // Transparente para se adaptar ao header
                         backdropFilter: 'blur(4px)',
                         border: `1px solid ${nextReminder.cor || '#BB86FC'}`,
-                        color: 'inherit',
+                        color: theme.palette.text.primary,
                         maxWidth: 150, // Limita largura em telas pequenas
                         cursor: 'pointer',
                         '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' }

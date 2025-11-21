@@ -6,6 +6,7 @@ interface SerializedUser {
     uid: string
     email: string | null
     isAnonymous: boolean
+    avatar: string | null
 }
 
 interface AuthState {
