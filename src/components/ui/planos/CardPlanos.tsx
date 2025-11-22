@@ -28,14 +28,14 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                                 Para quem está começando e quer experimentar.
                                 Ideal para usuários que querem manter lembretes simples e criar o hábito de usar o app
                             </Typography>
-                            <List>
+                           <List>
                                 <ListItem>
                                     <ListItemIcon><CheckIcon color="primary" /></ListItemIcon>
-                                    <ListItemText primary="1 Lembrete por dia" />
+                                    <ListItemText primary="Ideal para testar" />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemIcon><CheckIcon color="primary" /></ListItemIcon>
-                                    <ListItemText primary="Notificações por push" />
+                                    <ListItemText primary="Notificação por push" />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemIcon><CheckIcon color="primary" /></ListItemIcon>
@@ -47,7 +47,7 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                                 </ListItem>
                                 <ListItem>
                                     <ListItemIcon><CloseIcon color="error" /></ListItemIcon>
-                                    <ListItemText primary="Sem recorrência (ex: todo dia ou toda semana)" />
+                                    <ListItemText primary="Sem recorrência" />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemIcon><CloseIcon color="error" /></ListItemIcon>
@@ -99,7 +99,7 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                                     <ListItemIcon><CheckIcon color="primary" /></ListItemIcon><ListItemText primary="Categorias/Tags ilimitadas para organização" />
                                 </ListItem>
                                 <ListItem>
-                                    <ListItemIcon><CheckIcon color="primary" /></ListItemIcon><ListItemText primary="Função Soneca para adiar um lembrete por 5min, 1h, 1 dia" />
+                                    <ListItemIcon><CheckIcon color="primary" /></ListItemIcon><ListItemText primary="Função Soneca para adiar um lembrete por quanto precisar" />
                                 </ListItem>
                                 <ListItem>
                                     <ListItemIcon><CheckIcon color="primary" /></ListItemIcon><ListItemText primary="Integração com WhatsApp (30 lembretes por mês)" />
