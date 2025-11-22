@@ -4,7 +4,7 @@ import ThemeSwitcher from '../theme/ThemeSwitcher'
 import { menuItems } from './menuItems'
 import LogoAnimated from '../logo/LogoAnimated'
 import { useRouter, usePathname } from 'next/navigation'
-import SubscriptionStatus from './SubscriptionStatus'
+import SubscriptionStatusFooter from './SubscriptionStatusFooter'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/app/lib/firebase'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
@@ -136,7 +136,7 @@ export default function SideNav({
                 ))}
             </List>
             <Divider />
-            <SubscriptionStatus desktopOpen={desktopOpen} />
+            <SubscriptionStatusFooter desktopOpen={desktopOpen} />
             {/* ThemeSwitcher que SÓ aparece quando o menu está ABERTO */}
             <Box
                 sx={(theme) => ({

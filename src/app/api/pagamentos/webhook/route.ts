@@ -22,6 +22,12 @@ async function manageSubscriptionStatusChange(
 ) {
     // 1. Busca dados atualizados da Stripe
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    console.log(">>> DADOS VINDOS DA STRIPE:", {
+        id: subscription.id,
+        status: subscription.status,
+        cancel_at_period_end: subscription.cancel_at_period_end,
+        canceled_at: subscription.canceled_at
+    })
 
     // 2. Descobre quem é o usuário no Firebase
     let firebaseUserId: string | null = null
@@ -59,6 +65,7 @@ async function manageSubscriptionStatusChange(
 
         // Campos de Cancelamento e Término
         cancelAtPeriodEnd: subscription.cancel_at_period_end, 
+
         // O Firestore exige NULL se não houver valor, undefined causa crash
         canceledAt: subscription.canceled_at ? Timestamp.fromMillis(subscription.canceled_at * 1000) : null,
         endedAt: subscription.ended_at ? Timestamp.fromMillis(subscription.ended_at * 1000) : null,
