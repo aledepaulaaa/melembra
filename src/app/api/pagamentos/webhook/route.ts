@@ -22,12 +22,10 @@ async function manageSubscriptionStatusChange(
 ) {
     // 1. Busca dados atualizados da Stripe
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    console.log(">>> DADOS VINDOS DA STRIPE:", {
-        id: subscription.id,
-        status: subscription.status,
-        cancel_at_period_end: subscription.cancel_at_period_end,
-        canceled_at: subscription.canceled_at
-    })
+    
+    console.log(`>>> WEBHOOK PROCESSANDO: ${subscription.id}`)
+    console.log(`>>> Status: ${subscription.status}`)
+    console.log(`>>> Cancel At Period End (Stripe): ${subscription.cancel_at_period_end}`)
 
     // 2. Descobre quem é o usuário no Firebase
     let firebaseUserId: string | null = null
