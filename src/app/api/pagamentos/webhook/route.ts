@@ -18,14 +18,19 @@ const db = getFirebaseFirestore()
  */
 async function manageSubscriptionStatusChange(
     subscriptionId: string,
-    customerId: string
+    customerId: string,
+    eventObject?: Stripe.Subscription
 ) {
-    // 1. Busca dados atualizados da Stripe
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    
-    console.log(`>>> WEBHOOK PROCESSANDO: ${subscription.id}`)
-    console.log(`>>> Status: ${subscription.status}`)
-    console.log(`>>> Cancel At Period End (Stripe): ${subscription.cancel_at_period_end}`)
+    // 1. Tenta usar o objeto do evento primeiro (ele é o gatilho da mudança)
+    // Se não vier, busca na API.
+    let subscription = eventObject || await stripe.subscriptions.retrieve(subscriptionId)
+
+    // 1.1. SEGURO CONTRA DELAY:
+    // Se o evento diz que foi uma atualização, mas a API diz que não cancelou,
+    // forçamos uma re-verificação se o objeto do evento tiver cancel_at_period_end = true
+    if (eventObject && eventObject.cancel_at_period_end && !subscription.cancel_at_period_end) {
+        subscription = eventObject
+    }
 
     // 2. Descobre quem é o usuário no Firebase
     let firebaseUserId: string | null = null
@@ -62,7 +67,7 @@ async function manageSubscriptionStatusChange(
         createdAt: Timestamp.fromMillis(subscription.created * 1000),
 
         // Campos de Cancelamento e Término
-        cancelAtPeriodEnd: subscription.cancel_at_period_end, 
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
 
         // O Firestore exige NULL se não houver valor, undefined causa crash
         canceledAt: subscription.canceled_at ? Timestamp.fromMillis(subscription.canceled_at * 1000) : null,
@@ -73,6 +78,7 @@ async function manageSubscriptionStatusChange(
     await db.collection('subscriptions').doc(firebaseUserId).set(subscriptionData, { merge: true })
 
     console.log(`✅ Assinatura sincronizada para ${firebaseUserId}. Status: ${subscription.status}. Cancela no fim? ${subscription.cancel_at_period_end}`)
+    console.log(`>>> LOG FINAL: ID ${subscription.id} | CancelEnd: ${subscription.cancel_at_period_end}`)
 }
 
 export async function POST(request: Request) {
@@ -114,7 +120,7 @@ export async function POST(request: Request) {
             case 'customer.subscription.created':
             case 'customer.subscription.updated':
             case 'customer.subscription.deleted':
-                await manageSubscriptionStatusChange(subscription.id, subscription.customer as string)
+                await manageSubscriptionStatusChange(subscription.id, subscription.customer as string, subscription)
                 break
 
             default:

@@ -16,54 +16,70 @@ export const addMessageToChat = (props: HandlerProps, message: Omit<Serializable
 
 // Função auxiliar para chamar a IA (reutilizável p/ Texto e Áudio)
 const processTextWithAI = async (props: HandlerProps, textToAnalyze: string) => {
-    try {
-        props.setIsLoading(true)
-        props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({
-            sender: 'bot', text: 'Analisando...'
-        }))
+    props.setIsLoading(true)
 
+    // 1. CRUCIAL: Cria a mensagem do BOT imediatamente.
+    // Sem isso, a UI não sabe onde renderizar os componentes de confirmação,
+    // pois 'isLastBotMessage' seria falso (a última seria a do usuário).
+    props.dispatch(addChatMessage({
+        id: Date.now(),
+        sender: 'bot',
+        text: 'Analisando...'
+    }))
+
+    try {
+        // 2. Chama a API
         const analyzeResponse = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 text: textToAnalyze,
-                currentDate: new Date().toISOString() // Envia a hora atual do usuário
+                currentDate: new Date().toISOString()
             })
         })
 
+        if (!analyzeResponse.ok) throw new Error('Erro IA')
         const { data } = await analyzeResponse.json()
 
-        // Lógica de processamento (igual a que fizemos antes)
+        // 3. Processa datas
         let newDate = data.date ? new Date(`${data.date}T12:00:00`) : null
 
         props.setReminder(prev => ({
             ...prev,
             title: data.title || textToAnalyze,
+            sobre: data.description || prev.sobre,
             date: newDate || prev.date,
             time: data.time || prev.time,
-            category: data.category || prev.category || 'Geral'
+            category: data.category || prev.category || 'Geral',
+            recurrence: data.recurrence || 'Não repetir'
         }))
 
         props.setShowTextInput(false)
 
-        // Smart Skip Logic
+        // 4. Atualiza a mensagem que criamos no passo 1 com a resposta final
+        // E define o passo correto para a UI renderizar o componente
         if (data.title && data.date && data.time) {
-            props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({
+            props.dispatch(updateLastMessage({
                 sender: 'bot',
                 text: `Entendi! "${data.title}" para ${new Date(`${data.date}T${data.time}`).toLocaleString('pt-BR')}.\nDeseja personalizar?`
             }))
             props.setStep(ConversationStep.ASKING_CUSTOMIZATION)
-        } else if (data.date && !data.time) {
-            props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({ sender: 'bot', text: `Certo, dia ${data.date}. Qual horário?` }))
+        }
+        else if (data.date && !data.time) {
+            props.dispatch(updateLastMessage({ sender: 'bot', text: `Certo, dia ${data.date}. Qual horário?` }))
             props.setStep(ConversationStep.ASKING_TIME)
-        } else {
-            // Fallback padrão
-            props.dispatch(require('@/app/store/slices/reminderSlice').updateLastMessage({ sender: 'bot', text: 'Para quando devo agendar?' }))
+        }
+        else {
+            // Fallback se faltar dados
+            props.dispatch(updateLastMessage({ sender: 'bot', text: `Entendi "${data.title}". Para qual dia?` }))
             props.setStep(ConversationStep.ASKING_DATE)
         }
 
     } catch (e) {
         console.error(e)
+        // Em caso de erro, avisa na mensagem que já criamos
+        props.dispatch(updateLastMessage({ sender: 'bot', text: 'Não entendi muito bem. Pode tentar simplificar?' }))
+        props.setShowTextInput(true)
     } finally {
         props.setIsLoading(false)
     }
@@ -205,10 +221,13 @@ export const handleConfirmSave = async (props: HandlerProps) => {
     )
 
     if (result.success) {
-        openSnackbar('Lembrete salvo com sucesso!', 'success')
+        props.openSnackbar('Lembrete salvo com sucesso!', 'success')
         addMessageWithTyping(props, {
             sender: 'bot', text: 'Seu lembrete foi criado!',
         })
+
+        // Avança para o passo final
+        props.setStep(ConversationStep.SAVED)
 
         // LÓGICA DE BLOQUEIO IMEDIATO PARA FREE
         if (props.subscription.plan === 'free') {
@@ -291,6 +310,35 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
             break
         case ConversationStep.ASKING_NOTIFICATIONS:
             moveToConfirmation(props)
+            break
+        case ConversationStep.ASKING_CUSTOMIZATION:
+            const lowerText = trimmedValue.toLowerCase()
+
+            // Se o usuário disse algo positivo
+            if (lowerText.includes('sim') || lowerText.includes('quero') || lowerText.includes('claro')) {
+                addMessageWithTyping(props, {
+                    sender: 'bot',
+                    text: 'Excelente! Configure os detalhes abaixo:'
+                })
+                // O step continua ASKING_CUSTOMIZATION, mas a mudança de texto do bot
+                // vai gatilhar o RenderFullCustomizationForm no ReminderForm.tsx
+            }
+            // Se disse algo negativo
+            else if (lowerText.includes('não') || lowerText.includes('nao') || lowerText.includes('pular')) {
+                // Usa a mesma lógica do botão "Pular"
+                addMessageWithTyping(props, {
+                    sender: 'bot',
+                    text: 'Tudo pronto! Por favor, confirme os detalhes:'
+                })
+                props.setStep(ConversationStep.CONFIRMING)
+            }
+            // Caso não entenda
+            else {
+                addMessageWithTyping(props, {
+                    sender: 'bot',
+                    text: 'Não entendi. Digite "Sim" para personalizar ou "Não" para pular.'
+                })
+            }
             break
     }
 }

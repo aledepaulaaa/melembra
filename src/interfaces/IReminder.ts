@@ -46,12 +46,14 @@ export interface Reminder {
 export enum ConversationStep {
     ASKING_CATEGORY,
     ASKING_TITLE,
-    ASKING_DATE, ASKING_TIME,
+    ASKING_DATE,
+    ASKING_TIME,
     ASKING_RECURRENCE,
     ASKING_NOTIFICATIONS,
     ASKING_CUSTOMIZATION,
     CONFIRMING,
-    SAVING
+    SAVING,
+    SAVED
 }
 
 export interface ReminderFormProps {

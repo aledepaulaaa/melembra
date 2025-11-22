@@ -1,5 +1,5 @@
 'use client'
-// appbora/src/components/forms/ReminderForm.tsx
+//appbora/src/components/forms/ReminderForm.tsx
 import React from 'react'
 import * as Handlers from './reminderFormHandlers'
 import * as UI from './reminderFormUI'
@@ -26,7 +26,10 @@ import { isToday } from 'date-fns'
 import UsageCountdown from '@/components/ui/planos/upgradeplanos/UsageCountdown'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import AuthPromptDialog from '@/components/ui/dialogs/AuthPromptDialog'
-import { Box, TextField, IconButton, CircularProgress, Typography, Button, Paper, Tooltip, Stack, Menu, MenuItem, ListItemIcon, ListItemText, useTheme } from '@mui/material'
+import {
+    Box, TextField, IconButton, CircularProgress, Typography, Button, Paper, Tooltip,
+    Stack, Menu, MenuItem, ListItemIcon, ListItemText, useTheme
+} from '@mui/material'
 
 const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
     const router = useRouter()
@@ -94,18 +97,6 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
 
     // Props unificadas para os Handlers
     const handlerProps = { ...formState, userId, router, onChatStart, subscription, openSnackbar }
-
-    // Se o histórico estiver vazio, o bot dá as boas-vindas para iniciar o fluxo e mostrar as categorias
-    // React.useEffect(() => {
-    //     if (formState.chatHistory.length === 0) {
-    //         // Pequeno timeout para não conflitar com a montagem inicial
-    //         Handlers.addMessageToChat(handlerProps, {
-    //             sender: 'bot',
-    //             text: 'Olá! Bora lembrar do que hoje?'
-    //         })
-    //     }
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [])
 
     // --- PROCESSAMENTO DE ÁUDIO ---
     // Monitora quando o blob de áudio é gerado (ao soltar o botão ou acabar o tempo)
@@ -219,10 +210,26 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 && <UI.RenderTimeClockWithConfirm {...handlerProps} />}
                                             {isLastBotMessage && formState.step === ConversationStep.ASKING_RECURRENCE
                                                 && <UI.RenderRecurrenceButtons {...handlerProps} formattedTime={formState.reminder.time || ''} />}
-                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_CUSTOMIZATION && lastUserMessage !== 'Sim, quero personalizar.' && (
-                                                <UI.RenderCustomizationPrompt {...handlerProps} />
+                                            {isLastBotMessage && formState.step === ConversationStep.ASKING_CUSTOMIZATION && (
+                                                // Verifica o conteúdo da mensagem do BOT para decidir qual componente mostrar
+                                                msg.text?.includes('Excelente')
+                                                    ? <UI.RenderFullCustomizationForm {...handlerProps} />
+                                                    : <UI.RenderCustomizationPrompt {...handlerProps} />
                                             )}
                                             {isLastBotMessage && formState.step === ConversationStep.CONFIRMING && <UI.RenderConfirmation {...handlerProps} />}
+                                            {isLastBotMessage && formState.step === ConversationStep.SAVED && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="secondary" // Ou a cor que preferir para destaque
+                                                        fullWidth
+                                                        onClick={() => router.push('/lembretes')}
+                                                        sx={{ mt: 2, borderRadius: 4 }}
+                                                    >
+                                                        Ver Meus Lembretes
+                                                    </Button>
+                                                </motion.div>
+                                            )}
                                         </Box>
                                     </Box>
                                 </motion.div>
