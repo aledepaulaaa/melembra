@@ -284,12 +284,30 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
     const trimmedValue = value.trim()
     addMessageToChat(props, { sender: 'user', text: trimmedValue || "Pular" })
 
-    if ((props.step === ConversationStep.ASKING_TITLE || props.step === ConversationStep.ASKING_CATEGORY) && trimmedValue.length > 15) {
+    const isPremium = props.subscription.plan === 'premium'
+
+    // --- LÓGICA DE INTELIGÊNCIA ARTIFICIAL (RESTRIÇÃO DE PLANO) ---
+    // Só processa com IA se:
+    // 1. For Premium
+    // 2. Estiver nas etapas iniciais
+    // 3. O texto for longo (indício de linguagem natural com data/hora)
+    if (isPremium && (props.step === ConversationStep.ASKING_TITLE || props.step === ConversationStep.ASKING_CATEGORY) && trimmedValue.length > 15) {
         processTextWithAI(props, trimmedValue)
-        return
+        return // Interrompe aqui para a IA assumir o controle
     }
 
+    // --- FLUXO MANUAL (PLUS / FREE) ---
+    // Se não entrou no if acima, segue o fluxo passo a passo normal
     switch (props.step) {
+        case ConversationStep.ASKING_CATEGORY_NAME: // <--- NOVO CASE
+            if (!trimmedValue) return
+
+            props.setReminder(prev => ({ ...prev, category: trimmedValue }))
+            addMessageWithTyping(props, { sender: 'bot', text: `Categoria "${trimmedValue}" definida. O que devo lembrar?` })
+
+            props.setStep(ConversationStep.ASKING_TITLE)
+            break
+
         case ConversationStep.ASKING_CATEGORY:
             // Se o usuário digitou algo na etapa de categoria (ex: clicou em "Outra"), salvamos como categoria
             if (!trimmedValue) return
@@ -303,8 +321,13 @@ export const handleUserInput = (props: HandlerProps, value: string, chatHistoryL
                 props.openSnackbar("Seu lembrete precisa de um nome.", 'error')
                 return
             }
+            // O texto digitado vira o Título.
+            // Ex: Se o usuário Plus digitou "Almoçar amanhã às 10", o título será esse texto todo.
+            // E o bot perguntará a data logo em seguida, mantendo o fluxo manual.
             props.setReminder(prev => ({ ...prev, title: trimmedValue }))
-            addMessageWithTyping(props, { sender: 'bot', text: 'Para quando devo agendar?' }) // Simplificado, pode usar getRandomDateResponse
+
+            addMessageWithTyping(props, { sender: 'bot', text: 'Para quando devo agendar?' })
+
             props.setShowTextInput(false) // Esconde teclado para mostrar DatePicker
             props.setStep(ConversationStep.ASKING_DATE)
             break

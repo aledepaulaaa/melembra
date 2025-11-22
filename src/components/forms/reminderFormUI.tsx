@@ -2,7 +2,7 @@
 // appbora/src/lib/forms/reminderFormUI.tsx
 import React from 'react'
 import { motion } from 'framer-motion'
-import { defaultCategories, HandlerProps } from '@/interfaces/IReminder'
+import { ConversationStep, defaultCategories, HandlerProps } from '@/interfaces/IReminder'
 import DiamondIcon from '@mui/icons-material/Diamond'
 import * as Handlers from './reminderFormHandlers'
 import { MobileDatePicker, TimeClock } from '@mui/x-date-pickers'
@@ -13,6 +13,7 @@ import ReminderCustomizationForm from './ReminderCustomizationForm'
 import { resizeImageToStorage } from '@/app/lib/resizeImageToStorage'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { fileToBase64 } from '@/app/utils/base64'
+import { isToday } from 'date-fns/isToday'
 
 // --- COMPONENTE DE CATEGORIAS ---
 export const RenderCategorySelector = (props: HandlerProps) => {
@@ -50,8 +51,10 @@ export const RenderCategorySelector = (props: HandlerProps) => {
                     onClick={() => {
                         Handlers.addMessageToChat(props, { sender: 'user', text: 'Outra categoria' })
                         Handlers.addMessageWithTyping(props, { sender: 'bot', text: 'Qual nome você quer dar para essa categoria?' })
+
                         props.setShowTextInput(true)
-                        // Pequeno hack: o próximo texto digitado será tratado como categoria no handleUserInput
+                        // MUDANÇA: Seta o passo específico para capturar o nome
+                        props.setStep(ConversationStep.ASKING_CATEGORY_NAME)
                     }}
                     sx={{ cursor: 'pointer' }}
                 />
@@ -97,6 +100,8 @@ export const RenderDatePicker = (props: HandlerProps) => {
                         Handlers.handleDateSelect(props, date)
                     }}
                     defaultValue={props.reminder.date || new Date()}
+                    minDate={new Date()}
+                    disablePast
                     slotProps={{
                         textField: {
                             sx: { display: 'none' }
@@ -109,7 +114,14 @@ export const RenderDatePicker = (props: HandlerProps) => {
 }
 
 export const RenderTimeClockWithConfirm = (props: HandlerProps & { minTime?: Date }) => {
-    const [selectedTime, setSelectedTime] = React.useState<Date | null>(props.reminder.date || props.minTime || new Date())
+    const isTodaySelected = props.reminder.date && isToday(props.reminder.date)
+    const minTime = isTodaySelected ? new Date() : undefined
+
+    const [selectedTime, setSelectedTime] = React.useState<Date | null>(
+        // Se for hoje, inicia com a hora atual arredondada pra frente
+        isTodaySelected ? new Date() : (props.reminder.date || new Date())
+    )
+
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Stack direction="column" alignItems="center" justifyContent="center" spacing={1}>
@@ -117,7 +129,7 @@ export const RenderTimeClockWithConfirm = (props: HandlerProps & { minTime?: Dat
                     ampm={false}
                     value={selectedTime}
                     onChange={(time) => setSelectedTime(time as Date)}
-                    minTime={props.minTime}
+                    minTime={minTime}
                     sx={{ bgcolor: 'transparent', borderRadius: 2, my: 1, maxHeight: 300, overflow: "hidden" }}
                 />
             </Stack>

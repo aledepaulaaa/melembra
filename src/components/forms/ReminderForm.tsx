@@ -39,7 +39,7 @@ const UpgradeBlocker = ({ lastUsage }: { lastUsage: Date | null }) => {
                 <Typography variant="h6" fontWeight={700}>Limite diário atingido!</Typography>
                 <Typography sx={{ my: 1 }}>Seu próximo lembrete gratuito estará disponível em:</Typography>
                 {lastUsage && <UsageCountdown lastUsageTime={lastUsage} />}
-                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, assine um plano.</Typography>
+                <Typography sx={{ my: 2 }}>Para criar lembretes ilimitados, confira os nossos planos.</Typography>
                 <Button startIcon={<DiamondOutlinedIcon />} variant="outlined" onClick={() => router.push('/planos')}>
                     Assinar
                 </Button>
@@ -66,6 +66,7 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
     const userId = user?.uid
     const theme = useTheme()
     const isPremium = plan === 'premium'
+    const isFree = plan === 'free'
 
     // --- Lógica de Bloqueio (Planos) ---
     React.useEffect(() => {
@@ -319,9 +320,11 @@ export default function ReminderForm({ onChatStart = () => { } }: ReminderFormPr
                                                 transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                                                 PaperProps={{ sx: { borderRadius: 3, mb: 1 } }}
                                             >
-                                                <MenuItem onClick={handleCategoryOption}>
+                                                <MenuItem onClick={handleCategoryOption} disabled={isFree}>
                                                     <ListItemIcon><CategoryIcon fontSize="small" /></ListItemIcon>
-                                                    <ListItemText>Categorias</ListItemText>
+                                                    <ListItemText>
+                                                        Categorias {isFree && "(Plus - Premium)"}
+                                                    </ListItemText>
                                                 </MenuItem>
                                                 <MenuItem onClick={handleImageUploadClick} disabled={!isPremium}>
                                                     <ListItemIcon><ImageOutlinedIcon fontSize="small" /></ListItemIcon>

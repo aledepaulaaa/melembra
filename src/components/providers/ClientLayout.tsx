@@ -28,6 +28,9 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
     // --- MUDANÇA 1: Obter 'user' E 'status' do Redux ---
     const { user, status } = useAppSelector((state) => state.auth)
+    const subscription = useAppSelector((state) => state.subscription)
+    const { plan } = subscription
+    const isAssinante = plan === 'plus' || plan === 'premium'
 
     // O hook continua aqui. Ele receberá 'undefined' se o usuário estiver deslogado,
     // o que é um comportamento esperado que o hook deve saber lidar.
@@ -103,7 +106,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                     <Box sx={{ flexGrow: 1, textAlign: 'center', }}>
                         <UpgradeButtonHeader />
                         <Box sx={{ display: { xs: 'flex', sm: 'block' }, justifyContent: 'center', mt: 1, mb: 0.8 }}>
-                            <NextReminderHeader />
+                            {isAssinante && <NextReminderHeader />}
                         </Box>
                     </Box>
                     <ThemeSwitcher />
@@ -174,7 +177,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                 >
                     <Box sx={{ pointerEvents: 'auto', display: 'flex', gap: 2, alignItems: 'center' }}>
                         <UpgradeButtonHeader />
-                        <NextReminderHeader />
+                        {isAssinante && <NextReminderHeader />}
                     </Box>
                 </Toolbar>
                 <PaymentStatusHandler /> 

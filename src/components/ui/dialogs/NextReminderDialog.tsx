@@ -8,9 +8,11 @@ import { Reminder } from '@/interfaces/IReminder'
 import { motion } from 'framer-motion'
 import { useSnackbar } from '@/contexts/SnackbarProvider'
 import { snoozeReminder } from '@/app/actions/actions'
-import { MobileDateTimePicker } from '@mui/x-date-pickers'
+import { LocalizationProvider, MobileDateTimePicker } from '@mui/x-date-pickers'
 import EditCalendarIcon from '@mui/icons-material/EditCalendar'
 import { Dialog, DialogContent, Typography, Box, IconButton, Stack, Chip, Button, ListItemText, Menu, MenuItem, ListItemIcon } from '@mui/material'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { ptBR } from 'date-fns/locale/pt-BR'
 
 interface NextReminderDialogProps {
     open: boolean
@@ -34,7 +36,7 @@ export default function NextReminderDialog({ open, onClose, reminder }: NextRemi
 
         const res = await snoozeReminder(reminder.id, minutes)
         if (res.success) {
-            openSnackbar(`Adiado em ${minutes} minutos!`, 'success')
+            openSnackbar('Lembrete adiado com sucesso!', 'success')
             onClose() // Fecha dialog
             // Opcional: forçar refresh da home
         } else {
@@ -95,90 +97,92 @@ export default function NextReminderDialog({ open, onClose, reminder }: NextRemi
     if (!reminder) return null
 
     return (
-        <>
-            <Dialog
-                open={open}
-                onClose={onClose}
-                slotProps={{
-                    backdrop: {
-                        style: {
-                            borderRadius: 20,
-                            borderTop: `8px solid ${reminder.cor || '#BB86FC'}`,
-                            overflow: 'hidden'
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+            <>
+                <Dialog
+                    open={open}
+                    onClose={onClose}
+                    slotProps={{
+                        backdrop: {
+                            style: {
+                                borderRadius: 20,
+                                borderTop: `8px solid ${reminder.cor || '#BB86FC'}`,
+                                overflow: 'hidden'
+                            }
                         }
-                    }
-                }}
-            >
-                <Box sx={{ position: 'absolute', right: 8, top: 8 }}>
-                    <IconButton onClick={onClose}><CloseIcon /></IconButton>
-                </Box>
-                <DialogContent sx={{ textAlign: 'center', py: 5, px: 3 }}>
-                    <Typography variant="overline" color="text.secondary" fontWeight={700} letterSpacing={2}>
-                        PRÓXIMO LEMBRETE
-                    </Typography>
-                    <Box my={3}>
-                        <motion.div
-                            animate={{ scale: [1, 1.05, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                        >
-                            <Typography variant="h3" fontWeight={900} sx={{ fontFamily: 'monospace' }}>
-                                {timeLeft}
-                            </Typography>
-                        </motion.div>
+                    }}
+                >
+                    <Box sx={{ position: 'absolute', right: 8, top: 8 }}>
+                        <IconButton onClick={onClose}><CloseIcon /></IconButton>
                     </Box>
-                    <Typography variant="h5" fontWeight={700} gutterBottom>
-                        {reminder.title}
-                    </Typography>
-                    <Stack direction="row" justifyContent="center" spacing={1} mt={2}>
-                        {reminder.category && <Chip label={reminder.category} size="small" />}
-                        <Chip
-                            icon={<AccessTimeIcon />}
-                            label={new Date(reminder.scheduledAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            variant="outlined"
-                        />
-                    </Stack>
-                    {/* BOTÃO SONECA */}
-                    <Box mt={4} display="flex" justifyContent="center">
-                        <Button
-                            variant="outlined"
-                            color="warning"
-                            startIcon={<SnoozeIcon />}
-                            onClick={handleSnoozeClick}
-                            sx={{ borderRadius: 4 }}
+                    <DialogContent sx={{ textAlign: 'center', py: 5, px: 3 }}>
+                        <Typography variant="overline" color="text.secondary" fontWeight={700} letterSpacing={2}>
+                            PRÓXIMO LEMBRETE
+                        </Typography>
+                        <Box my={3}>
+                            <motion.div
+                                animate={{ scale: [1, 1.05, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                            >
+                                <Typography variant="h3" fontWeight={900} sx={{ fontFamily: 'monospace' }}>
+                                    {timeLeft}
+                                </Typography>
+                            </motion.div>
+                        </Box>
+                        <Typography variant="h5" fontWeight={700} gutterBottom>
+                            {reminder.title}
+                        </Typography>
+                        <Stack direction="row" justifyContent="center" spacing={1} mt={2}>
+                            {reminder.category && <Chip label={reminder.category} size="small" />}
+                            <Chip
+                                icon={<AccessTimeIcon />}
+                                label={new Date(reminder.scheduledAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                variant="outlined"
+                            />
+                        </Stack>
+                        {/* BOTÃO SONECA */}
+                        <Box mt={4} display="flex" justifyContent="center">
+                            <Button
+                                variant="outlined"
+                                color="inherit"
+                                startIcon={<SnoozeIcon />}
+                                onClick={handleSnoozeClick}
+                                sx={{ borderRadius: 4 }}
+                            >
+                                Soneca (Adiar)
+                            </Button>
+                        </Box>
+                        <Menu
+                            anchorEl={anchorEl}
+                            open={Boolean(anchorEl)}
+                            onClose={() => setAnchorEl(null)}
                         >
-                            Soneca (Adiar)
-                        </Button>
-                    </Box>
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={() => setAnchorEl(null)}
-                    >
-                        <MenuItem onClick={() => handleSnoozeConfirm(10)}>
-                            <ListItemText>10 minutos</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleSnoozeConfirm(60)}>
-                            <ListItemText>1 hora</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleSnoozeConfirm(1440)}> {/* 24h */}
-                            <ListItemText>Amanhã (24h)</ListItemText>
-                        </MenuItem>
-                        <MenuItem onClick={() => { setAnchorEl(null); setOpenCustomDate(true) }}>
-                            <ListItemIcon><EditCalendarIcon fontSize="small" /></ListItemIcon>
-                            <ListItemText>Escolher Data...</ListItemText>
-                        </MenuItem>
-                    </Menu>
-                </DialogContent>
-            </Dialog>
-            {openCustomDate && (
-                <MobileDateTimePicker
-                    open={openCustomDate}
-                    onClose={() => setOpenCustomDate(false)}
-                    onAccept={handleCustomDateAccept}
-                    defaultValue={new Date(new Date().getTime() + 3600000)} // Padrão: +1h
-                    slotProps={{ textField: { sx: { display: 'none' } } }} // Esconde o input de texto
-                />
-            )}
-        </>
+                            <MenuItem onClick={() => handleSnoozeConfirm(10)}>
+                                <ListItemText>10 minutos</ListItemText>
+                            </MenuItem>
+                            <MenuItem onClick={() => handleSnoozeConfirm(60)}>
+                                <ListItemText>1 hora</ListItemText>
+                            </MenuItem>
+                            <MenuItem onClick={() => handleSnoozeConfirm(1440)}> {/* 24h */}
+                                <ListItemText>Amanhã (24h)</ListItemText>
+                            </MenuItem>
+                            <MenuItem onClick={() => { setAnchorEl(null); setOpenCustomDate(true) }}>
+                                <ListItemIcon><EditCalendarIcon fontSize="small" /></ListItemIcon>
+                                <ListItemText>Definir data...</ListItemText>
+                            </MenuItem>
+                        </Menu>
+                    </DialogContent>
+                </Dialog>
+                {openCustomDate && (
+                    <MobileDateTimePicker
+                        open={openCustomDate}
+                        onClose={() => setOpenCustomDate(false)}
+                        onAccept={handleCustomDateAccept}
+                        defaultValue={new Date(new Date().getTime() + 3600000)} // Padrão: +1h
+                        slotProps={{ textField: { sx: { display: 'none' } } }} // Esconde o input de texto
+                    />
+                )}
+            </>
+        </LocalizationProvider>
     )
 }

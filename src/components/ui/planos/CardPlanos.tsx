@@ -53,10 +53,6 @@ export default function CardPlanos({ handleUpgradeClick, currentPlan, isRedirect
                                     <ListItemIcon><CloseIcon color="error" /></ListItemIcon>
                                     <ListItemText primary="Sem categorias e soneca" />
                                 </ListItem>
-                                <ListItem>
-                                    <ListItemIcon><CloseIcon color="error" /></ListItemIcon>
-                                    <ListItemText primary="Sem recursos de inteligência artificial ou personalização" />
-                                </ListItem>
                             </List>
                             <Button fullWidth variant="outlined" disabled>Seu plano atual</Button>
                         </CardContent>
